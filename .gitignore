@@ -17,6 +17,7 @@
 .settings/
 .project
 .history/
+**/*.bak
 
 # macOS General
 .DS_Store
