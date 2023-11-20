@@ -1,0 +1,1 @@
+This folder contains assets to a simple "authenticate with username" flow. This is described on [IBM Community Blogs](https://community.ibm.com/community/user/security/blogs/vivek-shankar1/2023/11/20/flow-auth-with-username).
