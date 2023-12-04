@@ -349,13 +349,7 @@
 			}
 
             function redirectToTarget() {
-                // take the browser to the target
-                let params = new URLSearchParams(window.location.search);
-                let targetUrl = "/";
-                if (params.has("Target")) {
-                    targetUrl = params.get("Target");
-                }
-                window.location.replace(targetUrl);
+                window.location.replace("@context.post_url@");
             }
 
             function refreshAutofill() {

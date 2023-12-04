@@ -107,10 +107,11 @@
 				// if its there, show regular login, otherwise redirect to workflow
 				const urlParams = new URLSearchParams(window.location.search);
 				const workflowLaunched = urlParams.get("normalLogin");
+				const targetURL = urlParams.get("Target");
 				if (workflowLaunched == "true") {
 					document.getElementById("bodyWrapperDiv").style.display = "block";
 				} else {
-					window.location.replace("/flows/?reference=" + workflowReference)
+					window.location.replace("/flows/?reference=" + workflowReference + ((targetURL != null && targetURL.length > 0) ? ("&Target="+encodeURIComponent(targetURL)) : ""));
 				}
          	});
 
