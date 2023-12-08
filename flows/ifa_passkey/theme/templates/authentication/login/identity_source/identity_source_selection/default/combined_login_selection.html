@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+    <head>
+		<!--
+			This page has been modified to redirect to the passkey IFA workflow
+			*unless* the URL in the location bar includes "normalLogin=true" which is a trick
+			to keep us from getting into a bad state if the workflow is broken. 
+			When "normalLogin=true" is in the query string the regular login page is loaded.
+		-->
+        <base href="/" />
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="shortcut icon" type="image/x-icon" href="/ui/assets/img/favicon.ico" />
+	<link rel="stylesheet" href="/usc/css/stateless.css">
+	<link rel="stylesheet" href="/idaas/mtfim/static/styles.css">
+	<link rel="stylesheet" href="/template/v1.0/static/theme.css?themeId=@THEME_ID@" />
+
+        <title>$LOGIN_TITLE$</title>
+
+        <script>
+			const idSources = @ID_SOURCES@;
+        </script>
+        <script type="text/javascript" src="/idaas/mtfim/static/lsp.js?locale=@LOCALE@"></script>
+    </head>
+
+	<body>
+	<div id="bodyWrapperDiv" style="display: none;">
+		<div class="cs-content cs-all-error">
+			@PAGE_HEADER@
+			<div class="login-main">
+				<p class="cs-select-login-provider-instructions"></p>
+				<div class="passwordless-signin" id="passwordless-signin">
+					<div class="passwordless-options cs-flex-row">
+					</div>
+				</div>
+				<div class="cloud-directory" id="cloud-directory">
+					<form id="cloud-directory-form" method="post">
+						<div class="bx--form-item bx--text-input-wrapper">
+							<div class="w-100 display-flex">
+								<label for="user-name-input" class="bx--label" id="user-name-label">$LOGIN_USER_NAME$</label>
+								<a id="forgot-username-link" class="bx--link forgot-pwd" href="" tabindex="4">$LOGIN_WITH_FORGOT_USERNAME$</a>
+							</div>
+							<div class="bx--text-input__field-wrapper">
+								<input id="user-name-input" type="text" class="bx--text-input" name="username" placeholder="$LOGIN_USER_NAME$" value="@LOGIN_HINT@" tabindex="1">
+							</div>
+						</div>
+						<div class="bx--form-item bx--text-input-wrapper bx--password-input-wrapper">
+							<div class="w-100 display-flex">
+								<label for="password-input" class="bx--label">$LOGIN_PASSWORD$</label>
+								<a id="forgot-password-link" class="bx--link forgot-pwd" href="" tabindex="4">$LOGIN_WITH_FORGOT_PASSWORD$</a>
+							</div>
+							<div class="bx--text-input__field-outer-wrapper">
+								<div class="bx--text-input__field-wrapper">
+									<input id="password-input" name="password" placeholder="$LOGIN_PASSWORD$" type="password" class="bx--text-input bx--password-input"
+										tabindex="2" autocomplete="off">
+									<button type="button" id="show-pwd-btn" class="bx--text-input--password__visibility__toggle bx--btn bx--btn--icon-only bx--tooltip__trigger bx--tooltip--a11y bx--tooltip--bottom bx--tooltip--align-center pwd-icon-button">
+										<span class="bx--assistive-text">$SHOW_PASSWORD_HELP_TXT$</span>
+										<svg class="bx--icon-visibility-on" focusable="false" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" fill="currentColor" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
+											<path id="eyeIcon" d="M15.5,7.8C14.3,4.7,11.3,2.6,8,2.5C4.7,2.6,1.7,4.7,0.5,7.8c0,0.1,0,0.2,0,0.3c1.2,3.1,4.1,5.2,7.5,5.3c3.3-0.1,6.3-2.2,7.5-5.3C15.5,8.1,15.5,7.9,15.5,7.8z M8,12.5c-2.7,0-5.4-2-6.5-4.5c1-2.5,3.8-4.5,6.5-4.5s5.4,2,6.5,4.5C13.4,10.5,10.6,12.5,8,12.5M8,5C6.3,5,5,6.3,5,8s1.3,3,3,3s3-1.3,3-3S9.7,5,8,5z M8,10c-1.1,0-2-0.9-2-2s0.9-2,2-2s2,0.9,2,2S9.1,10,8,10z"></path>
+										</svg>
+									</button>
+								</div>
+							</div>
+						</div>
+						<input type="hidden" name="operation" value="verify">
+						<div class="submit-wrapper">
+							<button class="button cs-hide-focus" id="login-button" value="login" type="submit" tabindex="3">$LOGIN_BUTTON$</button>
+						</div>
+						<input type="hidden" name="error_redirect_support" value="true" />
+					</form>
+				</div>
+				
+				<div id="login-failed-message">
+                    <p id="login-failed-text" class="error-message">@LOGIN_ERROR_MESSAGE@</p>
+                </div>
+                    
+				<div class="alternate-options-dropdown separator" id="alternate-options-dropdown">
+					<div class="bx--form-item">
+						<div class="bx--dropdown__wrapper ">
+							<ul data-dropdown data-value id="dropdown-id" class="bx--dropdown" tabindex="0">
+								<li class="bx--dropdown-text" id="dropdown-text">$SOCIAL_LOGIN_ALTERNATE_SIGNIN$</li>
+								<li class="bx--dropdown__arrow-container">
+									<svg focusable="false" preserveAspectRatio="xMidYMid meet" style="will-change: transform;" xmlns="http://www.w3.org/2000/svg" class="bx--dropdown__arrow" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 11L3 6l.7-.7L8 9.6l4.3-4.3.7.7z"></path></svg>
+								</li>
+								<li>
+									<ul class="bx--dropdown-list" id="id-sources"></ul>
+								</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+				<div id="alternate-signin-toggle" class="alternate-signin-toggle">
+					<a class="bx--link" id="alternate-signin-link">$SOCIAL_LOGIN_ALTERNATE_SIGNIN$</a>
+				</div>
+
+				@PAGE_FOOTER@
+
+			</div>
+		</div>
+		<script type="text/javascript" src="/usc/js/ieCheck.js"></script>
+		<script>
+			window.addEventListener("load", () => {
+
+				let workflowReference = "passkeyifa";
+
+				// check query string URL for normalLogin=true
+				// if its there, show regular login, otherwise redirect to workflow
+				const urlParams = new URLSearchParams(window.location.search);
+				const workflowLaunched = urlParams.get("normalLogin");
+				const targetURL = urlParams.get("Target");
+				if (workflowLaunched == "true") {
+					document.getElementById("bodyWrapperDiv").style.display = "block";
+				} else {
+					window.location.replace("/flows/?reference=" + workflowReference + ((targetURL != null && targetURL.length > 0) ? ("&Target="+encodeURIComponent(targetURL)) : ""));
+				}
+         	});
+
+		</script>
+	</div>
+	</body>
+</html>
