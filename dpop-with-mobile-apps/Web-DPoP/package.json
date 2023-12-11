@@ -1,0 +1,22 @@
+{
+  "name": "dpop-demo-app",
+  "version": "1.0.0",
+  "description": "Demo for DPoP token handling",
+  "main": "app.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.20.2",
+    "ejs": "^3.1.9",
+    "expres": "^0.0.5",
+    "express": "^4.18.2",
+    "https": "^1.0.0",
+    "node-jose": "^2.2.0",
+    "nodemon": "^3.0.1",
+    "openid-client": "^5.6.1"
+  }
+}
