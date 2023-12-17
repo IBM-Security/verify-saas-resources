@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <base href="/" />
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" type="image/x-icon" href="/ui/assets/img/favicon.ico" />
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="shortcut icon" type="image/x-icon" href="usc/favicon.ico" />
+        <link rel="stylesheet" href="usc/css/stateless.css" />
+        <!-- Optionally override carbon styles using the common theme.css (common/page_components/default/page_style.css in Theme files) -->
+        <link rel="stylesheet” href=“/template/v1.0/static/theme.css?themeId=@THEME_ID@" />
+        <!---->
+        
+    </head>
+    <body>
+        <div class="cs-content login">
+            @PAGE_HEADER@
+            <h3>Provide your username</h3>
+	
+            <p>Your username is used to determine how you should login.</p>
+            <div class="login-main">
+                <form id="login-main-form" class="login-fields input-centered" method="POST" action="@WORKFLOW_CALLBACK_URL@">
+                    <label class="label" id="username_label">Username</label>
+
+                    <div class="bx--select" style="margin-bottom: 20px">
+                        <input id="username" type="text" name="username"   
+                            placeholder="Username" required autocomplete="webauthn"/>
+                    </div>
+                    <button class="button" id="login-button" value="login" class="button-1 ease-in-anim-fast login"
+                        type="submit" cs-attach="submitButton" onClick="return validateInputs()">$FORGOT_USERNAME_CONTINUE$</button>
+					<input type="hidden" name="uvpaEnabled" id="uvpaEnabled" value="false" />
+                </form>
+            </div>
+            @PAGE_FOOTER@
+        </div>
+        <script type="text/javascript" src="/profile/static/carbon-components.min.js"></script>
+        <script type="text/javascript" src="/usc/js/ieCheck.js"></script>
+        <!---->
+   </body>
+</html>

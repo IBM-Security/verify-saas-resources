@@ -1,0 +1,53 @@
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <title>$GENERIC_ERROR_TITLE$</title>
+    <base href="/"/>
+    <link rel="shortcut icon" type="image/x-icon" href="ui/assets/img/favicon.ico" />
+    <link rel="stylesheet" href="usc/css/stateless.css" />
+    <link rel="stylesheet" href="template/v1.0/static/theme.css?themeId=@THEME_ID@" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  </head>
+  <body>
+    <div class="cs-content cs-all-error">
+      @PAGE_HEADER@
+      <div class="content">
+        <div class="error-header spaced">
+          <span>$GENERIC_ERROR_HEADER$</span>
+        </div>
+        <div class="error-message spaced">
+          <span>@context.errorMessage@</span>
+        </div>
+		<div id="detailsSection">
+			<div id="timestamp-label" class="spaced">
+				<span>$GENERIC_ERROR_OCCURRED_AT$ @TIMESTAMP@</span>
+			</div>
+			
+			<div id="exception-message-label" class="spaced">
+				<span>$GENERIC_ERROR_ERROR_DETAILS$ @context.errorDetails@</span>
+			</div>
+			<div class="spaced">
+				<span>$GENERIC_ERROR_CONTACT_SUPPORT$ </span><a class="cs-primary" href="$GENERIC_ERROR_SUPPORT_URL$" target="_blank">$GENERIC_ERROR_SUPPORT_URL$</a>
+			</div>
+		</div>
+
+		<button id="detailsButton" class="cs-link" onclick="toggleErrorDetails('$GENERIC_ERROR_VIEW_DETAILS$', '$GENERIC_ERROR_HIDE_DETAILS$')">$GENERIC_ERROR_VIEW_DETAILS$</button>
+      </div>
+      @PAGE_FOOTER@
+    </div>
+  </body>
+  <script>
+	document.getElementById('detailsSection').style.display = "none"
+
+	function toggleErrorDetails(viewText, hideText) {
+		var state = document.getElementById('detailsSection').style.display
+		if (state != 'none') {
+			document.getElementById('detailsSection').style.display = 'none'
+			document.getElementById('detailsButton').innerHTML = viewText
+		} else {
+			document.getElementById('detailsSection').style.display = 'block'
+			document.getElementById('detailsButton').innerHTML = hideText
+		}
+	}
+</script>
+</html>
