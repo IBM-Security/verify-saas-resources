@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title id="loginTitle">Confirmation page</title>
+	<base href="/" />
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" type="image/x-icon" href="usc/favicon.ico" />
+    <link rel="stylesheet" href="usc/css/stateless.css" />
+    <link rel="stylesheet" href="/template/v1.0/static/theme.css?themeId=@THEME_ID@" />
+	
+</head>
+<body>
+    <div class="cs-content login">
+        @PAGE_HEADER@
+        <div class="login-main">
+			
+            <form id="login-main-form" class="login-fields input-centered" method="POST" action="@WORKFLOW_CALLBACK_URL@">
+                <div style="font-family: 'Helvetica neue', sans-serif; font-size: 14px; padding: 10px 64px 0px 0px; color: #121212;">
+                   <p style="padding-bottom: 12px;font-size: 16px">Your account is successfully created.</p>
+                    <p style="padding-bottom: 12px; line-height: 24px">Click <a href="https://mytenant.verify.ibmcloudsecurity.com/ui">here</a> to get started.</p> 
+                 </div>
+            </form>
+            
+        </div>
+        @PAGE_FOOTER@
+    </div>
+	<!-- Please do not move JS code from here, it may affect functionality -->
+	<script type="text/javascript" >
+ 
+
+
+
+
+
+
+
+
+
+doIECheck();
+    
+    
+    
+    
+    </script>
+</body>
+</html>
+
+      

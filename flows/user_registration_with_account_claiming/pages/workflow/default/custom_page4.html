@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <base href="/" />
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" type="image/x-icon" href="/ui/assets/img/favicon.ico" />
+        <!-- Do not remove, Carbon style is used as base -->
+        <link rel="stylesheet" href="usc/css/stateless.css" />
+        
+        <!---->
+        <!-- Optionally override carbon styles using the common theme.css (common/page_components/default/page_style.css in Theme files) -->
+        <link rel="stylesheet” href=“/template/v1.0/static/theme.css?themeId=@THEME_ID@" />
+        <!---->
+        <title>error_page</title>
+    </head>
+ <body class="title-background">
+		<div class="cs-content cs-all-error">
+			@PAGE_HEADER@
+			<div class="content">
+				<div class="error-header spaced">
+					<span>$GENERIC_ERROR_HEADER$</span>
+				</div>
+			
+
+				<div id="detailsSection">
+				
+					
+					<div id="exception-message-label" class="spaced">
+						<span>$GENERIC_ERROR_ERROR_DETAILS$ Registration failed due to invalid data, please contact the administrator</span>
+					</div>
+					<div class="spaced">
+						<span>$GENERIC_ERROR_CONTACT_SUPPORT$ </span><a class="cs-primary" href="$GENERIC_ERROR_SUPPORT_URL$" target="_blank">$GENERIC_ERROR_SUPPORT_URL$</a>
+					</div>
+				</div>
+
+				<button id="detailsButton" class="cs-link" onclick="toggleErrorDetails('$GENERIC_ERROR_VIEW_DETAILS$', '$GENERIC_ERROR_HIDE_DETAILS$')">$GENERIC_ERROR_VIEW_DETAILS$</button>
+			</div>
+		</div>
+
+		<script>
+			if (!("@TIMESTAMP@" || "@EXCEPTION_MSG@" || "@REQ_ADDR@"  )){
+				document.getElementById('detailsButton').style.display = "none"
+			}
+
+			if (!"@TIMESTAMP@"){
+				document.getElementById('timestamp-label').style.display = "none"
+			}
+
+			if (!"@EXCEPTION_MSG@"){
+				document.getElementById('exception-message-label').style.display = "none"
+			}
+
+			if (!"@REQ_ADDR@"){
+				document.getElementById('request-address-label').style.display = "none"
+			}
+
+			if (!"@ERROR_MESSAGE@"){
+				document.getElementById('error-message-label').style.display = "none"
+			}
+
+			document.getElementById('detailsSection').style.display = "none"
+
+			function toggleErrorDetails(viewText, hideText) {
+				var state = document.getElementById('detailsSection').style.display
+				if (state != 'none') {
+					document.getElementById('detailsSection').style.display = 'none'
+					document.getElementById('detailsButton').innerHTML = viewText
+				} else {
+					document.getElementById('detailsSection').style.display = 'block'
+					document.getElementById('detailsButton').innerHTML = hideText
+				}
+			}
+		</script>
+	</body>
+</html>  
