@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <base href="/" />
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" type="image/x-icon" href="/ui/assets/img/favicon.ico" />
+        <!-- Do not remove, Carbon style is used as base -->
+        <link rel="stylesheet" href="/profile/static/carbon-components.min.css">
+        <!---->
+        <!-- Optionally override carbon styles using the common theme.css (common/page_components/default/page_style.css in Theme files) -->
+        <link rel="stylesheet” href=“/template/v1.0/static/theme.css?themeId=@THEME_ID@" />
+        <!---->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jsrsasign/8.0.20/jsrsasign-all-min.js"></script>
+        <title>Username or Passkey</title>
+    </head>
+    <body class="cs-content">
+        <div class="content">
+            <div>
+                @PAGE_HEADER@
+                <br>
+                <p>Enter your username or select a passkey</p>
+
+                <form id="usernameForm" method="POST" action="@WORKFLOW_CALLBACK_URL@">
+                    <input type="text" id="username" name="username" autocomplete="username webauthn" />
+                    <input type="submit" value="Next" />
+                    <p>OR</p>
+                    <input type="button" value="Sign in with a passkey" onclick="modalPasskeyLogin()"/>
+                </form>
+
+            </div>
+            <br>
+            <div id="errDiv" style="color:red; display:none;">
+            </div>
+            <br>
+            <!---->
+            @PAGE_FOOTER@
+        </div>
+		<script>
+
+            // couple of global vars for WebAuthn feature discovery - call performWebAuthnFeatureDiscovery (promise-based) to populate
+            let isUVPAA = false;
+            let isAutofillAvailable = false; 
+
+            let abortController;
+            let abortSignal;
+            let autofillWebAuthnPromise = null;
+            let autofillRefreshTimer = null;
+
+            let postLocation;
+
+            function hideDiv(id) {
+                document.getElementById(id).style.display = "none";
+            }
+
+            function showDiv(id) {
+                document.getElementById(id).style.display = "block";
+            }
+
+            function base64URLEncode(bytes) {
+                return hextob64u(BAtohex(new Uint8Array(bytes)));
+            }
+            function htmlEncode(s) {
+                if (s) {
+                    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+                } else {
+                    return '';
+                }
+            }
+
+            function htmlDecode(s) {
+                if (s) {
+                    return s.replace(/&quot;/g, '"').replace(/&gt;/g, '>').replace(/&lt;/g, '<').replace(/&amp;/g, '&');
+                } else {
+                    return '';
+                }
+            }
+
+			function getBaseURL() {
+				var locationHostPort = location.hostname+(location.port ? ':'+location.port: ''); 
+				var baseURL = location.protocol+'//'+locationHostPort;
+
+				return baseURL;
+			}
+
+            function webAuthnAvailable() {
+                return !(typeof(PublicKeyCredential) == undefined);
+            }
+
+            function performWebAuthnFeatureDiscovery() {
+                let allPromises = [];
+                if (webAuthnAvailable()) {
+                    isUVPAA = false;
+                    isAutofillAvailable = false; 
+                    allPromises.push(
+                        PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()
+                        .then((x) => { isUVPAA = x; })
+                        .catch((e) => { console.log("Error calling PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable: " + e); })
+                    );
+                    if (PublicKeyCredential.isConditionalMediationAvailable != null) {
+                        allPromises.push(
+                            PublicKeyCredential.isConditionalMediationAvailable()
+                            .then((x) => { isAutofillAvailable = x; })
+                            .catch((e) => { console.log("Error calling PublicKeyCredential.isConditionalMediationAvailable: " + e); })
+                        );    
+                    }
+                }
+                // now return all the promises
+                return Promise.all(allPromises);
+            }
+
+            function fetchOptions(isAutofill, cb, cberr) {
+				let headers = {
+					'Accept': 'application/json',
+					'Content-Type': 'application/json'
+				};
+
+				console.log(`DEBUG: ${getBaseURL()}`);
+
+				fetch( 
+					getBaseURL() + '/authsvc/mtfim/sps/apiauthsvc?PolicyId=urn:ibm:security:authentication:asf:fido2', 
+					{
+						method: 'GET',
+						headers: headers
+					}
+				).then((response) => {
+					console.log("fetchOptions response status: " + response.status);
+					return response.json();
+				}).then((data) => {
+					postLocation = data.location;
+					console.log("postLoc: " + postLocation);
+					cb(isAutofill, data.serverOptions, cberr);
+				}).catch((error) => {
+					cberr("fetchOptions error: " + error);
+				});
+			}
+
+            function cleanupAutofillControls() {
+                abortController = null;
+                abortSignal = null;
+                // if there is an autofill refresh challenge timer active, stop it
+                if (autofillRefreshTimer != null) {
+                    console.log("Canceling autofill refresh timer");
+                    window.clearTimeout(autofillRefreshTimer);
+                    autofillRefreshTimer = null;
+                }
+                autofillWebAuthnPromise = null;
+            }
+
+            async function abortAutofillIfRunning(shouldWait) {
+                //
+                // If autofill is active, abort it. 
+                // Note use of the Error class - this is needed to get consistent
+                // behaviour in the parameter passed to the catch() block of navigator.credentials.get
+                //
+                if (abortController != null) {
+                    console.log("Aborting existing autofill webauthn call");
+                    let abortError = new Error('Aborting existing autofill webauthn call');
+                    abortError.name = 'AbortError';
+                    abortController.abort(abortError);
+
+                    //
+                    // now we really *should* wait for the abort to complete in all cases when aborting
+                    // however if you do this on Safari (at least at time of writing
+                    // with Safari 16.5.1) when your are about to start a modal flow, 
+                    // then the browser will complain with the warning:
+                    //
+                    // User gesture is not detected. To use the WebAuthn API, call 'navigator.credentials.create' or 'navigator.credentials.get' within user activated events.
+                    //
+                    // and the user gets an ugly warning asking them to allow the modal call to WebAuthn (which they should not get)
+                    //
+                    // see: https://bugs.webkit.org/show_bug.cgi?id=258642
+                    //
+                    // So instead, in that case, we just completely assume that it's aborted
+                    // somewhat synchronously by the OS. This seems to work on Chrome and Safari.
+                    // 
+                    // When the bug is fixed, remove " && shouldWait" from condition below
+                    // and also the abortSignal.aborted would then be the only check necessary
+                    // in the catch block of the webauthn call below.
+                    //
+                    if (autofillWebAuthnPromise && shouldWait) {
+                        console.log("Waiting for existing autofill to abort");
+                        await autofillWebAuthnPromise;
+                        console.log("Finished waiting for existing autofill to abort");
+                        autofillWebAuthnPromise = null;
+                    }
+
+                    // regardless of whether we waited or not, clean up all the autofill control variables
+                    cleanupAutofillControls();
+                }
+            }
+
+            async function processAssertionOptionsResponse(isAutofill, options, cberr) {
+                console.log("processAssertionOptionsResponse: isAutofill: " + isAutofill + " options: " + JSON.stringify(options));
+
+                // if there is an existing autofill in progress, abort it here
+                // and wait for that to complete before proceeding
+                await abortAutofillIfRunning(isAutofill);
+
+                publicKey = {
+                    "rpId": options.rpId,
+                    "timeout": options.timeout,
+                    "challenge": new Uint8Array(b64toBA(b64utob64(options.challenge))),
+                    "userVerification": options.userVerification
+                };
+
+				let payload = {
+                    publicKey: publicKey
+				}
+
+				if (isAutofill) {
+					abortController = new AbortController();
+                	abortSignal = abortController.signal;
+					payload["signal"] = abortSignal;
+					payload["mediation"] = "conditional";
+				}
+
+                console.log("Calling navigator.credentials.get with options: " + JSON.stringify(payload));
+                let webauthnPromise = navigator.credentials.get(payload).then(function (assertion) {
+
+
+                    // on successful assertion we don't need any of these any more
+                    cleanupAutofillControls();
+
+                    var assertionJson = {};
+                    assertionJson.id = assertion.id;
+                    assertionJson.rawId = base64URLEncode(assertion.rawId);
+					assertionJson.type = assertion.type;
+					assertionJson.response = {
+						clientDataJSON: base64URLEncode(assertion.response.clientDataJSON),
+           		        authenticatorData: base64URLEncode(assertion.response.authenticatorData),
+                    	signature: base64URLEncode(assertion.response.signature),
+                    	userHandle: base64URLEncode(assertion.response.userHandle)
+					};
+
+					assertionJson.getClientExtensionResults = assertion.getClientExtensionResults();
+                    
+					// not yet supported by ISV SaaS
+                    //assertionJson.authenticatorAttachment = assertion.authenticatorAttachment;
+
+                    console.log("assertionJson: " + JSON.stringify(assertionJson));
+
+					processAssertionResponse(assertionJson, cberr);
+
+                }).catch(function (err) {
+                    //
+                    // if this is the autofill call, then this might be perfectly normal since it may have been aborted
+                    // as a result of the user pressing the Login with a passkey button 
+                    // abortSignal might be null because we don't await the promise to finish in modal case due to Safari bug, 
+                    // so also check if the err is an Error with name "AbortError" as an alternative for checking if we have been aborted.
+                    //
+                    //console.log("catch block: err: " + err + " typeof(err): " + typeof(err) + " isAutofill: " + isAutofill + " abortSignal: " + abortSignal + " abortSignal.aborted: " + (abortSignal != null ? abortSignal.aborted : "null") + " err.name: " + ((err != null && err.name != null) ? err.name : "null") );
+
+                    if ((abortSignal != null && abortSignal.aborted) || (err != null && err.name != null && err.name == "AbortError")) {
+                        console.log("Autofill request aborted");
+                        cleanupAutofillControls();
+                    } else {
+                        cberr(err);
+                    }
+
+                    // if the modal was aborted, resume autofill if supported
+                    if (!isAutofill && isAutofillAvailable) {
+                        console.log("calling kickoffAutofill from within catch handler of modal webauthn");
+                        refreshAutofill();
+                    }
+                });
+
+                if (isAutofill) {
+                    // store this, so on conforming browsers we can await it
+                    // before starting the modal UI
+                    autofillWebAuthnPromise = webauthnPromise;
+
+                    // set a timer to get fresh options every now and then.
+                    // Use 30 seconds or 30 seconds less than the timeout if thats larger.
+                    let refreshInterval = 30000;
+                    if (options.timeout != null && options.timeout > 60000) {
+                        refreshInterval = options.timeout - 30000;
+                    }
+                    console.log("Will get a fresh autofill challenge in (ms): " + refreshInterval);
+                    autofillRefreshTimer = window.setTimeout(refreshAutofill, refreshInterval);
+                }
+            }
+
+			function processAssertionResponse(assertionJson, cberr) {
+				var postData = {
+					"operation": "authenticate",
+					"assertionResponse": assertionJson
+				};
+
+				let headers = {
+					'Accept': 'application/json',
+					'Content-Type': 'application/json'
+				};
+
+				fetch( 
+					getBaseURL() + postLocation,
+					{
+						method: 'POST',
+						headers: headers,
+						body: JSON.stringify(postData)
+					}
+				).then((response) => {
+					console.log("processAssertionResponse response status: " + response.status);
+
+                    if (response.status == 204) {
+                        // We now have an authenticated session cookie.
+                        // Just before redirecting to the target URL, signal to the 
+                        // workflow that we are done. This allows server-side workflow
+                        // cleanup to occur.
+                        fetch(
+                            document.getElementById("usernameForm").action,
+                            {
+                                body: "done=true",
+                                headers: {
+                                    "Content-Type": "application/x-www-form-urlencoded",
+                                },
+                                method: "POST"
+                            }
+                        ).then((x) => {
+                            redirectToTarget();
+                        }).catch((e) => {
+                            console.log(e);
+                            redirectToTarget();
+                        });
+                    } else {
+                        // an error occured
+                        try {
+                            response.json().then((data) => {
+                                if (typeof data.exceptionMsg != undefined) {
+                                    cberr(data.exceptionMsg);
+                                }
+                            }).catch((e) => {
+                                cberr(e);
+                            });
+                        } catch (e) {
+                            cberr(e);
+                        }
+
+                        // in error case, resume autofill
+                        refreshAutofill();
+                    }
+
+				}).catch((error) => {
+					cberr("processAssertionResponse error: " + error);
+                    // in error case, resume autofill
+                    refreshAutofill();
+				}).finally(() => {
+                    console.log("Finally called");
+                });
+			}
+
+            function redirectToTarget() {
+                window.location.replace("@context.post_url@");
+            }
+
+            function refreshAutofill() {
+                if (isAutofillAvailable) {
+                    fetchOptions(true, processAssertionOptionsResponse, onError);
+                }
+            }
+
+            function modalPasskeyLogin() {
+                hideDiv("errDiv");
+                fetchOptions(false, processAssertionOptionsResponse, onError);
+            }
+
+            function onError(msg) {
+                console.log("error: " + msg);
+                document.getElementById("errDiv").innerText = msg;
+                showDiv("errDiv");
+            }
+
+            window.addEventListener('load', (e) => {
+                performWebAuthnFeatureDiscovery()
+                .then((x) => {
+                    // kick of the condiitonal mediation flow if available
+                    refreshAutofill();
+                });
+            });
+        </script>
+        <script type="text/javascript" src="/profile/static/carbon-components.min.js"></script>
+        <script type="text/javascript" src="/usc/js/ieCheck.js"></script>
+        <!---->
+    </body>
+</html>  
