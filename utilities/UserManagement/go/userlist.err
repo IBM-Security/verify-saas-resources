@@ -1,0 +1,116 @@
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0*   Trying 23.222.241.81:443...
+* Connected to preprod-perf-scale.pre1.idng.ibmcloudsecurity.com (23.222.241.81) port 443 (#0)
+* ALPN: offers h2
+* ALPN: offers http/1.1
+* TLSv1.0 (OUT), TLS header, Certificate Status (22):
+} [5 bytes data]
+* TLSv1.3 (OUT), TLS handshake, Client hello (1):
+} [512 bytes data]
+* TLSv1.2 (IN), TLS header, Certificate Status (22):
+{ [5 bytes data]
+* TLSv1.3 (IN), TLS handshake, Server hello (2):
+{ [122 bytes data]
+* TLSv1.2 (IN), TLS header, Finished (20):
+{ [5 bytes data]
+* TLSv1.2 (IN), TLS header, Supplemental data (23):
+{ [5 bytes data]
+* TLSv1.3 (IN), TLS handshake, Encrypted Extensions (8):
+{ [29 bytes data]
+* TLSv1.2 (IN), TLS header, Supplemental data (23):
+{ [5 bytes data]
+* TLSv1.3 (IN), TLS handshake, Certificate (11):
+{ [2845 bytes data]
+* TLSv1.2 (IN), TLS header, Supplemental data (23):
+{ [5 bytes data]
+* TLSv1.3 (IN), TLS handshake, CERT verify (15):
+{ [79 bytes data]
+* TLSv1.2 (IN), TLS header, Supplemental data (23):
+{ [5 bytes data]
+* TLSv1.3 (IN), TLS handshake, Finished (20):
+{ [52 bytes data]
+* TLSv1.2 (OUT), TLS header, Finished (20):
+} [5 bytes data]
+* TLSv1.3 (OUT), TLS change cipher, Change cipher spec (1):
+} [1 bytes data]
+* TLSv1.2 (OUT), TLS header, Supplemental data (23):
+} [5 bytes data]
+* TLSv1.3 (OUT), TLS handshake, Finished (20):
+} [52 bytes data]
+* SSL connection using TLSv1.3 / TLS_AES_256_GCM_SHA384
+* ALPN: server accepted h2
+* Server certificate:
+*  subject: C=US; ST=New York; L=Armonk; O=International Business Machines Corporation; CN=*.pre1.idng.ibmcloudsecurity.com
+*  start date: Apr 28 00:00:00 2023 GMT
+*  expire date: Apr 29 23:59:59 2024 GMT
+*  issuer: C=US; O=DigiCert Inc; CN=DigiCert TLS RSA SHA256 2020 CA1
+*  SSL certificate verify result: unable to get local issuer certificate (20), continuing anyway.
+* Using HTTP2, server supports multiplexing
+* Copying HTTP/2 data in stream buffer to connection buffer after upgrade: len=0
+* TLSv1.2 (OUT), TLS header, Supplemental data (23):
+} [5 bytes data]
+* TLSv1.2 (OUT), TLS header, Supplemental data (23):
+} [5 bytes data]
+* TLSv1.2 (OUT), TLS header, Supplemental data (23):
+} [5 bytes data]
+* h2h3 [:method: GET]
+* h2h3 [:path: /v2.0/Users?useBookmark=true&count=2500&attributes=userName]
+* h2h3 [:scheme: https]
+* h2h3 [:authority: preprod-perf-scale.pre1.idng.ibmcloudsecurity.com]
+* h2h3 [user-agent: curl/7.85.0]
+* h2h3 [accept: */*]
+* h2h3 [authorization: Bearer Z84orb4BHSeSWYKH2Sse2GD_t4nypu4DsWnlEcSDRZo.z9gUWsTC4eaQsjG_2Fr29jmTa2L7JNkx-iyDvwsJF5qrsqSRoDbbPYjHHuyQA3DqP7zS2LzKbmddzDAKcGg9fg.M18xNzAwNDQ1MTIzXzEz]
+* Using Stream ID: 1 (easy handle 0x56481ce0adc0)
+* TLSv1.2 (OUT), TLS header, Supplemental data (23):
+} [5 bytes data]
+> GET /v2.0/Users?useBookmark=true&count=2500&attributes=userName HTTP/2
+> Host: preprod-perf-scale.pre1.idng.ibmcloudsecurity.com
+> user-agent: curl/7.85.0
+> accept: */*
+> authorization: Bearer Z84orb4BHSeSWYKH2Sse2GD_t4nypu4DsWnlEcSDRZo.z9gUWsTC4eaQsjG_2Fr29jmTa2L7JNkx-iyDvwsJF5qrsqSRoDbbPYjHHuyQA3DqP7zS2LzKbmddzDAKcGg9fg.M18xNzAwNDQ1MTIzXzEz
+> 
+* TLSv1.2 (IN), TLS header, Supplemental data (23):
+{ [5 bytes data]
+* TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
+{ [297 bytes data]
+* TLSv1.2 (IN), TLS header, Supplemental data (23):
+{ [5 bytes data]
+* TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
+{ [297 bytes data]
+* old SSL session ID is stale, removing
+* TLSv1.2 (IN), TLS header, Supplemental data (23):
+{ [5 bytes data]
+* TLSv1.2 (OUT), TLS header, Supplemental data (23):
+} [5 bytes data]
+* TLSv1.2 (IN), TLS header, Supplemental data (23):
+{ [5 bytes data]
+  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:02 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:03 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:04 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:05 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:06 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:07 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:08 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:09 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:10 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:11 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:12 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:13 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:14 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:15 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:16 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:17 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:18 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:19 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:20 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:21 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:22 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:23 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:24 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:25 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:26 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:27 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:28 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:29 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:30 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:31 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:32 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:33 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:34 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:35 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:36 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:37 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:38 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:39 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:40 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:41 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:42 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:43 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:44 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:45 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:46 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:47 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:48 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:49 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:50 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:51 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:52 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:53 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:54 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:55 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:56 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:57 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:58 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:59 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:01:00 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:01:01 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:01:02 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:01:03 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:01:04 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:01:05 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:01:06 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:01:07 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:01:08 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:01:09 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:01:10 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:01:11 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:01:12 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:01:13 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:01:14 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:01:15 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:01:16 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:01:17 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:01:18 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:01:19 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:01:20 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:01:21 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:01:22 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:01:23 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:01:24 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:01:25 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:01:26 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:01:27 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:01:28 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:01:29 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:01:30 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:01:31 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:01:32 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:01:33 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:01:34 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:01:35 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:01:36 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:01:37 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:01:38 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:01:39 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:01:40 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:01:41 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:01:42 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:01:43 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:01:44 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:01:45 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:01:46 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:01:47 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:01:48 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:01:49 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:01:50 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:01:51 --:--:--     0* TLSv1.2 (IN), TLS header, Supplemental data (23):
+{ [5 bytes data]
+  0     0    0     0    0     0      0      0 --:--:--  0:01:51 --:--:--     0< HTTP/2 529 
+< x-backside-transport: FAIL FAIL
+< content-language: en_US
+< content-type: application/scim+json
+< p3p: CP="NON CUR OTPi OUR NOR UNI"
+< x-frame-options: SAMEORIGIN
+< x-content-type-options: nosniff
+< cache-control: no-cache, no-store, max-age=0, must-revalidate
+< expires: 0
+< x-xss-protection: 1; mode=block
+< x-correlation-id: CORR_ID-AK6aa80f7e-6c7e-4143-9d4b-05454e78fb7f
+< content-security-policy: frame-ancestors 'self'
+< server-timing: intid;desc=5776ca544f01e463
+< x-ua-compatible: IE=edge
+< x-global-transaction-id: fa8ee24a655abc78b501ce11
+< content-length: 119
+< date: Mon, 20 Nov 2023 01:56:56 GMT
+< set-cookie: CIPD-S-SESSION-ID=0:1:rediscol01a:3ITnRN8PJz3qF40RXobBXH81nj4/bPtL2GFj1Q66b4U=; Path=/; SameSite=None; Secure; HttpOnly
+< set-cookie: CISESSIONIDPP01A=PBC5YS:914954517; Path=/; Domain=pre1.idng.ibmcloudsecurity.com; Secure; HttpOnly
+< strict-transport-security: max-age=31536000 ; includeSubDomains
+< set-cookie: _abck=0CBA1ED5DEB660EC155934E6829AFE26~-1~YAAQUTsvFzMJ1N2LAQAARetx6gpoOqLB71EHrF4othRfUNvcFIRVcHacxRw5fji3co+b8Nuw9k4GankE5fXpmnu+Y6QJcnBlPIqtaeIHHrEJdES7BJfG+ONTlCBMxgIf6IdS8fFJbtuz/N5qhpfYDw0q75awgQsR8Yqk2dt4R4wdTPHWKM4zbsOv32MVJx+nFX5gi82yqDLGmSyvAA1MtgXI+Z4v+xdKVjq1qJXs3z2KRMP4HdIWgRwFqMRU0VZ4piN8vhoyIwB/WGJZnhQ8vZ/It2gjrQGdFtaXw6fyUqXRwMnbanZTD9w4cHgNay19P+S0lB5VTmmaZiToPZ4nGBlY7kB5fJnUlROAEXXiYx4KRbr/OrkPRvL6I0jdirTfmlC8~-1~-1~-1; Domain=.ibmcloudsecurity.com; Path=/; Expires=Tue, 19 Nov 2024 01:56:56 GMT; Max-Age=31536000; SameSite=None; Secure
+< set-cookie: bm_sz=026FC5F869F54BA84DA150AA8E076297~YAAQUTsvFzQJ1N2LAQAARetx6hVfbShbdexDMunJgLlVkEUgX0+sInmUKe3wFHX1NrXogcVhOz0prvDQuoHhtCubh8sh8fUlAfu2ag2LVKFOKy2OnKAwCX1Y7psWeRmLn/nvRzL5e+EpSdgNGs2usvgJmRM4Q/hZadUIdowxlnb9gDnkCrej8ubPfBuY5g6nk8TuQBjb9tPB+9PbIu3GjPeN8NRrEqINP71CouHYWQ1k2ziK1whS9xeEdppAtyuKOxWCMc+jlPxobZ1pOuv0jQXr4DJnbyeW9Vu8SCB5MACf2o7XtF00+sLCdVJZ~3621443~4536134; Domain=.ibmcloudsecurity.com; Path=/; Expires=Mon, 20 Nov 2023 05:55:04 GMT; Max-Age=14288; SameSite=None; Secure
+< 
+* TLSv1.2 (IN), TLS header, Supplemental data (23):
+{ [5 bytes data]
+100   119  100   119    0     0      1      0  0:01:59  0:01:51  0:00:08    36
+* Connection #0 to host preprod-perf-scale.pre1.idng.ibmcloudsecurity.com left intact
