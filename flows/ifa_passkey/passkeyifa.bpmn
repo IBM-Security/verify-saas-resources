@@ -1,12 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?><bpmn2:definitions xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" exporter="Camunda Modeler" exporterVersion="5.0.0" id="_FXeIoKhnEeOC4LOKh_69JQ" targetNamespace="isv_customtasks" xmlns:bioc="http://bpmn.io/schema/bpmn/biocolor/1.0" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:color="http://www.omg.org/spec/BPMN/non-normative/color/1.0" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:isv="http://ibm.com/bpmn/isv" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL BPMN20.xsd"><bpmn2:process camunda:historyTimeToLive="1" id="passkeyifa" isExecutable="true" name="PasskeyIFA"><bpmn2:startEvent id="Event_0onayf9"><bpmn2:outgoing>Flow_12xl4zo</bpmn2:outgoing></bpmn2:startEvent><bpmn2:serviceTask camunda:class="com.ibm.security.access.workflow.camunda.customTaskListener.CustomRuleTask" id="isv_function_1699932915017_customId" name="Workflow PreCheck"><bpmn2:extensionElements><isv:inputOutput><isv:inputParameter displayName="Rule expression" id="inputData" instruction="Use functions and conditions to add or transform data" name="inputData" order="1" required="true" type="String">statements:
     - context: &gt;
-        # view at https://webhook.site/#!/f055e888-9da5-4842-b9fe-7b7e36990dee
-        logToServer := hc.Post("https://fidointerop.securitypoc.com/dump", {}, "WorkflowPreCheck context: "+jsonToString({
-            "ctx": ctx,
-            "idsuser": idsuser,
-            "user": user
-        }))
-    - context: &gt;
         theme := has(ctx.themeId) ? ctx.themeId : ""
     - context: &gt;
         postUrl := has(ctx.Target) &amp;&amp; ctx.Target != "" ? ctx.Target : "https://" + ctx.__tenantid + "/usc"
@@ -17,12 +10,6 @@
             "auth": (has(idsuser.uid) ? "true" : "false"), 
             "post_url": context.postUrl
         }</isv:inputParameter><isv:outputParameter displayName="Script output" id="result" instruction="The response after executing the rule expression" name="result" order="2" type="String"/></isv:inputOutput></bpmn2:extensionElements><bpmn2:incoming>Flow_12xl4zo</bpmn2:incoming><bpmn2:outgoing>Flow_1lkql7t</bpmn2:outgoing></bpmn2:serviceTask><bpmn2:sequenceFlow id="Flow_12xl4zo" sourceRef="Event_0onayf9" targetRef="isv_function_1699932915017_customId"/><bpmn2:serviceTask camunda:class="com.ibm.security.access.workflow.camunda.customTaskListener.RenderHTMLTask" id="isv_page_1699932918602_customId" name="PromptForUsernameOrPasskey"><bpmn2:extensionElements><isv:inputOutput><isv:inputParameter attrDisplayText="themeRegistrations.name" attrId="themeRegistrations.id" defaultValue="default" displayName="Theme" endpoint="/v1.0/branding/themes" id="themeId" inputType="SingleSelect" instruction="Name of the theme to render" method="GET" name="themeId" order="1" placeholder="Select a theme" required="true" type="String">aedb491f-d4c5-4cf6-9bef-4d921595bd12</isv:inputParameter><isv:inputParameter attrDisplayText="templateList.name" attrId="templateList.name" defaultValue="custom_page1" displayName="Template name" endpoint="/bpm-mgmt/v1.0/customtask/util/templateList" id="templatename" inputType="SingleSelect" instruction="Name of the template to render" method="GET" name="templateName" order="2" placeholder="Select a template" required="true" type="String">custom_page1</isv:inputParameter><isv:inputParameter displayName="Signal(optional)" id="signal" instruction="Signal can be used to resume the task in an existing flow. To return to the existing flow after execution of the task, specify a signal value and ensure that a message event is configured after the task, with the same Signal value." name="signal" order="3" type="String">onUsernameSubmit</isv:inputParameter></isv:inputOutput></bpmn2:extensionElements><bpmn2:incoming>Flow_0cc9wy8</bpmn2:incoming><bpmn2:outgoing>Flow_0pr3lux</bpmn2:outgoing></bpmn2:serviceTask><bpmn2:serviceTask camunda:class="com.ibm.security.access.workflow.camunda.customTaskListener.CustomRuleTask" id="isv_function_1699932922144_customId" name="ProcessUsernameOrDoneNow"><bpmn2:extensionElements><isv:inputOutput><isv:inputParameter displayName="Rule expression" id="inputData" instruction="Use functions and conditions to add or transform data" name="inputData" order="1" required="true" type="String">statements:
-    - context: &gt;
-        logToServer := hc.Post("https://fidointerop.securitypoc.com/dump", {}, "ProcessUsernameOrDoneNow context: "+jsonToString({
-            "ctx": ctx,
-            "idsuser": idsuser,
-            "user": user
-        }))
     - context: &gt;
         theme := has(ctx.themeId) ? ctx.themeId : ""
     - context: &gt;
