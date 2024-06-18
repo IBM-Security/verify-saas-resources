@@ -8,8 +8,6 @@ plugins {
 
 buildscript {
 
-    repositories { mavenCentral() }
-
     dependencies {
         classpath("org.jetbrains.kotlin:kotlin-serialization:1.9.10")
     }
