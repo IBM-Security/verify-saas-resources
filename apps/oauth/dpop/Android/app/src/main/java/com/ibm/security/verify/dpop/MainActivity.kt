@@ -43,27 +43,37 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
+
 import java.nio.charset.StandardCharsets
 import java.security.Key
 import java.security.KeyPairGenerator
 import java.security.KeyStore
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
+import java.security.cert.CertificateFactory
+import java.security.cert.X509Certificate
 import java.security.interfaces.RSAPublicKey
 import java.security.spec.RSAKeyGenParameterSpec
 import java.util.Base64
+import java.util.Locale
+import javax.net.ssl.HostnameVerifier
+import javax.net.ssl.SSLContext
+import javax.net.ssl.TrustManagerFactory
+import javax.net.ssl.X509TrustManager
 
 
 class MainActivity : ComponentActivity() {
 
     companion object {
         lateinit var retrofit: Retrofit
+        lateinit var retrofitCustomSSL: Retrofit    // separate instance to handle custom SSL certificate
         const val TAG = "DPoP-Demo"
         const val RSA_KEY_NAME = "rsa-dpop-demo-key.com.ibm.security.verify.dpop"
         const val ANDROID_KEYSTORE = "AndroidKeyStore"
     }
 
     private lateinit var apiService: ApiService
+    private lateinit var apiServiceCustomSSL: ApiService
     private lateinit var dpopToken: DpopToken
     private lateinit var keyStore: KeyStore
 
@@ -71,13 +81,15 @@ class MainActivity : ComponentActivity() {
     private val tokenValidation = MutableLiveData("...")
 
     // Change these parameters according to your IBM Security Verify tenant
-    private val tenant = "<your-isv-tenant>"
-    private val clientId = "<your-clientId>"
-    private val clientSecret = "<your-clientSecret>"
-    private val resourceServer = "<resource-server>:8080" // e.g. "192.168.42.2:8080"
+    private val tenant = "<your_tenant>" // without protocol
+    private val clientId = "your_clientid"
+    private val clientSecret = "<your_clientsecret>"
+    private val resourceServer = "192.168.42.23" // without protocol and port
+    private val resourceServerPort = "8080"
 
     private val tokenEndpoint = String.format("https://%s/oauth2/token", tenant)
-    private val resourceEndpoint = String.format("http://%s/validate-token", resourceServer)
+    private val resourceEndpoint =
+        String.format("https://%s:%s/validate-token", resourceServer, resourceServerPort)
 
     @OptIn(ExperimentalSerializationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -97,16 +109,33 @@ class MainActivity : ComponentActivity() {
 
         val okHttpClientBuilder = OkHttpClient.Builder()
         val loggingInterceptor = HttpLoggingInterceptor()
+
         loggingInterceptor.level = HttpLoggingInterceptor.Level.BODY
         okHttpClientBuilder.addInterceptor(loggingInterceptor)
-
         retrofit = Retrofit.Builder()
             .baseUrl("https://localhost")
             .client(okHttpClientBuilder.build())
             .addConverterFactory(Json.asConverterFactory("application/json".toMediaType()))
             .build()
-
         apiService = retrofit.create(ApiService::class.java)
+
+        val trustManager = getCustomTrustManager(R.raw.cert)
+        val sslContext = SSLContext.getInstance("TLS").apply {
+            init(null, arrayOf(trustManager), null)
+        }
+        val customHostnameVerifier = HostnameVerifier { hostname, _ ->
+            hostname == "localhost" || hostname == resourceServer
+        }
+        okHttpClientBuilder.hostnameVerifier(customHostnameVerifier)
+        okHttpClientBuilder.sslSocketFactory(sslContext.socketFactory, trustManager)
+
+        /*  Retrofit instance with custom SSL certificate for Node app   */
+        retrofitCustomSSL = Retrofit.Builder()
+            .baseUrl("https://localhost")
+            .client(okHttpClientBuilder.build())
+            .addConverterFactory(Json.asConverterFactory("application/json".toMediaType()))
+            .build()
+        apiServiceCustomSSL = retrofitCustomSSL.create(ApiService::class.java)
 
         keyStore = KeyStore.getInstance(ANDROID_KEYSTORE)
         keyStore.load(null)
@@ -269,7 +298,7 @@ class MainActivity : ComponentActivity() {
             accessToken = dpopToken.accessToken
         )
 
-        apiService.validateDpopToken(
+        apiServiceCustomSSL.validateDpopToken(
             headers,
             String.format("DPoP %s", dpopToken.accessToken),
             resourceEndpoint
@@ -283,11 +312,19 @@ class MainActivity : ComponentActivity() {
                     if (response.isSuccessful) {
                         Log.d(TAG, "DPoP token validation successful")
                         tokenValidation.value =
-                            String.format("%d - DPoP token validation successful", response.code())
+                            String.format(
+                                Locale.getDefault(),
+                                "%d - DPoP token validation successful",
+                                response.code()
+                            )
                     } else {
                         Log.d(TAG, "DPoP token validation failed")
                         tokenValidation.value =
-                            String.format("%d - DPoP token validation failed", response.code())
+                            String.format(
+                                Locale.getDefault(),
+                                "%d - DPoP token validation failed",
+                                response.code()
+                            )
                     }
                 }
 
@@ -359,5 +396,25 @@ class MainActivity : ComponentActivity() {
         } catch (e: NoSuchAlgorithmException) {
             throw RuntimeException(e)
         }
+    }
+
+    private fun getCustomTrustManager(certResourceId: Int): X509TrustManager {
+        val certificateFactory = CertificateFactory.getInstance("X.509")
+        val certificate =
+            applicationContext.resources.openRawResource(certResourceId).use { inputStream ->
+                certificateFactory.generateCertificate(inputStream) as X509Certificate
+            }
+
+        val keyStore = KeyStore.getInstance(KeyStore.getDefaultType()).apply {
+            load(null, null)
+            setCertificateEntry("custom", certificate)
+        }
+
+        val trustManagerFactory =
+            TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm()).apply {
+                init(keyStore)
+            }
+
+        return trustManagerFactory.trustManagers[0] as X509TrustManager
     }
 }
