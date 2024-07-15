@@ -1,4 +1,4 @@
-# IBM Security Verify Privacy Utility for Viewing Trace Logs
+# IBM Security Verify Utility for Viewing Trace Logs
 
 Go program that retrieves trace logs on IBM Security Verify.
 
