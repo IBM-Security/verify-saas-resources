@@ -7,7 +7,7 @@ Go program that retrieves trace logs on IBM Security Verify.
 ## Prerequisites
 
 * Create an API client
- - An API client is necessary to get the accesses for viewing trace logs. The following document [Create an API client](https://docs.verify.ibm.com/verify/docs/create-api-client) describes
+  - An API client is necessary to get the accesses for viewing trace logs. The following document [Create an API client](https://docs.verify.ibm.com/verify/docs/create-api-client) describes
 how to create an API client with the appropriate accesses.  The set of accesses that you need for viewing trace logs is readTraceLogs.
 
 
@@ -56,18 +56,18 @@ Usage of ./queryLogs:
 The queryLogs utility accepts 7 commands:
 
 * clientID 
- -  The client ID created in the previous step with the right access
+  - The client ID created in the previous step with the right access
 * clientSecret 
- - The corresponding client secret
+  - The corresponding client secret
 * filter 
- - The custom filter to filter logs, in the format `<key>=<value>` and delimited by `&` and enclosed in double quotes
+  - The custom filter to filter logs, in the format `<key>=<value>` and delimited by `&` and enclosed in double quotes
 * hostname 
- - The hostname of the tenant 
+  - The hostname of the tenant 
 * severity 
- - The severity to filter logs  
+  - The severity to filter logs 
 * spanID 
- - The span ID to filter logs
+  - The span ID to filter logs
 * traceID 
- - The trace ID to filter logs
+  - The trace ID to filter logs
 
 The program will initially retrieve all logs that match the filters from the last 15 minutes, then subsequently retrieve newer logs that match the filters as they are generated and available.
