@@ -1,0 +1,1 @@
+This folder contains assets to a "user registration flow with identity proofing". This is described as an article published on [IBM Verify Docs](https://docs.verify.ibm.com/docs/flow-designer-user-registration-with-identity-proofing)

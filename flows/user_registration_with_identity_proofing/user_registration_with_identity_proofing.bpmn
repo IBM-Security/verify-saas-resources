@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn2:definitions xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" exporter="Camunda Modeler" exporterVersion="5.0.0" id="_FXeIoKhnEeOC4LOKh_69JQ" targetNamespace="isv_customtasks" xmlns:bioc="http://bpmn.io/schema/bpmn/biocolor/1.0" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:color="http://www.omg.org/spec/BPMN/non-normative/color/1.0" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:isv="http://ibm.com/bpmn/isv" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL BPMN20.xsd">
+	<bpmn2:process camunda:historyTimeToLive="1" id="user_registration_with_identity_proofing" isExecutable="true" isv:propertiesSchemaVersion="2.1" name="user_registration_with_identity_proofing">
+		<bpmn2:startEvent camunda:displayName="Start event" id="Event_0onayf9">
+			<bpmn2:outgoing>Flow_056dqwm</bpmn2:outgoing>
+		</bpmn2:startEvent>
+		<bpmn2:endEvent camunda:displayName="End event" id="Event_0yan7ej_customId">
+			<bpmn2:incoming>Flow_03byk5x</bpmn2:incoming>
+			<bpmn2:incoming>Flow_1th3zrl</bpmn2:incoming>
+		</bpmn2:endEvent>
+		<bpmn2:serviceTask camunda:class="com.ibm.security.access.workflow.camunda.customTaskListener.RenderHTMLTask" id="isv_page_1697523312770_customId" name="Account creation confirmation">
+			<bpmn2:extensionElements>
+				<isv:inputOutput>
+					<isv:inputParameter id="themeId" name="themeId">8aeacca5-2cf6-4815-982c-fef1a7f49a8d</isv:inputParameter>
+					<isv:inputParameter id="templatename" name="templateName">custom_page5</isv:inputParameter>
+					<isv:inputParameter id="callback" name="callback"/>
+					<isv:inputParameter id="signal" name="signal">done</isv:inputParameter>
+				</isv:inputOutput>
+			</bpmn2:extensionElements>
+			<bpmn2:incoming>Flow_0pwvgcu</bpmn2:incoming>
+			<bpmn2:outgoing>Flow_03byk5x</bpmn2:outgoing>
+		</bpmn2:serviceTask>
+		<bpmn2:sequenceFlow id="Flow_03byk5x" sourceRef="isv_page_1697523312770_customId" targetRef="Event_0yan7ej_customId"/>
+		<bpmn2:serviceTask camunda:class="com.ibm.security.access.workflow.camunda.customTaskListener.CreateUserTask" id="isv_create_user_1698873553666_customId" name="Create user">
+			<bpmn2:extensionElements>
+				<isv:inputOutput>
+					<isv:outputParameter id="user" name="user"/>
+				</isv:inputOutput>
+			</bpmn2:extensionElements>
+			<bpmn2:incoming>Flow_0pmg6iu</bpmn2:incoming>
+			<bpmn2:outgoing>Flow_0s97r84</bpmn2:outgoing>
+		</bpmn2:serviceTask>
+		<bpmn2:sequenceFlow id="Flow_0s97r84" sourceRef="isv_create_user_1698873553666_customId" targetRef="Gateway_13gelji_customId"/>
+		<bpmn2:exclusiveGateway id="Gateway_13gelji_customId">
+			<bpmn2:incoming>Flow_0s97r84</bpmn2:incoming>
+			<bpmn2:outgoing>Flow_0pwvgcu</bpmn2:outgoing>
+			<bpmn2:outgoing>Flow_05o6a17</bpmn2:outgoing>
+		</bpmn2:exclusiveGateway>
+		<bpmn2:sequenceFlow id="Flow_0pwvgcu" sourceRef="Gateway_13gelji_customId" targetRef="isv_page_1697523312770_customId">
+			<bpmn2:conditionExpression xsi:type="bpmn2:tFormalExpression">${S(workflow_context).hasProp("user")}</bpmn2:conditionExpression>
+		</bpmn2:sequenceFlow>
+		<bpmn2:serviceTask camunda:class="com.ibm.security.access.workflow.camunda.customTaskListener.RenderHTMLTask" id="isv_page_1700919590195_customId" name="Error Page">
+			<bpmn2:extensionElements>
+				<isv:inputOutput>
+					<isv:inputParameter id="themeId" name="themeId">8aeacca5-2cf6-4815-982c-fef1a7f49a8d</isv:inputParameter>
+					<isv:inputParameter id="templatename" name="templateName">custom_page4</isv:inputParameter>
+					<isv:inputParameter id="callback" name="callback"/>
+					<isv:inputParameter id="signal" name="signal"/>
+				</isv:inputOutput>
+			</bpmn2:extensionElements>
+			<bpmn2:incoming>Flow_05o6a17</bpmn2:incoming>
+			<bpmn2:incoming>Flow_1rygunh</bpmn2:incoming>
+			<bpmn2:outgoing>Flow_1th3zrl</bpmn2:outgoing>
+		</bpmn2:serviceTask>
+		<bpmn2:sequenceFlow id="Flow_1th3zrl" sourceRef="isv_page_1700919590195_customId" targetRef="Event_0yan7ej_customId"/>
+		<bpmn2:sequenceFlow id="Flow_05o6a17" sourceRef="Gateway_13gelji_customId" targetRef="isv_page_1700919590195_customId">
+			<bpmn2:conditionExpression xsi:type="bpmn2:tFormalExpression">${!S(workflow_context).hasProp("user")}</bpmn2:conditionExpression>
+		</bpmn2:sequenceFlow>
+		<bpmn2:sequenceFlow id="Flow_056dqwm" sourceRef="Event_0onayf9" targetRef="isv_user_form_1740071237668_customId"/>
+		<bpmn2:serviceTask camunda:class="com.ibm.security.access.workflow.camunda.customTaskListener.UserFormsTask" id="isv_user_form_1740071237668_customId" name="User Attribute Collection Form">
+			<bpmn2:extensionElements>
+				<isv:inputOutput>
+					<isv:inputParameter id="formId" name="formId">ba7bf02b-0113-4aeb-a04a-40156a4b51ba</isv:inputParameter>
+					<isv:inputParameter id="callback" name="callback">yes</isv:inputParameter>
+					<isv:inputParameter id="signal" name="signal">user_registration_with_identity_proofing_1740071258091</isv:inputParameter>
+					<isv:outputParameter id="userFormData" name="userFormData"/>
+				</isv:inputOutput>
+			</bpmn2:extensionElements>
+			<bpmn2:incoming>Flow_056dqwm</bpmn2:incoming>
+			<bpmn2:outgoing>Flow_0gnjl1h</bpmn2:outgoing>
+		</bpmn2:serviceTask>
+		<bpmn2:intermediateCatchEvent id="Event_0dayamd_customId">
+			<bpmn2:incoming>Flow_0gnjl1h</bpmn2:incoming>
+			<bpmn2:outgoing>Flow_1nqld3c</bpmn2:outgoing>
+			<bpmn2:messageEventDefinition id="autogenerated_isv_user_form_1740071237668_customId" messageRef="Message_0t3pib4"/>
+		</bpmn2:intermediateCatchEvent>
+		<bpmn2:sequenceFlow id="Flow_0gnjl1h" sourceRef="isv_user_form_1740071237668_customId" targetRef="Event_0dayamd_customId"/>
+		<bpmn2:serviceTask camunda:class="com.ibm.security.access.workflow.camunda.customTaskListener.IdentityProofingTask" id="isv_identity_proofing_1740071272790_customId" name="Identity Proofing Flow">
+			<bpmn2:extensionElements>
+				<isv:inputOutput>
+					<isv:inputParameter id="flowId" name="flowId">b51480e1-3f01-4c3c-a527-98742572e2a2</isv:inputParameter>
+					<isv:inputParameter id="callback" name="callback">yes</isv:inputParameter>
+					<isv:inputParameter id="signal" name="signal">user_registration_with_identity_proofing_1740071282642</isv:inputParameter>
+					<isv:outputParameter id="identityProofingData" name="identityProofingData"/>
+					<isv:outputParameter id="idpStatus" name="idpStatus"/>
+				</isv:inputOutput>
+			</bpmn2:extensionElements>
+			<bpmn2:incoming>Flow_1nqld3c</bpmn2:incoming>
+			<bpmn2:outgoing>Flow_1wpxb2p</bpmn2:outgoing>
+		</bpmn2:serviceTask>
+		<bpmn2:sequenceFlow id="Flow_1nqld3c" sourceRef="Event_0dayamd_customId" targetRef="isv_identity_proofing_1740071272790_customId"/>
+		<bpmn2:intermediateCatchEvent id="Event_19yvj0z_customId">
+			<bpmn2:incoming>Flow_1wpxb2p</bpmn2:incoming>
+			<bpmn2:outgoing>Flow_0yazw0r</bpmn2:outgoing>
+			<bpmn2:messageEventDefinition id="autogenerated_isv_identity_proofing_1740071272790_customId" messageRef="Message_0d7jevn"/>
+		</bpmn2:intermediateCatchEvent>
+		<bpmn2:sequenceFlow id="Flow_1wpxb2p" sourceRef="isv_identity_proofing_1740071272790_customId" targetRef="Event_19yvj0z_customId"/>
+		<bpmn2:exclusiveGateway default="Flow_1rygunh" id="Gateway_147ijsf_customId">
+			<bpmn2:incoming>Flow_0yazw0r</bpmn2:incoming>
+			<bpmn2:outgoing>Flow_0pmg6iu</bpmn2:outgoing>
+			<bpmn2:outgoing>Flow_1rygunh</bpmn2:outgoing>
+		</bpmn2:exclusiveGateway>
+		<bpmn2:sequenceFlow id="Flow_0yazw0r" sourceRef="Event_19yvj0z_customId" targetRef="Gateway_147ijsf_customId"/>
+		<bpmn2:sequenceFlow id="Flow_0pmg6iu" name="Valid User" sourceRef="Gateway_147ijsf_customId" targetRef="isv_create_user_1698873553666_customId">
+			<bpmn2:extensionElements>
+				<isv:conditionJson>{"type":"basic","condition":[{"@context.idpStatus@":[{"op":"eq","vl":"approve"}]}]}</isv:conditionJson>
+			</bpmn2:extensionElements>
+			<bpmn2:conditionExpression xsi:type="bpmn2:tFormalExpression">${(S(workflow_context).prop("idpStatus").value()=="approve")}</bpmn2:conditionExpression>
+		</bpmn2:sequenceFlow>
+		<bpmn2:sequenceFlow id="Flow_1rygunh" name="Invalid User" sourceRef="Gateway_147ijsf_customId" targetRef="isv_page_1700919590195_customId"/>
+	</bpmn2:process>
+	<bpmn2:message id="Message_1eryj9v" name="step1"/>
+	<bpmn2:message id="Message_1tek9de" name="step1"/>
+	<bpmn2:message id="Message_0cki9t1" name="test"/>
+	<bpmn2:message id="Message_1wjpi7q" name="step1"/>
+	<bpmn2:message id="Message_179l10u" name="emailValidate"/>
+	<bpmn2:message id="Message_0neg2r7" name="created"/>
+	<bpmn2:message id="Message_1ky8pa5" name="register"/>
+	<bpmn2:message id="Message_1ahs64j" name="phoneValidate"/>
+	<bpmn2:message id="Message_03y2bik" name="basic"/>
+	<bpmn2:message id="Message_13fja3x" name="additional"/>
+	<bpmn2:message id="Message_00kpmq2" name="test"/>
+	<bpmn2:message id="Message_1w8vzek" name="done"/>
+	<bpmn2:message id="Message_1id6wbc" name="x"/>
+	<bpmn2:message id="Message_0i1i8wi" name="done"/>
+	<bpmn2:message id="Message_0um25u7" name="complete"/>
+	<bpmn2:message id="Message_1bdc0aj" name="accountDetails"/>
+	<bpmn2:message id="Message_0t3pib4" name="user_registration_with_identity_proofing_1740071258091"/>
+	<bpmn2:message id="Message_0d7jevn" name="user_registration_with_identity_proofing_1740071282642"/>
+	<bpmn2:message id="Message_0abfu17" name="user_registration_with_identity_proofing_1740071922095"/>
+	<bpmndi:BPMNDiagram id="BPMNDiagram_1">
+		<bpmndi:BPMNPlane bpmnElement="user_registration_with_identity_proofing" id="BPMNPlane_1">
+			<bpmndi:BPMNShape bioc:stroke="#161616" bpmnElement="Event_0onayf9" color:border-color="#161616" id="Event_0onayf9_di">
+				<dc:Bounds height="40" width="126" x="526" y="-80"/>
+			</bpmndi:BPMNShape>
+			<bpmndi:BPMNShape bioc:stroke="#161616" bpmnElement="Event_0yan7ej_customId" color:border-color="#161616" id="Event_0yan7ej_di">
+				<dc:Bounds height="40" width="126" x="1527" y="640"/>
+			</bpmndi:BPMNShape>
+			<bpmndi:BPMNShape bioc:stroke="#161616" bpmnElement="isv_page_1697523312770_customId" color:border-color="#161616" id="Activity_0grf2ih_di">
+				<dc:Bounds height="76" width="188" x="1246" y="622"/>
+				<bpmndi:BPMNLabel/>
+			</bpmndi:BPMNShape>
+			<bpmndi:BPMNShape bioc:stroke="#161616" bpmnElement="isv_create_user_1698873553666_customId" color:border-color="#161616" id="Activity_1rfswtr_di">
+				<dc:Bounds height="76" width="188" x="826" y="622"/>
+			</bpmndi:BPMNShape>
+			<bpmndi:BPMNShape bioc:stroke="#161616" bpmnElement="Gateway_13gelji_customId" color:border-color="#161616" id="Gateway_13gelji_di" isMarkerVisible="true">
+				<dc:Bounds height="50" width="50" x="1085" y="635"/>
+			</bpmndi:BPMNShape>
+			<bpmndi:BPMNShape bioc:stroke="#161616" bpmnElement="isv_page_1700919590195_customId" color:border-color="#161616" id="Activity_1q15yep_di">
+				<dc:Bounds height="76" width="188" x="1246" y="762"/>
+				<bpmndi:BPMNLabel/>
+			</bpmndi:BPMNShape>
+			<bpmndi:BPMNShape bpmnElement="isv_user_form_1740071237668_customId" id="Activity_1wmlp8v_di">
+				<dc:Bounds height="76" width="188" x="495" y="32"/>
+				<bpmndi:BPMNLabel/>
+			</bpmndi:BPMNShape>
+			<bpmndi:BPMNShape bpmnElement="Event_0dayamd_customId" id="Event_0dayamd_di">
+				<dc:Bounds height="36" width="36" x="571" y="152"/>
+			</bpmndi:BPMNShape>
+			<bpmndi:BPMNShape bpmnElement="isv_identity_proofing_1740071272790_customId" id="Activity_0hznokl_di">
+				<dc:Bounds height="76" width="188" x="495" y="222"/>
+				<bpmndi:BPMNLabel/>
+			</bpmndi:BPMNShape>
+			<bpmndi:BPMNShape bpmnElement="Event_19yvj0z_customId" id="Event_19yvj0z_di">
+				<dc:Bounds height="36" width="36" x="571" y="352"/>
+			</bpmndi:BPMNShape>
+			<bpmndi:BPMNShape bpmnElement="Gateway_147ijsf_customId" id="Gateway_147ijsf_di" isMarkerVisible="true">
+				<dc:Bounds height="50" width="50" x="564" y="635"/>
+			</bpmndi:BPMNShape>
+			<bpmndi:BPMNEdge bioc:stroke="#161616" bpmnElement="Flow_03byk5x" color:border-color="#161616" id="Flow_03byk5x_di">
+				<di:waypoint x="1434" y="660"/>
+				<di:waypoint x="1527" y="660"/>
+			</bpmndi:BPMNEdge>
+			<bpmndi:BPMNEdge bioc:stroke="#161616" bpmnElement="Flow_0s97r84" color:border-color="#161616" id="Flow_0s97r84_di">
+				<di:waypoint x="1014" y="660"/>
+				<di:waypoint x="1085" y="660"/>
+			</bpmndi:BPMNEdge>
+			<bpmndi:BPMNEdge bioc:stroke="#161616" bpmnElement="Flow_0pwvgcu" color:border-color="#161616" id="Flow_0pwvgcu_di">
+				<di:waypoint x="1135" y="660"/>
+				<di:waypoint x="1246" y="660"/>
+			</bpmndi:BPMNEdge>
+			<bpmndi:BPMNEdge bioc:stroke="#161616" bpmnElement="Flow_1th3zrl" color:border-color="#161616" id="Flow_1th3zrl_di">
+				<di:waypoint x="1434" y="800"/>
+				<di:waypoint x="1590" y="800"/>
+				<di:waypoint x="1590" y="680"/>
+			</bpmndi:BPMNEdge>
+			<bpmndi:BPMNEdge bioc:stroke="#161616" bpmnElement="Flow_05o6a17" color:border-color="#161616" id="Flow_05o6a17_di">
+				<di:waypoint x="1110" y="685"/>
+				<di:waypoint x="1110" y="780"/>
+				<di:waypoint x="1246" y="780"/>
+			</bpmndi:BPMNEdge>
+			<bpmndi:BPMNEdge bioc:stroke="#161616" bpmnElement="Flow_056dqwm" color:border-color="#161616" id="Flow_056dqwm_di">
+				<di:waypoint x="589" y="-40"/>
+				<di:waypoint x="589" y="32"/>
+			</bpmndi:BPMNEdge>
+			<bpmndi:BPMNEdge bpmnElement="Flow_0gnjl1h" id="Flow_0gnjl1h_di">
+				<di:waypoint x="589" y="108"/>
+				<di:waypoint x="589" y="152"/>
+			</bpmndi:BPMNEdge>
+			<bpmndi:BPMNEdge bpmnElement="Flow_1nqld3c" id="Flow_1nqld3c_di">
+				<di:waypoint x="589" y="188"/>
+				<di:waypoint x="589" y="222"/>
+			</bpmndi:BPMNEdge>
+			<bpmndi:BPMNEdge bpmnElement="Flow_1wpxb2p" id="Flow_1wpxb2p_di">
+				<di:waypoint x="589" y="298"/>
+				<di:waypoint x="589" y="352"/>
+			</bpmndi:BPMNEdge>
+			<bpmndi:BPMNEdge bpmnElement="Flow_0yazw0r" id="Flow_0yazw0r_di">
+				<di:waypoint x="589" y="388"/>
+				<di:waypoint x="589" y="635"/>
+			</bpmndi:BPMNEdge>
+			<bpmndi:BPMNEdge bpmnElement="Flow_0pmg6iu" id="Flow_0pmg6iu_di">
+				<di:waypoint x="614" y="660"/>
+				<di:waypoint x="826" y="660"/>
+				<bpmndi:BPMNLabel>
+					<dc:Bounds height="16" width="63" x="692" y="642"/>
+				</bpmndi:BPMNLabel>
+			</bpmndi:BPMNEdge>
+			<bpmndi:BPMNEdge bpmnElement="Flow_1rygunh" id="Flow_1rygunh_di">
+				<di:waypoint x="589" y="685"/>
+				<di:waypoint x="589" y="820"/>
+				<di:waypoint x="1246" y="820"/>
+				<bpmndi:BPMNLabel>
+					<dc:Bounds height="16" width="75" x="502" y="750"/>
+				</bpmndi:BPMNLabel>
+			</bpmndi:BPMNEdge>
+		</bpmndi:BPMNPlane>
+	</bpmndi:BPMNDiagram>
+</bpmn2:definitions>
