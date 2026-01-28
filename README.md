@@ -1,5 +1,3 @@
-Here’s the updated **README.md** that incorporates the latest configuration instructions for `app.yaml`, `util/user_mapper.py`, and `util/attribute_applicator.py`.  
-It now reflects the full configurable attribute system, the split of responsibilities, and best practices for when/how to customize each file.
 
 ```markdown
 # IBM Security Verify Bulk User Loader & Deleter
@@ -158,10 +156,3 @@ Happy bulk managing in IBM Verify!
 Questions? Ping @chronos2g or open an issue.
 ```
 
-This README now clearly explains:
-- The role of each file
-- When to edit `app.yaml` vs `user_mapper.py` vs `attribute_applicator.py`
-- The full `attribute_rules` syntax
-- Why the split exists (configurability vs logic)
-
-Let me know if you'd like to add a CSV template section, screenshots, or anything else!
