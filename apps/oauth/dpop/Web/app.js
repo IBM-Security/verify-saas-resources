@@ -2,6 +2,7 @@ import express from 'express'
 import jose from 'node-jose'
 import crypto from 'crypto'
 import https from 'https'
+import fs from 'fs'
 import { time } from 'console';
 
 const app = express();
@@ -10,10 +11,10 @@ const key = fs.readFileSync('./key.pem');
 const cert = fs.readFileSync('./cert.pem');
 
 // Change these parameters according to your IBM Security Verify tenant
-const clientId = "<your-clientId>"
-const clientSecret = "<your-clientSecret>"
+const clientId = "<your_clientid>"
+const clientSecret = "<your_clientsecret>"
 const authorizationHeader = "Basic " + Buffer.from(`${clientId}:${clientSecret}`).toString('base64')
-const tenant = "https://<your-isv-tenant>"
+const tenant = "<your_tenant>" // without protocol
 
 const port = 8080
 const introspectEndpoint = `/oauth2/introspect`
