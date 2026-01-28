@@ -1,69 +1,160 @@
-# app.yaml - IBM Security Verify Bulk User Import / Deletion Configuration Template
+```markdown
+# IBM Security Verify Bulk User Loader & Deleter
+
+Python tools for bulk creating, updating, and deleting users in **IBM Security Verify** using the SCIM 2.0 API.
+
+- `bulk_loader.py` — Bulk create/update users from CSV (with passwords, custom attributes, etc.)
+- `bulk_deletion.py` — Bulk delete users listed in CSV (with safe dry-run mode)
+
+Both scripts share the same `conf/application.yaml` configuration.
+
+## Requirements
+
+- Python 3.8+ (3.10 or 3.11 recommended)
+- Required packages: `requests`, `pyyaml`
+
+## Installation
+
+```bash
+# Navigate to project folder
+cd your-project-folder
+
+# Create & activate virtual environment
+python3 -m venv venv
+source venv/bin/activate          # macOS/Linux/WSL
+# Windows: venv\Scripts\activate
+```
+
+```bash
+# Install dependencies
+pip install requests pyyaml
+# or (recommended):
+pip install -r requirements.txt
+```
+
+## Directory Structure
+
+```
+your-project/
+├── conf/
+│   └── application.yaml          # ← main configuration file (YAML)
+├── data/
+│   └── upload.csv                # ← input CSV with user data
+├── bulk_loader.py                # create/update users
+├── bulk_deletion.py              # delete users
+├── requirements.txt              # optional but recommended
+└── util/
+    ├── __init__.py
+    ├── config_loader.py
+    ├── logger.py
+    ├── access_token_util.py
+    ├── user_mapper.py
+    ├── attribute_applicator.py
+    └── scim_client.py
+```
+
+## Configuring conf/application.yaml
+
+Copy and customize the template below. All paths are relative to the project root.
+
+```yaml
+# conf/application.yaml - IBM Security Verify Bulk User Import / Deletion Configuration Template
 # ===============================================================================
 # This file drives both bulk_loader.py (create/update) and bulk_deletion.py.
-# 
-# Required sections: tenant, auth, import
-# Optional: delete, logging
 #
-# Security note:
-#   - NEVER commit real client_secret or other secrets to version control
-#   - Use environment variables, secrets manager, or .gitignore'd copy in production
+# Security note: NEVER commit real secrets to version control
 
 tenant:
-  base_url: "https://your-tenant.verify.ibm.com"      # ← REQUIRED: Your IBM Verify tenant base URL (no trailing /v2.0)
-  scim_path: "/v2.0"                                  # Usually fixed; rarely changed
+  base_url: "https://your-tenant.verify.ibm.com"      # ← REQUIRED: Your IBM Verify tenant base URL
+  scim_path: "/v2.0"                                  # Usually fixed
 
 auth:
-  client_id:     "your-client-id-here"                # ← REQUIRED: OAuth Client ID with manageUsers scope
-  client_secret: "your-client-secret-here"            # ← REQUIRED: OAuth Client Secret (keep extremely secure!)
-  token_path:    "/v1.0/endpoint/default/token"       # Usually correct for IBM Verify; confirm in your tenant
+  client_id:     "your-client-id-here"                # ← REQUIRED: OAuth Client ID (manageUsers scope)
+  client_secret: "your-client-secret-here"            # ← REQUIRED: OAuth Client Secret (keep secure!)
+  token_path:    "/v1.0/endpoint/default/token"       # Usually correct
 
 import:
-  csv_file:   "data/upload.csv"                       # ← REQUIRED: Path to your CSV file (relative or absolute)
-  batch_size: 200                                     # RECOMMENDED: 50–1000; start small (50–100) for testing
+  csv_file:   "data/upload.csv"                       # ← REQUIRED: Path to your CSV (relative to project root)
+  batch_size: 200                                     # Recommended: 50–1000; start small
 
   # Attribute rules — define which SCIM attributes to set on every user
-  # Rules are applied in order; later rules can override earlier ones
   attribute_rules:
-    # ────────────────────────────────────────────────────────────────
-    # Core SCIM attributes (no extension URN needed)
-    # ────────────────────────────────────────────────────────────────
-    - name: "active"                                  # Built-in: enables/disables user
+    # Core SCIM attributes
+    - name: "active"
       value: true
-      type: static                                    # "static" = fixed value | "from_csv" = read from CSV
-      csv_column: null                                # only used if type: from_csv
+      type: static                                    # "static" or "from_csv"
 
-    # ────────────────────────────────────────────────────────────────
-    # Custom / extension attributes (nested in IBM extension)
-    # ────────────────────────────────────────────────────────────────
-    - name: "registrationstatus"                      # Your tenant's custom attribute name (lowercase)
+    # Custom attribute (nested in IBM extension)
+    - name: "registrationstatus"
       value: "completed"
       type: static
       extension_urn: "urn:ietf:params:scim:schemas:extension:ibm:2.0:User"
-      custom_container: "customAttributes"            # Nested array name in IBM extension
-      custom_name_key: "name"                         # Key for attribute name inside each item
-      custom_value_key: "values"                      # Key for value array (usually array even for single value)
+      custom_container: "customAttributes"
+      custom_name_key: "name"
+      custom_value_key: "values"
 
-    # Example: another custom attribute pulled from CSV column
+    # Example: value from CSV column
     # - name: "employeeNumber"
     #   type: from_csv
-    #   csv_column: "employee_id"                     # Must match a column header in CSV
-    #   extension_urn: "urn:ietf:params:scim:schemas:extension:enterprise:2.0:User"
-    #   # No custom_container needed if it's a direct field (not nested)
-
-    # Example: set a static department in enterprise extension
-    # - name: "department"
-    #   value: "Engineering"
-    #   type: static
+    #   csv_column: "employee_id"
     #   extension_urn: "urn:ietf:params:scim:schemas:extension:enterprise:2.0:User"
 
 delete:
-  dry_run: true                                       # REQUIRED for safety: set to false ONLY when ready to delete
+  dry_run: true                                       # Set false ONLY when ready to delete
 
 logging:
-  level: INFO                                         # DEBUG / INFO / WARNING / ERROR / CRITICAL
+  level: INFO
   format: "%(asctime)s  %(levelname)-8s  %(message)s"
   datefmt: "%Y-%m-%d %H:%M:%S"
-  to_file: false                                      # Set true to also write to file
-  file_path: "logs/bulk_operations.log"               # Only used if to_file: true
-  file_mode: "a"                                      # "w" = overwrite each run, "a" = append
+  to_file: false
+  file_path: "logs/bulk_operations.log"
+  file_mode: "a"
+```
+
+### CSV Format (data/upload.csv)
+
+Required columns:
+- `preferred_username`
+- `email`
+- `externalId` (recommended)
+- `given_name`, `family_name` (optional)
+- `password` (optional; supports `{SHA-1}...` prefix)
+- Any columns referenced in `from_csv` rules (e.g. `employee_id`)
+
+## Usage
+
+```bash
+# Activate virtual environment first
+source venv/bin/activate          # macOS/Linux/WSL
+# Windows: venv\Scripts\activate
+
+# Create/update users
+python bulk_loader.py
+
+# Delete users (dry-run first!)
+python bulk_deletion.py
+```
+
+**Before real deletion**:
+1. Review logs
+2. Edit `conf/application.yaml` → set `delete.dry_run: false`
+3. Re-run
+
+## Security Notes
+
+- Never commit `conf/application.yaml` with real secrets
+- Use least-privilege OAuth client (only `manageUsers`)
+- Always test deletions with `dry_run: true`
+- Consider exporting users first via SCIM or UI backup
+
+## Troubleshooting
+
+- **KeyError: 'registration_status_urn'** → remove any old references in `config_loader.py`
+- **401 Unauthorized** → wrong client credentials / missing scope
+- **400 Bad Request** → check logs for CSIAIxxxx codes
+- **Custom attributes missing** → verify `attribute_rules` structure & URN
+
+Happy bulk managing in IBM Verify!
+
+Questions? Ping @chronos2g or open an issue.
+```
