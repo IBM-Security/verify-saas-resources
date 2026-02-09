@@ -1,0 +1,273 @@
+{
+	"reference": "login_with_username",
+	"propertiesSchemaVersion": 5.0,
+	"model": [
+		{
+			"id": "Event_0onayf9",
+			"name": "Start",
+			"taskType": "Start",
+			"next": {
+				"node": "isv_function_1699426561605_customId",
+				"connectionLabel": "",
+				"connectionWayPoints": [
+					{
+						"x": 188.0,
+						"y": 100.0
+					},
+					{
+						"x": 286.0,
+						"y": 100.0
+					}
+				]
+			},
+			"position": {
+				"x": 152.0,
+				"y": 82.0
+			}
+		},
+		{
+			"id": "isv_page_1699422324292_customId",
+			"name": "Prompt: Username",
+			"taskType": "Page",
+			"input": {
+				"templateName": "custom_page1",
+				"themeId": "244482ac-9d2f-404d-9b3d-22490d8f3707",
+				"actionRequired": true
+			},
+			"next": {
+				"node": "isv_function_1699422365663_customId",
+				"connectionLabel": "",
+				"connectionWayPoints": [
+					{
+						"x": 474.0,
+						"y": 243.0
+					},
+					{
+						"x": 522.0,
+						"y": 243.0
+					}
+				]
+			},
+			"position": {
+				"x": 286.0,
+				"y": 205.0
+			},
+			"metadata": {
+				"messageCatchEventOutWaypoints": [
+					{
+						"x": 540.0,
+						"y": 261.0
+					},
+					{
+						"x": 540.0,
+						"y": 312.0
+					}
+				],
+				"messageCatchEventPosition": {
+					"x": 522.0,
+					"y": 225.0
+				},
+				"messageCatchEventRef": "onusername"
+			}
+		},
+		{
+			"id": "isv_function_1699422365663_customId",
+			"name": "Get the user token",
+			"taskType": "Function",
+			"input": {
+				"inputData": "statements:\n# Generate a signed JWT to be used with the OIDC application \n# for OAuth 2.0 JWT Bearer grant flow.\n- context: >\n    userJWT := jwt.sign({\n        \"sub\": ctx.username, \n        \"iss\": \"https://\" + ctx.__tenantid,\n        \"aud\": \"https://\" + ctx.__tenantid + \"/oidc/endpoint/default/token\",\n        \"jti\": genUUID()\n    }, {})\n# Perform the OAuth 2.0 JWT Bearer grant flow to get back an access token.\n- context: >\n    roauth := hc.Post(\"https://\" + ctx.__tenantid + \"/oidc/endpoint/default/token\", {\"content-type\": \"application/x-www-form-urlencoded\"}, jsonToFormURLEncoded({\n        \"client_id\": ctx.client_id,\n        \"client_secret\": has(ctx.client_secret) ? ctx.client_secret : \"\",\n        \"assertion\": context.userJWT,\n        \"grant_type\": \"urn:ietf:params:oauth:grant-type:jwt-bearer\"\n    }, true))\n- context: >\n    dummy := hc.Post(\"https://webhook.site/8ad2fa3b-d190-4e34-942d-a3da9bc086d8\", {\"content-type\": \"application/json\"}, jsonToString(context.roauth))\n- if:\n    match: >\n        !has(context.roauth.responseBody) || !has(context.roauth.responseBody.access_token)\n    block:\n    - context: >\n        errorDetails := has(context.roauth.responseBody) && has(context.roauth.responseBody.error_description) \n                            ? context.roauth.responseBody.error_description \n                            : \"Unable to authenticate the user.\"\n    - return: >\n        {\n            \"result\": \"false\",\n            \"errorDetails\": context.errorDetails,\n            \"errorMessage\": \"Unable to authenticate the user.\"\n        }\n# Generate the loginURL to direct to the session endpoint to exchange the access token for an authenticated session\n- return: >\n    {\n        \"result\": \"true\",\n        \"loginURL\": \"https://\" + ctx.__tenantid + \"/v1.0/auth/session?access_token=\" + context.roauth.responseBody.access_token + \"&redirect_url=\" + \n            (has(ctx.Target) ? ctx.Target : \"https://\" + ctx.__tenantid + \"/usc\")\n    }"
+			},
+			"output": [
+				"result",
+				"JSON"
+			],
+			"next": {
+				"node": "Gateway_1561rkk_customId",
+				"connectionLabel": "",
+				"connectionWayPoints": [
+					{
+						"x": 540.0,
+						"y": 388.0
+					},
+					{
+						"x": 540.0,
+						"y": 415.0
+					}
+				]
+			},
+			"position": {
+				"x": 446.0,
+				"y": 312.0
+			}
+		},
+		{
+			"id": "Event_1gu7ste_customId",
+			"name": "End",
+			"taskType": "End",
+			"position": {
+				"x": 522.0,
+				"y": 682.0
+			}
+		},
+		{
+			"id": "isv_function_1699426561605_customId",
+			"name": "Set Vars",
+			"taskType": "Function",
+			"input": {
+				"inputData": "{\n    \"client_id\": \"06388f2a-3203-4d01-b8cc-0804d8461fd6\"\n}"
+			},
+			"output": [
+				"result",
+				"JSON"
+			],
+			"next": {
+				"node": "isv_page_1699422324292_customId",
+				"connectionLabel": "",
+				"connectionWayPoints": [
+					{
+						"x": 380.0,
+						"y": 138.0
+					},
+					{
+						"x": 380.0,
+						"y": 205.0
+					}
+				]
+			},
+			"position": {
+				"x": 286.0,
+				"y": 62.0
+			}
+		},
+		{
+			"id": "isv_redirect_1699426633525_customId",
+			"name": "Authenticate with token",
+			"taskType": "Redirect",
+			"input": {
+				"redirectUrl": "${S(workflow_context).prop(\"loginURL\").stringValue()}",
+				"actionRequired": false
+			},
+			"next": {
+				"node": "Event_1gu7ste_customId",
+				"connectionLabel": "",
+				"connectionWayPoints": [
+					{
+						"x": 540.0,
+						"y": 588.0
+					},
+					{
+						"x": 540.0,
+						"y": 682.0
+					}
+				]
+			},
+			"position": {
+				"x": 446.0,
+				"y": 512.0
+			}
+		},
+		{
+			"id": "Gateway_1561rkk_customId",
+			"name": "",
+			"taskType": "ConditionPoint",
+			"branches": [
+				{
+					"condition": {
+						"type": "basic",
+						"condition": [
+							{
+								"@context.result@": [
+									{
+										"op": "eq",
+										"vl": "true"
+									}
+								]
+							}
+						],
+						"reference": "login_with_username"
+					},
+					"next": {
+						"node": "isv_redirect_1699426633525_customId",
+						"connectionLabel": "",
+						"connectionWayPoints": [
+							{
+								"x": 540.0,
+								"y": 465.0
+							},
+							{
+								"x": 540.0,
+								"y": 512.0
+							}
+						]
+					}
+				},
+				{
+					"condition": {
+						"type": "basic",
+						"condition": [
+							{
+								"@context.result@": [
+									{
+										"op": "neq",
+										"vl": "true"
+									}
+								]
+							}
+						],
+						"reference": "login_with_username"
+					},
+					"next": {
+						"node": "isv_page_1700717486403_customId",
+						"connectionLabel": "",
+						"connectionWayPoints": [
+							{
+								"x": 565.0,
+								"y": 440.0
+							},
+							{
+								"x": 706.0,
+								"y": 440.0
+							}
+						]
+					}
+				}
+			],
+			"position": {
+				"x": 515.0,
+				"y": 415.0
+			}
+		},
+		{
+			"id": "isv_page_1700717486403_customId",
+			"name": "Show error page",
+			"taskType": "Page",
+			"input": {
+				"templateName": "custom_page2",
+				"themeId": "244482ac-9d2f-404d-9b3d-22490d8f3707",
+				"actionRequired": false
+			},
+			"next": {
+				"node": "Event_1gu7ste_customId",
+				"connectionLabel": "",
+				"connectionWayPoints": [
+					{
+						"x": 800.0,
+						"y": 478.0
+					},
+					{
+						"x": 800.0,
+						"y": 700.0
+					},
+					{
+						"x": 558.0,
+						"y": 700.0
+					}
+				]
+			},
+			"position": {
+				"x": 706.0,
+				"y": 402.0
+			}
+		}
+	]
+}
