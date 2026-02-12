@@ -1,0 +1,84 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "IBM Security Verify - OAuth2 Introspect Token",
+    "version": "2.0.0",
+    "description": "Introspect OAuth2 token and return token details."
+  },
+  "servers": [
+    {
+      "url": "https://{tenanturl}",
+      "variables": {
+        "tenanturl": {
+          "default": "{tenant_url}",
+          "description": "Tenant base URL"
+        }
+      }
+    }
+  ],
+  "paths": {
+    "/oauth2/introspect": {
+      "post": {
+        "summary": "Introspect OAuth2 Token",
+        "operationId": "introspectOAuth2Token",
+        "responses": {
+          "200": {
+            "description": "Token introspection successful.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntrospectResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "IntrospectResponse": {
+        "type": "object",
+        "properties": {
+          "aud": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "exp": {
+            "type": "integer"
+          },
+          "iat": {
+            "type": "integer"
+          },
+          "iss": {
+            "type": "string"
+          },
+          "sub": {
+            "type": "string"
+          },
+          "nbf": {
+            "type": "integer"
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "scope": {
+            "type": "string"
+          },
+          "grant_id": {
+            "type": "string"
+          },
+          "userType": {
+            "type": "string"
+          },
+          "client_id": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "IBM Security Verify - OAuth2 Token Exchange",
+    "version": "2.0.0",
+    "description": "Exchange token for access token with authorization details."
+  },
+  "servers": [
+    {
+      "url": "https://{tenanturl}",
+      "variables": {
+        "tenanturl": {
+          "default": "{tenant_url}",
+          "description": "Tenant base URL"
+        }
+      }
+    }
+  ],
+  "paths": {
+    "/oauth2/token": {
+      "post": {
+        "summary": "Exchange token for access token with authorization details",
+        "operationId": "exchangeTokenForAccessToken",
+        "responses": {
+          "200": {
+            "description": "Access token successfully exchanged.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "TokenResponse": {
+        "type": "object",
+        "properties": {
+          "scope": {
+            "type": "string"
+          },
+          "grant_id": {
+            "type": "string"
+          },
+          "expires_in": {
+            "type": "integer"
+          },
+          "token_type": {
+            "type": "string"
+          },
+          "access_token": {
+            "type": "string"
+          },
+          "refresh_token": {
+            "type": "string"
+          },
+          "allowedFactors": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  }
+}
