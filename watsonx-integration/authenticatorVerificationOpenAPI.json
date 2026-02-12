@@ -1,204 +1,270 @@
 {
-  "openapi": "3.0.3",
-  "info": {
-    "title": "IBM Security Verify - Authenticator Verification API",
-    "version": "1.0.0",
-    "description": "APIs to create verification requests and get verification status."
-  },
-  "servers": [
-    {
-      "url": "https://{tenanturl}",
-      "variables": {
-        "tenanturl": {
-          "default": "{tenant_url}",
-          "description": "Tenant base URL"
-        }
-      }
-    }
-  ],
-  "paths": {
-    "/v1.0/authenticators/{authenticatorId}/verifications": {
-      "post": {
-        "summary": "Create a verification request",
-        "operationId": "createVerificationRequest",
-        "parameters": [
-          {
-            "name": "authenticatorId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "description": "Unique ID of the authenticator."
-          },
-          {
-            "name": "Accept",
-            "in": "header",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "default": "application/json"
-            }
-          },
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "Content-Type",
-            "in": "header",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "default": "application/json"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Verification request created successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/VerificationResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/v1.0/authenticators/{authenticatorId}/verifications/{verificationId}": {
-      "get": {
-        "summary": "Get verification status",
-        "operationId": "getVerificationStatus",
-        "parameters": [
-          {
-            "name": "authenticatorId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "description": "Unique ID of the authenticator."
-          },
-          {
-            "name": "verificationId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "description": "Unique ID of the verification request."
-          },
-          {
-            "name": "Accept",
-            "in": "header",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "default": "application/json"
-            }
-          },
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "Content-Type",
-            "in": "header",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "default": "application/json"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Verification status retrieved successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/VerificationStatusResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  },
-  "components": {
-    "schemas": {
-      "VerificationResponse": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string"
-          },
-          "creationTime": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "VerificationStatusResponse": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "topic": {
-            "type": "string"
-          },
-          "owner": {
-            "type": "string"
-          },
-          "state": {
-            "type": "string"
-          },
-          "expiryTime": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "userActions": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/UserAction"
-            }
-          },
-          "creationTime": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "UserAction": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "signedData": {
-            "type": "string"
-          },
-          "userAction": {
-            "type": "string"
-          }
-        }
-      }
-    }
-  }
+	"openapi": "3.0.3",
+	"info": {
+		"title": "IBM Security Verify - Authenticator Verification API",
+		"version": "1.0.0",
+		"description": "APIs to create verification requests and get verification status."
+	},
+	"servers": [
+		{
+			"url": "https://{tenanturl}",
+			"variables": {
+				"tenanturl": {
+					"default": "{tenant_url}",
+					"description": "Tenant base URL"
+				}
+			}
+		}
+	],
+	"paths": {
+		"/v1.0/authenticators/{authenticatorId}/verifications": {
+			"post": {
+				"summary": "Create verification request",
+				"operationId": "createVerificationRequest",
+				"parameters": [
+					{
+						"name": "authenticatorId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string"
+						},
+						"description": "Unique ID of the authenticator."
+					},
+					{
+						"name": "Accept",
+						"in": "header",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"default": "application/json"
+						}
+					},
+					{
+						"name": "Authorization",
+						"in": "header",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"name": "Content-Type",
+						"in": "header",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"default": "application/json"
+						}
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/VerificationBody"
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Verification request created successfully.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/VerificationResponse"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/v1.0/authenticators/{authenticatorId}/verifications/{verificationId}": {
+			"get": {
+				"summary": "Get verification status",
+				"operationId": "getVerificationStatus",
+				"parameters": [
+					{
+						"name": "authenticatorId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string"
+						},
+						"description": "Unique ID of the authenticator."
+					},
+					{
+						"name": "verificationId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string"
+						},
+						"description": "Unique ID of the verification request."
+					},
+					{
+						"name": "Accept",
+						"in": "header",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"default": "application/json"
+						}
+					},
+					{
+						"name": "Authorization",
+						"in": "header",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"name": "Content-Type",
+						"in": "header",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"default": "application/json"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Verification status retrieved successfully.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/VerificationStatusResponse"
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	},
+	"components": {
+		"schemas": {
+			"VerificationBody": {
+				"type": "object",
+				"properties": {
+					"transactionData": {
+						"type": "object",
+						"properties": {
+							"message": {
+								"type": "string"
+							},
+							"originIpAddress": {
+								"type": "string",
+								"default": "192.168.222.222"
+							},
+							"originUserAgent": {
+								"type": "string",
+								"default": "watsonx orchestrate"
+							}
+						}
+					},
+					"pushNotification": {
+						"type": "object",
+						"properties": {
+							"send": {
+								"type": "boolean",
+								"default": true
+							},
+							"message": {
+								"type": "string"
+							},
+							"title": {
+								"type": "string",
+								"default": "Trade App"
+							}
+						}
+					},
+					"authenticationMethods": {
+						"type": "array",
+						"items": {
+							"type": "object",
+							"default": [
+								{
+									"methodType": "signature",
+									"id": "XXXXXXXXXXXXXXXXX"
+								}
+							]
+						}
+					},
+					"logic": {
+						"type": "string",
+						"default": "OR"
+					},
+					"expiresIn": {
+						"type": "integer",
+						"default": 120
+					}
+				}
+			},
+			"VerificationResponse": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"status": {
+						"type": "string"
+					},
+					"creationTime": {
+						"type": "string",
+						"format": "date-time"
+					}
+				}
+			},
+			"VerificationStatusResponse": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"topic": {
+						"type": "string"
+					},
+					"owner": {
+						"type": "string"
+					},
+					"state": {
+						"type": "string"
+					},
+					"expiryTime": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"userActions": {
+						"type": "array",
+						"items": {
+							"$ref": "#/components/schemas/UserAction"
+						}
+					},
+					"creationTime": {
+						"type": "string",
+						"format": "date-time"
+					}
+				}
+			},
+			"UserAction": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"signedData": {
+						"type": "string"
+					},
+					"userAction": {
+						"type": "string"
+					}
+				}
+			}
+		}
+	}
 }
