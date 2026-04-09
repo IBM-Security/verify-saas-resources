@@ -118,7 +118,7 @@
                 ]
             },
             "input": {
-                "redirectUrl": "${S(workflow_context).prop(\"loginUrl\").value()}",
+                "redirectUrl": "@context.loginUrl@",
                 "actionRequired": false
             }
         },
