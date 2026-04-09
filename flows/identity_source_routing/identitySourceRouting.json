@@ -1,8 +1,15 @@
 {
+    "reference": "identity_source_routing",
+    "propertiesSchemaVersion": 5,
     "model": [
         {
             "id": "Event_0onayf9",
             "name": "Start",
+            "position": {
+                "x": 225,
+                "y": 0
+            },
+            "taskType": "Start",
             "next": {
                 "node": "isv_page_1693487581300_customId",
                 "connectionLabel": "",
@@ -16,16 +23,16 @@
                         "y": 115
                     }
                 ]
-            },
-            "position": {
-                "x": 225,
-                "y": 0
-            },
-            "taskType": "Start"
+            }
         },
         {
             "id": "isv_page_1693487581300_customId",
             "name": "Ask Username",
+            "position": {
+                "x": 194,
+                "y": 115
+            },
+            "taskType": "Page",
             "next": {
                 "node": "isv_function_1693487621614_customId",
                 "connectionLabel": "",
@@ -44,12 +51,7 @@
                 "themeId": "8a079161-1cf8-4c0c-8771-a417fbb9a6bd",
                 "templateName": "custom_page1",
                 "actionRequired": true
-            },
-            "position": {
-                "x": 194,
-                "y": 115
-            },
-            "taskType": "Page"
+            }
         },
         {
             "id": "Event_0fzzuo8_customId",
@@ -63,6 +65,11 @@
         {
             "id": "isv_function_1693487621614_customId",
             "name": "Compute Login URL",
+            "position": {
+                "x": 194,
+                "y": 266
+            },
+            "taskType": "Function",
             "next": {
                 "node": "Gateway_0pwnuro_customId",
                 "connectionLabel": "",
@@ -78,20 +85,20 @@
                 ]
             },
             "input": {
-                "inputData": "statements:\n\n# This is the map of email domain to identity source realm\n- context: > \n    idsMap := {\n        \"gmail.com\": \"www.google.com\",\n        \"in.ibm.com\": \"www.ibm.com\",\n        \"default\": \"cloudIdentityRealm\"\n    }\n    \n# Extract the domain\n- context: \"tokens := ctx.username.split('@')\"\n- context: \"domain := context.tokens.size() > 1 ? context.tokens[1] : 'default'\"\n\n# Using the domain, extract the realm from the map. Route to default, if no valid domain found.\n- context: \"realm := context.idsMap.exists(x, x == context.domain) ? context.idsMap[context.domain] : 'invalid'\"\n\n# Use the realm parameter to route the login flow to the appropriate end-point.\n# If the realm has been deduced to be default, route the flow to the default login endpoint.\n\n- if:\n    match: context.domain == \"in.ibm.com\"\n    block:\n        - return: >\n            {\n                'loginUrl': context.realm\n            }\n    elseifs:\n        - match: context.domain == \"gmail.com\"\n          block:\n            - return: > \n                {\n                    'loginUrl': context.realm\n                }\n          elseifs:\n            - match: context.realm == \"invalid\"\n              block:\n                - return: >\n                    {\n                        'loginUrl': 'invalid'\n                    }\n              else:\n                - return: >\n                    {\n                        'loginUrl': 'https://' + ctx.__tenantid + '/idaas/mtfim/sps/idaas/login?runtime=true&login_hint=' + ctx.username + '&realm_hint=' + context.realm\n                    }\n"
+                "inputData": "statements:\n\n# This is the map of email domain to identity source realm\n- context: > \n    idsMap := {\n        \"gmail.com\": \"www.google.com\",\n        \"in.ibm.com\": \"www.ibm.com\",\n        \"default\": \"cloudIdentityRealm\"\n    }\n    \n# Extract the domain\n- context: \"tokens := ctx.username.split('@')\"\n- context: \"domain := context.tokens.size() > 1 ? context.tokens[1] : 'default'\"\n\n# Using the domain, extract the realm from the map. Route to default, if no valid domain found.\n- context: \"realm := context.idsMap.exists(x, x == context.domain) ? context.idsMap[context.domain] : 'invalid'\"\n\n# Use the realm parameter to route the login flow to the appropriate end-point.\n# If the realm has been deduced to be default, route the flow to the default login endpoint.\n\n- if:\n    match: context.domain == \"in.ibm.com\"\n    block:\n        - return: >\n            {\n                'loginUrl': context.realm\n            }\n    elseifs:\n        - match: context.domain == \"gmail.com\"\n          block:\n            - return: > \n                {\n                    'loginUrl': context.realm\n                }\n          elseifs:\n            - match: context.realm == \"invalid\"\n              block:\n                - return: >\n                    {\n                        'loginUrl': 'invalid'\n                    }\n              else:\n                - return: >\n                    {\n                        'loginUrl': 'https://' + ctx.__tenantid + '/idaas/mtfim/sps/idaas/login?runtime=true&login_hint=' + ctx.username + '&Target=https%3A%2F%2F' + ctx.__tenantid +'%2Fusc' + '&realm_hint=' + context.realm\n                    }\n"
             },
             "output": [
                 "JSON"
-            ],
-            "position": {
-                "x": 194,
-                "y": 266
-            },
-            "taskType": "Function"
+            ]
         },
         {
             "id": "isv_redirect_1693487627874_customId",
             "name": "Login Page Redirect",
+            "position": {
+                "x": 0,
+                "y": 540
+            },
+            "taskType": "Redirect",
             "next": {
                 "node": "Event_0fzzuo8_customId",
                 "connectionLabel": "",
@@ -113,16 +120,16 @@
             "input": {
                 "redirectUrl": "${S(workflow_context).prop(\"loginUrl\").value()}",
                 "actionRequired": false
-            },
-            "position": {
-                "x": 0,
-                "y": 540
-            },
-            "taskType": "Redirect"
+            }
         },
         {
             "id": "Gateway_0pwnuro_customId",
             "name": "",
+            "position": {
+                "x": 264,
+                "y": 417
+            },
+            "taskType": "ConditionPoint",
             "branches": [
                 {
                     "next": {
@@ -202,16 +209,16 @@
                         ]
                     }
                 }
-            ],
-            "position": {
-                "x": 264,
-                "y": 417
-            },
-            "taskType": "ConditionPoint"
+            ]
         },
         {
             "id": "isv_page_1701268906329_customId",
             "name": "Error Page",
+            "position": {
+                "x": 388,
+                "y": 540
+            },
+            "taskType": "Page",
             "next": {
                 "node": "Event_0fzzuo8_customId",
                 "connectionLabel": "",
@@ -234,14 +241,7 @@
                 "themeId": "8a079161-1cf8-4c0c-8771-a417fbb9a6bd",
                 "templateName": "custom_page2",
                 "actionRequired": false
-            },
-            "position": {
-                "x": 388,
-                "y": 540
-            },
-            "taskType": "Page"
+            }
         }
-    ],
-    "reference": "identity_source_routing",
-    "propertiesSchemaVersion": 5
+    ]
 }
