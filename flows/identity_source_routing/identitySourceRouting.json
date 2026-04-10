@@ -1,0 +1,247 @@
+{
+    "reference": "identity_source_routing",
+    "propertiesSchemaVersion": 5,
+    "model": [
+        {
+            "id": "Event_0onayf9",
+            "name": "Start",
+            "position": {
+                "x": 225,
+                "y": 0
+            },
+            "taskType": "Start",
+            "next": {
+                "node": "isv_page_1693487581300_customId",
+                "connectionLabel": "",
+                "connectionWayPoints": [
+                    {
+                        "x": 288,
+                        "y": 40
+                    },
+                    {
+                        "x": 288,
+                        "y": 115
+                    }
+                ]
+            }
+        },
+        {
+            "id": "isv_page_1693487581300_customId",
+            "name": "Ask Username",
+            "position": {
+                "x": 194,
+                "y": 115
+            },
+            "taskType": "Page",
+            "next": {
+                "node": "isv_function_1693487621614_customId",
+                "connectionLabel": "",
+                "connectionWayPoints": [
+                    {
+                        "x": 288,
+                        "y": 191
+                    },
+                    {
+                        "x": 288,
+                        "y": 266
+                    }
+                ]
+            },
+            "input": {
+                "themeId": "8a079161-1cf8-4c0c-8771-a417fbb9a6bd",
+                "templateName": "custom_page1",
+                "actionRequired": true
+            }
+        },
+        {
+            "id": "Event_0fzzuo8_customId",
+            "name": "End",
+            "position": {
+                "x": 225,
+                "y": 691
+            },
+            "taskType": "End"
+        },
+        {
+            "id": "isv_function_1693487621614_customId",
+            "name": "Compute Login URL",
+            "position": {
+                "x": 194,
+                "y": 266
+            },
+            "taskType": "Function",
+            "next": {
+                "node": "Gateway_0pwnuro_customId",
+                "connectionLabel": "",
+                "connectionWayPoints": [
+                    {
+                        "x": 288,
+                        "y": 342
+                    },
+                    {
+                        "x": 288,
+                        "y": 417
+                    }
+                ]
+            },
+            "input": {
+                "inputData": "statements:\n\n# This is the map of email domain to identity source realm\n- context: > \n    idsMap := {\n        \"gmail.com\": \"www.google.com\",\n        \"in.ibm.com\": \"www.ibm.com\",\n        \"default\": \"cloudIdentityRealm\"\n    }\n    \n# Extract the domain\n- context: \"tokens := ctx.username.split('@')\"\n- context: \"domain := context.tokens.size() > 1 ? context.tokens[1] : 'default'\"\n\n# Using the domain, extract the realm from the map. Route to default, if no valid domain found.\n- context: \"realm := context.idsMap.exists(x, x == context.domain) ? context.idsMap[context.domain] : 'invalid'\"\n\n# Use the realm parameter to route the login flow to the appropriate end-point.\n# If the realm has been deduced to be default, route the flow to the default login endpoint.\n\n- if:\n    match: context.domain == \"in.ibm.com\"\n    block:\n        - return: >\n            {\n                'loginUrl': context.realm\n            }\n    elseifs:\n        - match: context.domain == \"gmail.com\"\n          block:\n            - return: > \n                {\n                    'loginUrl': context.realm\n                }\n          elseifs:\n            - match: context.realm == \"invalid\"\n              block:\n                - return: >\n                    {\n                        'loginUrl': 'invalid'\n                    }\n              else:\n                - return: >\n                    {\n                        'loginUrl': 'https://' + ctx.__tenantid + '/idaas/mtfim/sps/idaas/login?runtime=true&login_hint=' + ctx.username + '&Target=https%3A%2F%2F' + ctx.__tenantid +'%2Fusc' + '&realm_hint=' + context.realm\n                    }\n"
+            },
+            "output": [
+                "JSON"
+            ]
+        },
+        {
+            "id": "isv_redirect_1693487627874_customId",
+            "name": "Login Page Redirect",
+            "position": {
+                "x": 0,
+                "y": 540
+            },
+            "taskType": "Redirect",
+            "next": {
+                "node": "Event_0fzzuo8_customId",
+                "connectionLabel": "",
+                "connectionWayPoints": [
+                    {
+                        "x": 94,
+                        "y": 616
+                    },
+                    {
+                        "x": 94,
+                        "y": 711
+                    },
+                    {
+                        "x": 225,
+                        "y": 711
+                    }
+                ]
+            },
+            "input": {
+                "redirectUrl": "@context.loginUrl@",
+                "actionRequired": false
+            }
+        },
+        {
+            "id": "Gateway_0pwnuro_customId",
+            "name": "",
+            "position": {
+                "x": 264,
+                "y": 417
+            },
+            "taskType": "ConditionPoint",
+            "branches": [
+                {
+                    "next": {
+                        "node": "isv_redirect_1693487627874_customId",
+                        "connectionLabel": "Valid domain",
+                        "connectionWayPoints": [
+                            {
+                                "x": 264,
+                                "y": 441
+                            },
+                            {
+                                "x": 94,
+                                "y": 441
+                            },
+                            {
+                                "x": 94,
+                                "y": 540
+                            }
+                        ]
+                    },
+                    "condition": {
+                        "type": "basic",
+                        "condition": [
+                            {
+                                "@context@": [
+                                    {
+                                        "op": "hasProp",
+                                        "vl": "loginUrl"
+                                    }
+                                ],
+                                "@context.loginUrl@": [
+                                    {
+                                        "op": "neq",
+                                        "vl": "invalid"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                },
+                {
+                    "next": {
+                        "node": "isv_page_1701268906329_customId",
+                        "connectionLabel": "",
+                        "connectionWayPoints": [
+                            {
+                                "x": 312,
+                                "y": 441
+                            },
+                            {
+                                "x": 482,
+                                "y": 441
+                            },
+                            {
+                                "x": 482,
+                                "y": 540
+                            }
+                        ]
+                    },
+                    "condition": {
+                        "type": "basic",
+                        "condition": [
+                            {
+                                "@context@": [
+                                    {
+                                        "op": "hasProp",
+                                        "vl": "loginUrl"
+                                    }
+                                ],
+                                "@context.loginUrl@": [
+                                    {
+                                        "op": "eq",
+                                        "vl": "invalid"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "id": "isv_page_1701268906329_customId",
+            "name": "Error Page",
+            "position": {
+                "x": 388,
+                "y": 540
+            },
+            "taskType": "Page",
+            "next": {
+                "node": "Event_0fzzuo8_customId",
+                "connectionLabel": "",
+                "connectionWayPoints": [
+                    {
+                        "x": 482,
+                        "y": 616
+                    },
+                    {
+                        "x": 482,
+                        "y": 711
+                    },
+                    {
+                        "x": 351,
+                        "y": 711
+                    }
+                ]
+            },
+            "input": {
+                "themeId": "8a079161-1cf8-4c0c-8771-a417fbb9a6bd",
+                "templateName": "custom_page2",
+                "actionRequired": false
+            }
+        }
+    ]
+}
