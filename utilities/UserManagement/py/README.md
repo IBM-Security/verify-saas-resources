@@ -1,4 +1,3 @@
-
 ```markdown
 # IBM Security Verify Bulk User Loader & Deleter
 
@@ -36,7 +35,10 @@ pip install requests pyyaml
 
 ```
 your-project/
-├── app.yaml                  # ← main configuration file
+└── conf/
+    ├── app.yaml              # ← main configuration file
+└── data/
+    ├── upload.csv            # ← main configuration file
 ├── bulk_loader.py            # create/update users
 ├── bulk_deletion.py          # delete users
 └── util/

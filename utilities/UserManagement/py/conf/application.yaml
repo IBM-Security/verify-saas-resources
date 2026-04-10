@@ -1,0 +1,160 @@
+```markdown
+# IBM Security Verify Bulk User Loader & Deleter
+
+Python tools for bulk creating, updating, and deleting users in **IBM Security Verify** using the SCIM 2.0 API.
+
+- `bulk_loader.py` — Bulk create/update users from CSV (with passwords, custom attributes, etc.)
+- `bulk_deletion.py` — Bulk delete users listed in CSV (with safe dry-run mode)
+
+Both scripts share the same `conf/application.yaml` configuration.
+
+## Requirements
+
+- Python 3.8+ (3.10 or 3.11 recommended)
+- Required packages: `requests`, `pyyaml`
+
+## Installation
+
+```bash
+# Navigate to project folder
+cd your-project-folder
+
+# Create & activate virtual environment
+python3 -m venv venv
+source venv/bin/activate          # macOS/Linux/WSL
+# Windows: venv\Scripts\activate
+```
+
+```bash
+# Install dependencies
+pip install requests pyyaml
+# or (recommended):
+pip install -r requirements.txt
+```
+
+## Directory Structure
+
+```
+your-project/
+├── conf/
+│   └── application.yaml          # ← main configuration file (YAML)
+├── data/
+│   └── upload.csv                # ← input CSV with user data
+├── bulk_loader.py                # create/update users
+├── bulk_deletion.py              # delete users
+├── requirements.txt              # optional but recommended
+└── util/
+    ├── __init__.py
+    ├── config_loader.py
+    ├── logger.py
+    ├── access_token_util.py
+    ├── user_mapper.py
+    ├── attribute_applicator.py
+    └── scim_client.py
+```
+
+## Configuring conf/application.yaml
+
+Copy and customize the template below. All paths are relative to the project root.
+
+```yaml
+# conf/application.yaml - IBM Security Verify Bulk User Import / Deletion Configuration Template
+# ===============================================================================
+# This file drives both bulk_loader.py (create/update) and bulk_deletion.py.
+#
+# Security note: NEVER commit real secrets to version control
+
+tenant:
+  base_url: "https://your-tenant.verify.ibm.com"      # ← REQUIRED: Your IBM Verify tenant base URL
+  scim_path: "/v2.0"                                  # Usually fixed
+
+auth:
+  client_id:     "your-client-id-here"                # ← REQUIRED: OAuth Client ID (manageUsers scope)
+  client_secret: "your-client-secret-here"            # ← REQUIRED: OAuth Client Secret (keep secure!)
+  token_path:    "/v1.0/endpoint/default/token"       # Usually correct
+
+import:
+  csv_file:   "data/upload.csv"                       # ← REQUIRED: Path to your CSV (relative to project root)
+  batch_size: 200                                     # Recommended: 50–1000; start small
+
+  # Attribute rules — define which SCIM attributes to set on every user
+  attribute_rules:
+    # Core SCIM attributes
+    - name: "active"
+      value: true
+      type: static                                    # "static" or "from_csv"
+
+    # Custom attribute (nested in IBM extension)
+    - name: "registrationstatus"
+      value: "completed"
+      type: static
+      extension_urn: "urn:ietf:params:scim:schemas:extension:ibm:2.0:User"
+      custom_container: "customAttributes"
+      custom_name_key: "name"
+      custom_value_key: "values"
+
+    # Example: value from CSV column
+    # - name: "employeeNumber"
+    #   type: from_csv
+    #   csv_column: "employee_id"
+    #   extension_urn: "urn:ietf:params:scim:schemas:extension:enterprise:2.0:User"
+
+delete:
+  dry_run: true                                       # Set false ONLY when ready to delete
+
+logging:
+  level: INFO
+  format: "%(asctime)s  %(levelname)-8s  %(message)s"
+  datefmt: "%Y-%m-%d %H:%M:%S"
+  to_file: false
+  file_path: "logs/bulk_operations.log"
+  file_mode: "a"
+```
+
+### CSV Format (data/upload.csv)
+
+Required columns:
+- `preferred_username`
+- `email`
+- `externalId` (recommended)
+- `given_name`, `family_name` (optional)
+- `password` (optional; supports `{SHA-1}...` prefix)
+- Any columns referenced in `from_csv` rules (e.g. `employee_id`)
+
+## Usage
+
+```bash
+# Activate virtual environment first
+source venv/bin/activate          # macOS/Linux/WSL
+# Windows: venv\Scripts\activate
+
+# Create/update users
+python bulk_loader.py
+
+# Delete users (dry-run first!)
+python bulk_deletion.py
+```
+
+**Before real deletion**:
+1. Review logs
+2. Edit `conf/application.yaml` → set `delete.dry_run: false`
+3. Re-run
+
+## Security Notes
+
+- Never commit `conf/application.yaml` with real secrets
+- Use least-privilege OAuth client (only `manageUsers`)
+- Always test deletions with `dry_run: true`
+- Consider exporting users first via SCIM or UI backup
+
+## Troubleshooting
+
+- **KeyError: 'registration_status_urn'** → remove any old references in `config_loader.py`
+- **401 Unauthorized** → wrong client credentials / missing scope
+- **400 Bad Request** → check logs for CSIAIxxxx codes
+- **Custom attributes missing** → verify `attribute_rules` structure & URN
+
+Happy bulk managing in IBM Verify!
+
+Questions? Ping @chronos2g or open an issue.
+```
