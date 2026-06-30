@@ -1,0 +1,288 @@
+
+<html lang="en">
+<head>
+
+<meta content="text/html; charset=UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+
+
+
+
+<title>TrustMe Insurance - Error</title>
+<style>
+  :root {
+    --trustme-primary:   #00468C;
+    --trustme-secondary: #5cb3cc;
+    --trustme-dark:      #1a1a1a;
+    --trustme-text:      #4a4a4a;
+    --trustme-light-bg:  #f8f9fa;
+    --trustme-border:    #e0e0e0;
+    --error-bg:          #fff1f1;
+    --error-border:      #f2c6c6;
+    --error-text:        #a2191f;
+    --error-gradient:    linear-gradient(180deg, #ff6b6b, #d12727);
+  }
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    height: 100%;
+    font-family: 'IBM Plex Sans', 'Open Sans', Arial, sans-serif;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e8f4f8 100%);
+    color: var(--trustme-dark);
+  }
+
+  .error-wrapper {
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 30px 20px;
+  }
+
+  /* Page-header placeholder (renders @PAGE_HEADER@ token output) */
+  .page-header-slot { width: 100%; max-width: 900px; }
+
+  .error-container {
+    width: 100%;
+    max-width: 900px;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  /* ── Header ── */
+  .error-header {
+    background: linear-gradient(135deg, var(--trustme-primary) 0%, var(--trustme-secondary) 100%);
+    padding: 25px 30px;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+
+  .trustme-logo svg { width: 180px; height: 35px; }
+
+  .header-title { flex: 1; font-size: 18px; font-weight: 600; }
+
+  /* ── Error banner ── */
+  .error-content { padding: 30px; }
+
+  .error-banner {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    padding: 20px;
+    border-radius: 8px;
+    background: var(--error-bg);
+    border: 2px solid var(--error-border);
+    margin-bottom: 20px;
+  }
+
+  .error-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--error-gradient);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .error-icon::before {
+    content: "!";
+    color: white;
+    font-size: 28px;
+    font-weight: 700;
+  }
+
+  .error-message { flex: 1; }
+
+  .error-title {
+    color: var(--error-text);
+    font-weight: 700;
+    font-size: 18px;
+    margin-bottom: 8px;
+    line-height: 1.4;
+  }
+
+  .error-description {
+    color: var(--trustme-text);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  /* ── Action bar ── */
+  .action-bar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 15px 20px;
+    background: var(--trustme-light-bg);
+    border-radius: 8px;
+    margin-bottom: 20px;
+  }
+
+  .details-toggle {
+    background: none;
+    border: none;
+    color: var(--trustme-primary);
+    cursor: pointer;
+    padding: 8px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: underline;
+  }
+  .details-toggle:hover { color: var(--trustme-secondary); }
+
+  /* ── Details panel ── */
+  .details-panel {
+    display: none;
+    padding: 20px;
+    border-radius: 8px;
+    background: var(--trustme-light-bg);
+    border: 1px solid var(--trustme-border);
+    margin-bottom: 20px;
+  }
+  .details-panel.show { display: block; }
+
+  .detail-item { margin-bottom: 15px; font-size: 14px; line-height: 1.6; }
+  .detail-item:last-child { margin-bottom: 0; }
+
+  .detail-label { font-weight: 600; color: var(--trustme-primary); margin-bottom: 5px; }
+  .detail-value { color: var(--trustme-text); }
+
+  .reference-code {
+    background: white;
+    padding: 10px 15px;
+    border-radius: 6px;
+    border: 1px solid var(--trustme-border);
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    color: var(--trustme-dark);
+    margin-top: 6px;
+    word-break: break-all;
+  }
+
+  .support-link {
+    color: var(--trustme-primary);
+    font-weight: 600;
+    word-break: break-all;
+  }
+  .support-link:hover { text-decoration: underline; }
+
+  /* ── Footer ── */
+  .error-footer {
+    padding: 20px 30px;
+    background: var(--trustme-light-bg);
+    border-top: 1px solid var(--trustme-border);
+    text-align: center;
+    font-size: 13px;
+    color: var(--trustme-text);
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 768px) {
+    .error-header  { flex-direction: column; text-align: center; padding: 20px; }
+    .error-content { padding: 20px; }
+    .error-banner  { flex-direction: column; align-items: center; text-align: center; }
+    .error-title   { font-size: 16px; }
+    .error-description { font-size: 13px; }
+  }
+</style>
+</head>
+<body>
+<div class="error-wrapper">
+
+  
+  <div class="page-header-slot">@PAGE_HEADER@</div>
+
+  <div class="error-container" role="alert" aria-live="assertive">
+
+    
+    <div class="error-header">
+      <div class="trustme-logo">
+        <svg width="100%" height="35" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <text x="0" y="30" font-family="'Open Sans',sans-serif" font-size="28" font-weight="700" fill="#ffffff">TrustMe</text>
+          <text x="125" y="30" font-family="'Open Sans',sans-serif" font-size="20" font-weight="400" fill="#ffffff">Insurance</text>
+        </svg>
+      </div>
+      <div class="header-title">$GENERIC_ERROR_HEADER$</div>
+    </div>
+
+    
+    <div class="error-content">
+
+      
+      <div class="error-banner">
+        <div class="error-icon" aria-hidden="true"></div>
+        <div class="error-message">
+          <div class="error-title">$GENERIC_ERROR_HEADER$</div>
+          <div class="error-description">
+            $GENERIC_ERROR_ERROR_DETAILS$ @EXCEPTION_MSG@
+          </div>
+        </div>
+      </div>
+
+      
+      <div class="action-bar">
+        <button id="detailsButton" class="details-toggle cs-link" aria-expanded="false">
+          $GENERIC_ERROR_VIEW_DETAILS$
+        </button>
+      </div>
+
+      
+      <div id="detailsSection" class="details-panel" aria-hidden="true">
+
+        <div class="detail-item">
+          <div class="detail-label">$GENERIC_ERROR_OCCURRED_AT$</div>
+          <div class="detail-value" id="timestamp-value">@TIMESTAMP@</div>
+        </div>
+
+        <div class="detail-item">
+          <div class="detail-label">Flow Reference:</div>
+          <div class="reference-code">@REFERENCE@</div>
+        </div>
+
+        <div class="detail-item">
+          <div class="detail-label">Instance ID:</div>
+          <div class="reference-code">@EXECUTION_INSTANCE_ID@</div>
+        </div>
+
+        <div class="detail-item">
+          <div class="detail-label">Correlation ID:</div>
+          <div class="reference-code">@CORRELATION_ID@</div>
+        </div>
+
+        <div class="detail-item">
+          <div class="detail-label">$GENERIC_ERROR_CONTACT_SUPPORT$</div>
+          <div class="detail-value">
+            <a class="support-link cs-primary" href="$GENERIC_ERROR_SUPPORT_URL$" target="_blank" rel="noopener">$GENERIC_ERROR_SUPPORT_URL$</a>
+          </div>
+        </div>
+
+        <div class="detail-item" style="font-size:12px;color:var(--trustme-text)">
+          <strong>Tip:</strong> When contacting support, please provide the reference
+          code and correlation ID shown above to help us assist you more quickly.
+        </div>
+
+      </div>
+
+    </div>
+
+    
+    <div class="error-footer">
+      © 2024 TrustMe Insurance. All rights reserved.
+    </div>
+
+  </div>
+</div>
+
+
+
+
+
+</body>
+</html>
