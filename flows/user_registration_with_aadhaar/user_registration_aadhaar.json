@@ -1,33 +1,25 @@
 {
-    "reference": "user_registration_with_aadhaar",
+    "reference": "test3",
     "propertiesSchemaVersion": 5,
     "model": [
         {
             "id": "node-1-Start",
             "name": "Start",
             "position": {
-                "x": -1592.2493714760355,
-                "y": -246.7006330846407
+                "x": -1667.1216092964598,
+                "y": -251.25757957226762
             },
             "taskType": "Start",
             "next": {
-                "node": "node-11-ConditionPoint",
+                "node": "node-58-ConditionPoint",
                 "connectionWayPoints": [
                     {
-                        "x": -1466.2493714760355,
-                        "y": -226.7006330846407
-                    },
-                    {
-                        "x": -1446.2493714760355,
-                        "y": -226.7006330846407
-                    },
-                    {
-                        "x": -1448.9162099266355,
-                        "y": -226.7006330846407
+                        "x": -1541.1216092964598,
+                        "y": -231.25757957226762
                     },
                     {
                         "x": -1428.9162099266355,
-                        "y": -226.7006330846407
+                        "y": -231.25757957226762
                     }
                 ]
             }
@@ -71,7 +63,7 @@
                 ]
             },
             "input": {
-                "inputData": "# Assisted by AI\nstatements:\n  # internal identifier\n  - context: trnxId := genUUID()\n  \n  # Configuration variables from secrets\n  - context: apiCreds := \"<api_creds>\"\"\n  - context: apiBaseUrl := \"<api_base_url>\"\n  \n  \n  # Configurable redirect URLs\n  - context: redirectUrl := \"<workflow_callback_url>\" + \"?trnxId=\" + context.trnxId\n  - context: successRedirectUrl := context.redirectUrl\n  - context: failureRedirectUrl := context.redirectUrl\n  \n  # Timing configurations\n  - context: redirectTime := \"5\"\n  - context: successRedirectTime := \"5\"\n  - context: failureRedirectTime := \"5\"\n  \n  # Branding configurations\n  - context: >\n        logoUrl := \"<logo_url>\"\n  - context: >\n        favIconUrl := \"<fav_icon_url>\"\n        \n  - context: supportEmail := \"<support_email>\"\n  - context: companyName := \"<company_name>\"\n  \n  # Feature flags\n  - context: signup := true\n  - context: pinlessAuthentication := true\n  - context: logoVisible := \"true\"\n  - context: supportEmailVisible := \"true\"\n  - context: getScope := true\n  - context: showLoaderState := true\n  - context: shortenUrl := true\n  \n  # Other configurations\n  - context: purpose := \"kyc\" # \"kyc\" \"verification\" \"compliance\" \"availing_services\" \"educational\"\n  - context: consentValidTill := int(now) + 1800 + 19800 # 1800 : 30 min , 19800 : +5.30 india difference from GMT \n  - context: internalId := context.trnxId\n  - context: docType := [\"ADHAR\"]\n  \n  # Build request body\n  - context: >\n        requestBody := {\n          \"signup\": context.signup,\n          \"pinlessAuthentication\": context.pinlessAuthentication,\n          \"redirectUrl\": context.redirectUrl,\n          \"redirectTime\": context.redirectTime,\n          \"successRedirectUrl\": context.successRedirectUrl,\n          \"successRedirectTime\": context.successRedirectTime,\n          \"failureRedirectUrl\": context.failureRedirectUrl,\n          \"failureRedirectTime\": context.failureRedirectTime,\n          \"logoVisible\": context.logoVisible,\n          \"logo\": context.logoUrl,\n          \"supportEmailVisible\": context.supportEmailVisible,\n          \"supportEmail\": context.supportEmail,\n          \"purpose\": context.purpose,\n          \"getScope\": context.getScope,\n          \"consentValidTill\": context.consentValidTill,\n          \"showLoaderState\": context.showLoaderState,\n          \"internalId\": context.internalId,\n          \"companyName\": context.companyName,\n          \"favIcon\": context.favIconUrl,\n          \"shortenUrl\": context.shortenUrl,\n          \"docType\": context.docType\n        }\n  \n  # Make API call to DigiLocker service\n  - context: >\n      digilockerResponse := hc.Post(\n        \"https://\" + context.apiBaseUrl + \"/api/v3/digilocker-v2/createUrl\",\n        {\n          \"Content-Type\": \"application/json\",\n          \"authorization\": context.apiCreds\n        },\n        jsonToString(context.requestBody)\n      )\n  \n  # Return response with correct field mappings\n  - return: >\n      {\n        \"http_status\": string(context.digilockerResponse.statusCode),\n        \"digilocker_url\": has(context.digilockerResponse.responseBody.result.url) ? context.digilockerResponse.responseBody.result.url : \"\",\n        \"digilocker_request_id\": has(context.digilockerResponse.responseBody.result.requestId) ? context.digilockerResponse.responseBody.result.requestId : \"\",\n        \"trnxId\": context.trnxId\n      }\n"
+                "inputData": "# Function: initiateAuthSession\n# Purpose: Initiates a DigiLocker authentication session by creating a URL for user consent\n#\n# This function:\n# 1. Generates a unique transaction ID (trnxId) for tracking the session\n# 2. Configures API credentials and branding settings from secrets\n# 3. Builds the callback redirect URL dynamically from the tenant ID and flow reference\n# 4. Builds a request body with all configuration parameters\n# 5. Calls the DigiLocker API to create an authentication URL\n# 6. Returns the DigiLocker URL, request ID, and transaction ID\n#\n# Configurable parameters (adjust here as needed):\n#   consentTtlSeconds — how long (in seconds) the DigiLocker consent link remains valid\n#                       Default: 7776000 (90 days / ~3 months)\n#                       Other common values:\n#                         1800    =  30 minutes\n#                         86400   =  1 day\n#                         2592000 =  30 days\n#                         7776000 =  90 days\n#\n# Sample Input:\n# - context.__tenantid     e.g. \"abc.verify.ibm.com\"\n# - context.flowsReference e.g. \"user-registration-aadhaar\"\n# - Secrets: <api_creds>, <api_base_url>, <logo_url>, <fav_icon_url>, <support_email>, <company_name>\n#\n# Sample Output:\n# {\n#   \"http_status\": \"200\",\n#   \"digilocker_url\": \"https://digilocker.example.com/auth?id=abc123\",\n#   \"digilocker_request_id\": \"req_xyz789\",\n#   \"trnxId\": \"550e8400-e29b-41d4-a716-446655440000\"\n# }\n\nstatements:\n  # Generate internal identifier for tracking this authentication session\n  - context: trnxId := genUUID()\n  \n  # Retrieve API credentials and base URL from secrets\n  - context: apiCreds := \"<api_creds>\"\n  - context: apiBaseUrl := \"<api_base_url>\"\n  \n  # Build callback redirect URL dynamically from tenant ID and flow reference\n  # Format: https://<tenantid>/flows/<flowsReference>?trnxId=<uuid>\n  - context: redirectUrl := \"https://\" + context.__tenantid + \"/flows/\" + context.flowsReference + \"?trnxId=\" + context.trnxId\n\n  # successRedirectUrl and failureRedirectUrl currently share the same base URL.\n  # Good-to-have: append a distinct \"redirectStatus\" query parameter to let the\n  # callback handler know which DigiLocker outcome triggered the return.\n  # Example:\n  #   successRedirectUrl := context.redirectUrl + \"&redirectStatus=success\"\n  #   failureRedirectUrl := context.redirectUrl + \"&redirectStatus=failure\"\n  # At the flow entry point (Start / condition node) you can then read\n  # context.redirectStatus to branch immediately on success vs. failure without\n  # waiting for the full session-cache / scope validation.\n  - context: successRedirectUrl := context.redirectUrl\n  - context: failureRedirectUrl := context.redirectUrl\n  \n  # Set redirect timing in seconds\n  - context: redirectTime := \"5\"\n  - context: successRedirectTime := \"5\"\n  - context: failureRedirectTime := \"5\"\n  \n  # Configure branding elements\n  - context: logoUrl := \"<logo_url>\"\n  - context: favIconUrl := \"<fav_icon_url>\"\n  - context: supportEmail := \"<support_email>\"\n  - context: companyName := \"<company_name>\"\n  \n  # Set feature flags for DigiLocker session\n  - context: signup := true\n  - context: pinlessAuthentication := true\n  - context: logoVisible := \"true\"\n  - context: supportEmailVisible := \"true\"\n  - context: getScope := true\n  - context: showLoaderState := true\n  - context: shortenUrl := true\n  \n  # ── Consent expiry configuration ────────────────────────────────────────\n  # consentTtlSeconds controls how long the DigiLocker consent link stays valid.\n  # Adjust this value as needed (see header for common values).\n  - context: consentTtlSeconds := 7776000\n  \n  # consentValidTill = current Unix timestamp + TTL (no IST offset needed;\n  # DigiLocker accepts UTC epoch seconds)\n  - context: consentValidTill := int(now) + context.consentTtlSeconds\n  # ────────────────────────────────────────────────────────────────────────\n  \n  # Configure consent parameters\n  # Purpose options: \"kyc\", \"verification\", \"compliance\", \"availing_services\", \"educational\"\n  - context: purpose := \"kyc\"\n  - context: internalId := context.trnxId\n  # Request Aadhaar document\n  - context: docType := [\"ADHAR\"]\n  \n  # Build complete request body with all configuration\n  - context: >\n        requestBody := {\n          \"signup\": context.signup,\n          \"pinlessAuthentication\": context.pinlessAuthentication,\n          \"redirectUrl\": context.redirectUrl,\n          \"redirectTime\": context.redirectTime,\n          \"successRedirectUrl\": context.successRedirectUrl,\n          \"successRedirectTime\": context.successRedirectTime,\n          \"failureRedirectUrl\": context.failureRedirectUrl,\n          \"failureRedirectTime\": context.failureRedirectTime,\n          \"logoVisible\": context.logoVisible,\n          \"logo\": context.logoUrl,\n          \"supportEmailVisible\": context.supportEmailVisible,\n          \"supportEmail\": context.supportEmail,\n          \"purpose\": context.purpose,\n          \"getScope\": context.getScope,\n          \"consentValidTill\": context.consentValidTill,\n          \"showLoaderState\": context.showLoaderState,\n          \"internalId\": context.internalId,\n          \"companyName\": context.companyName,\n          \"favIcon\": context.favIconUrl,\n          \"shortenUrl\": context.shortenUrl,\n          \"docType\": context.docType\n        }\n  \n  # Call DigiLocker API to create authentication URL\n  - context: >\n      digilockerResponse := hc.Post(\n        \"https://\" + context.apiBaseUrl + \"/api/v3/digilocker-v2/createUrl\",\n        {\n          \"Content-Type\": \"application/json\",\n          \"authorization\": context.apiCreds\n        },\n        jsonToString(context.requestBody)\n      )\n  \n  # Return response with HTTP status, DigiLocker URL, request ID, and transaction ID\n  - return: >\n      {\n        \"http_status\": string(context.digilockerResponse.statusCode),\n        \"digilocker_url\": has(context.digilockerResponse.responseBody.result.url) ? context.digilockerResponse.responseBody.result.url : \"\",\n        \"digilocker_request_id\": has(context.digilockerResponse.responseBody.result.requestId) ? context.digilockerResponse.responseBody.result.requestId : \"\",\n        \"trnxId\": context.trnxId\n      }"
             },
             "output": [
                 "JSON"
@@ -108,71 +100,6 @@
             }
         },
         {
-            "id": "node-11-ConditionPoint",
-            "position": {
-                "x": -1428.9162099266355,
-                "y": -250.7006330846407
-            },
-            "taskType": "ConditionPoint",
-            "branches": [
-                {
-                    "next": {
-                        "node": "node-44-UserForm",
-                        "connectionLabel": "initiated",
-                        "connectionWayPoints": [
-                            {
-                                "x": -1404.9162099266355,
-                                "y": -250.7006330846407
-                            },
-                            {
-                                "x": -1404.9162099266355,
-                                "y": -306.77710204950654
-                            }
-                        ]
-                    }
-                },
-                {
-                    "next": {
-                        "node": "node-56-ConditionPoint",
-                        "connectionLabel": "trnxId available",
-                        "connectionWayPoints": [
-                            {
-                                "x": -1404.9162099266355,
-                                "y": -202.7006330846407
-                            },
-                            {
-                                "x": -1404.9162099266355,
-                                "y": -174.81968380582947
-                            },
-                            {
-                                "x": -1341.487134482828,
-                                "y": -174.81968380582947
-                            }
-                        ]
-                    },
-                    "condition": {
-                        "type": "basic",
-                        "condition": [
-                            {
-                                "@context@": [
-                                    {
-                                        "op": "hasProp",
-                                        "vl": "trnxId"
-                                    }
-                                ],
-                                "@context.trnxId@": [
-                                    {
-                                        "op": "notEmpty",
-                                        "vl": ""
-                                    }
-                                ]
-                            }
-                        ]
-                    }
-                }
-            ]
-        },
-        {
             "id": "node-12-Function",
             "name": "extractErrorDetails",
             "position": {
@@ -202,7 +129,7 @@
                 ]
             },
             "input": {
-                "inputData": "statements:\n    # - context: >\n    #     session_error := (has(context.valid_cache)  && (context.valid_cache == false)) || (has(context.valid_session)  && (context.valid_session == false)) ? true : false\n    - if:\n        match: >\n            (has(context.valid_cache)  && (context.valid_cache == false)) || (has(context.valid_session)  && (context.valid_session == false))\n        block:\n            - return: >\n                {\n                    \"message_id\" : \"WFURATMI001E\",\n                    \"message_description\" : \"The session is invalid. Please restart the flow and complete it within 30 minutes. If the issue persists, contact your system administrator.\"\n                }\n    # - context: >\n    #     trnxId_not_found_error := (has(context.id)  && (!has(context.trnxId) || (context.trnxId == null) || (context.trnxId == \"\"))) ? true : false\n    - if:\n        match: >\n            (has(context.trnxId) && (context.trnxId != null)  && (!has(context.requestId) || (context.requestId == null) || (context.requestId == \"\")))\n        block:\n            - return: >\n                {\n                    \"message_id\" : \"WFURATMI002E\",\n                    \"message_description\" : \"Missing query parameters. Please restart the flow. If the issue persists, contact your system administrator.\"\n                }\n    # - context: >\n    #     aadhaar_consent_error := has(context.valid) && has(context.aadhaar_consent) && (context.valid == \"false\" || context.aadhaar_consented == \"false\") ? true : false\n    - if:\n        match: >\n            has(context.valid) && has(context.aadhaar_consent) && (context.valid == \"false\" || context.aadhaar_consented == \"false\")\n        block:\n            - return: >\n                {\n                    \"message_id\" : \"WFURATMI003E\",\n                    \"message_description\" : \"Aadhaar consent is missing. Please restart the flow and complete the consent step. If the issues persist, contact your system administrator.\"\n                }\n    # - context: >\n    #     digilocker_fetch_error := has(context.ifError)  && context.ifError == \"true\" ? true : false\n    - if:\n        match: >\n            has(context.ifError)  && context.ifError == \"true\"\n        block:\n            - return: >\n                {\n                    \"message_id\" : \"WFURATMI000E\",\n                    \"message_description\" : \"Internal server error. Please try again after some time. If the issue persists, contact your system administrator.\"\n                }\n    # - context: >\n    #     aadhaar_xml_fetch_error := has(context.ifErrorAX)  && context.ifErrorAX == \"true\" ? true : false\n    - if:\n        match: >\n            has(context.ifErrorAX)  && context.ifErrorAX == \"true\"\n        block:\n            - return: >\n                {\n                    \"message_id\" : \"WFURATMI000E\",\n                    \"message_description\" : \"Internal server error. Please try again after some time. If the issue persists, contact your system administrator.\"\n                }\n    # - context: >\n    #     digi_profile_validation_eerror := has(context.valid_digi_profile_match) && context.valid_digi_profile_match == false ? true : false\n    - if:\n        match: >\n            has(context.valid_digi_profile_match) && context.valid_digi_profile_match == false\n        block:\n            - return: >\n                {\n                    \"message_id\" : \"WFURATMI004E\",\n                    \"message_description\" : \"Your Aadhaar details do not match your profile information. Please restart the flow and enter the correct details. If the issue persists, contact your system administrator.\"\n                }\n    # - context: >http_status\n    #     user_consent_error := has(context.user_consent)  && context.user_consent == \"no\" ? true : false\n    - if:\n        match: >\n            has(context.user_consent)  && context.user_consent == \"no\"\n        block:\n            - return: >\n                {\n                    \"message_id\" : \"WFURATMI005E\",\n                    \"message_description\" : \"User consent is missing. Please restart the flow and complete the consent step. If the issues persist, contact your system administrator.\"\n                }\n    # - context: >\n    #     setu_init_error := has(context.http_status) && (context.http_status!=null)  && (context.http_status != \"201\") ? true : false\n    - if:\n        match: >\n            has(context.http_status) && (context.http_status!=null)  && (context.http_status != \"201\")\n        block:\n            - return: >\n                {\n                    \"message_id\" : \"WFURATMI000E\",\n                    \"message_description\" : \"Internal server error. Please try again after some time. If the issue persists, contact your system administrator.\"\n                }\n    # - context: >\n    #     cache_set_error := has(context.cache_set) && has(context.cache_set.isSuccessful)  && (context.cache_set.isSuccessful != \"true\") ? true : false\n    - if:\n        match: >\n            has(context.cache_set) && has(context.cache_set.isSuccessful)  && (context.cache_set.isSuccessful != \"true\")\n        block:\n            - return: >\n                {\n                    \"message_id\" : \"WFURATMI000E\",\n                    \"message_description\" : \"Internal server error. Please try again after some time. If the issue persists, contact your system administrator.\"\n                }\n    # - context: >\n    #     crearte_user_error := has(context.crearteUserStatus) &&  has(context.crearteUserStatus.result) && !has(context.crearteUserStatus.result.id) ? true : false\n    - if:\n        match: >\n            has(context.crearteUserStatus) &&  has(context.crearteUserStatus.result) && !has(context.crearteUserStatus.result.id)\n        block:\n            - if: # CSIAI0047E : create user user already exsist \n                match: >\n                    has(context.crearteUserStatus.error) && (context.crearteUserStatus.error != \"\")  && (context.crearteUserStatus.error.contains(\"specified for attribute [urn:ietf:params:scim:schemas:extension:ibm:2.0:User:customAttributes.digilockerId] already exists.\"))\n                block:\n                    - return: >\n                        {\n                            \"message_id\" : \"WFURATMI006E\",\n                            \"message_description\" : \"This DigiLocker account is already associated with another user. log in with the associated account or use a different DigiLocker account. If the issues persist, contact your system administrator.\"\n                        }\n            # - if: # CSIAI0047E : create user user already exsist \n            #     match: >\n            #         has(context.crearteUserStatus.error) && (context.crearteUserStatus.error != \"\")  && (context.crearteUserStatus.error.contains(\"CSIAI0047E\"))\n            #     block:\n            #         - return: >\n            #             {\n            #                 \"message_id\" : \"WFURATMI008E\",\n            #                 \"message_description\" : \"A user with this username already exists. Please log in using that username or provide a different email. If the issues persist, contact your system administrator.\"\n            #             }\n            - return: > \n                {\n                    \"message_id\" : \"WFURATMI007E\",\n                    \"message_description\" : \"User registration failed due to an unexpected issue. If the issues persist, contact your system administrator.\"\n                }\n    # - return: >\n    #     {\n    #         \"session_error\" : context.session_error,\n    #         \"trnxId_not_found_error\" : context.trnxId_not_found_error,\n    #         \"digi_profile_validation_eerror\" : context.digi_profile_validation_eerror,\n    #         \"aadhaar_consent_error\" : context.aadhaar_consent_error,\n    #         \"digilocker_fetch_error\" : context.digilocker_fetch_error,\n    #         \"aadhaar_xml_fetch_error\" : context.aadhaar_xml_fetch_error,\n    #         \"user_consent_error\" : context.user_consent_error,\n    #         \"crearte_user_error\" : context.crearte_user_error,\n    #         \"setu_init_error\" : context.setu_init_error,\n    #         \"cache_set_error\" : context.cache_set_error\n    #     }"
+                "inputData": "# Function: extractErrorDetails\n# Purpose: Evaluates error conditions and returns an appropriate user-facing error message\n#\n# This function checks conditions in priority order and returns on the first match:\n# 1. Invalid session (valid_session = false)\n# 2. Missing callback query parameters (trnxId present but requestId absent)\n# 3. Aadhaar consent not provided (valid_digilocker = false or aadhaar_consented = false)\n# 4. DigiLocker identity provider API error (aadhaar_api_error = true)\n# 5. Aadhaar XML API error (aadhaar_xml_api_error = true)\n# 6. Profile validation mismatch (valid_digi_profile_match = false)\n# 7. User consent not given (user_consent != yes)\n# 8. User creation failed — DigiLocker ID already associated (duplicate digilockerId)\n# 9. User creation failed — generic failure\n# 10. Generic internal server error fallback\n#\n# -------------------------------------------------------------------\n# Error Code Convention (sample codes — replace with your own scheme)\n# -------------------------------------------------------------------\n# Format : WFURA<NNN><S>\n#   WF    = Workflow\n#   URA   = User Registration Aadhaar (this flow)\n#   NNN   = 3-digit sequential error identifier (001, 002, ...)\n#   S     = Severity: E = Error (system/flow fault), I = Informational (user action required)\n#\n# Examples:\n#   WFURA001E — Invalid session                          (E: system/session fault)\n#   WFURA002E — Missing query parameters                 (E: malformed callback URL)\n#   WFURA003E — Aadhaar consent missing                  (E: DigiLocker not completed)\n#   WFURA004E — Identity provider API error              (E: external API failure)\n#   WFURA005E — Aadhaar XML API error                    (E: external API failure)\n#   WFURA006E — Profile validation mismatch              (E: data mismatch, needs admin)\n#   WFURA007I — User consent not given                   (I: user declined, not a system fault)\n#   WFURA008I — DigiLocker ID already associated         (I: user already registered)\n#   WFURA009E — User registration failed (generic)       (E: unexpected system failure)\n#   WFURA000E — Internal server error                    (E: system fault)\n# -------------------------------------------------------------------\n#\n# Sample Output:\n# {\n#   \"message_id\": \"WFURA001E\",\n#   \"message_description\": \"The session is invalid. Please restart the flow.\"\n# }\n\nstatements:\n    # 1. Check invalid session\n    - if:\n        match: context.valid_session == false\n        block:\n            - return: >\n                {\n                    \"message_id\": \"WFURA001E\",\n                    \"message_description\": \"The session is invalid. Please restart the flow and complete it within 30 minutes. If the issue persists, contact your system administrator.\"\n                }\n    \n    # 2. Check missing callback query parameters\n    - if:\n        match: has(context.trnxId) && context.trnxId != null && (!has(context.requestId) || context.requestId == null || context.requestId == \"\")\n        block:\n            - return: >\n                {\n                    \"message_id\": \"WFURA002E\",\n                    \"message_description\": \"Missing query parameters. Please restart the flow. If the issue persists, contact your system administrator.\"\n                }\n    \n    # 3. Check Aadhaar consent not provided\n    - if:\n        match: (has(context.valid_digilocker) && context.valid_digilocker == \"false\") || (has(context.aadhaar_consented) && context.aadhaar_consented == \"false\")\n        block:\n            - return: >\n                {\n                    \"message_id\": \"WFURA003E\",\n                    \"message_description\": \"Aadhaar consent is missing. Please restart the flow and complete the DigiLocker consent journey. If the issue persists, contact your system administrator.\"\n                }\n    \n    # 4. Check DigiLocker identity provider API error\n    - if:\n        match: has(context.aadhaar_api_error) && context.aadhaar_api_error == \"true\"\n        block:\n            - return: >\n                {\n                    \"message_id\": \"WFURA004E\",\n                    \"message_description\": \"Unable to retrieve DigiLocker identity details. Please try again. If the issue persists, contact your system administrator.\"\n                }\n    \n    # 5. Check Aadhaar XML API error\n    - if:\n        match: has(context.aadhaar_xml_api_error) && context.aadhaar_xml_api_error == \"true\"\n        block:\n            - return: >\n                {\n                    \"message_id\": \"WFURA005E\",\n                    \"message_description\": \"Unable to retrieve Aadhaar details. Please try again. If the issue persists, contact your system administrator.\"\n                }\n    \n    # 6. Check profile validation mismatch\n    - if:\n        match: has(context.valid_digi_profile_match) && context.valid_digi_profile_match == false\n        block:\n            - return: >\n                {\n                    \"message_id\": \"WFURA006E\",\n                    \"message_description\": \"Your Aadhaar details do not match your profile information. Please restart the flow and enter the correct details. If the issue persists, contact your system administrator.\"\n                }\n    \n    # 7. Check user consent not given\n    - if:\n        match: has(context.user_consent) && context.user_consent != \"yes\"\n        block:\n            - return: >\n                {\n                    \"message_id\": \"WFURA007I\",\n                    \"message_description\": \"User consent was not provided. Please restart the flow and provide consent to proceed.\"\n                }\n    \n    # 8. Check user creation failed\n    - if:\n        match: has(context.crearteUserStatus) && context.crearteUserStatus != null && has(context.crearteUserStatus.result) && !has(context.crearteUserStatus.result.id)\n        block:\n            # 8a. DigiLocker ID already associated with another user\n            - if:\n                match: has(context.crearteUserStatus.error) && context.crearteUserStatus.error != \"\" && context.crearteUserStatus.error.contains(\"specified for attribute [urn:ietf:params:scim:schemas:extension:ibm:2.0:User:customAttributes.digilockerId] already exists.\")\n                block:\n                    - return: >\n                        {\n                            \"message_id\": \"WFURA008I\",\n                            \"message_description\": \"This DigiLocker account is already associated with another user. Log in with the associated account or use a different DigiLocker account. If the issue persists, contact your system administrator.\"\n                        }\n            # 8b. Generic user creation failure\n            # - if:  # Uncomment to handle username already exists (CSIAI0047E)\n            #     match: has(context.crearteUserStatus.error) && context.crearteUserStatus.error != \"\" && context.crearteUserStatus.error.contains(\"CSIAI0047E\")\n            #     block:\n            #         - return: >\n            #             {\n            #                 \"message_id\": \"WFURA010E\",\n            #                 \"message_description\": \"A user with this username already exists. Please log in using that username or provide a different email. If the issue persists, contact your system administrator.\"\n            #             }\n            - return: >\n                {\n                    \"message_id\": \"WFURA009E\",\n                    \"message_description\": \"User registration failed due to an unexpected issue. Please try again. If the issue persists, contact your system administrator.\"\n                }\n    \n    # 9. Generic internal server error fallback\n    - return: >\n        {\n            \"message_id\": \"WFURA000E\",\n            \"message_description\": \"Internal server error. Please try again after some time. If the issue persists, contact your system administrator.\"\n        }\n"
             },
             "output": [
                 "JSON"
@@ -212,33 +139,25 @@
             "id": "node-13-Function",
             "name": "fetchAadhaarData",
             "position": {
-                "x": -835.677243830727,
-                "y": 490.17589401600344
+                "x": -979.9128518833176,
+                "y": 327.91083495683915
             },
             "taskType": "Function",
             "next": {
                 "node": "node-29-ConditionPoint",
                 "connectionWayPoints": [
                     {
-                        "x": -647.677243830727,
-                        "y": 528.1758940160034
+                        "x": -791.9128518833176,
+                        "y": 365.91083495683915
                     },
                     {
-                        "x": -627.677243830727,
-                        "y": 528.1758940160034
-                    },
-                    {
-                        "x": -633.3676039765135,
-                        "y": 528.1758940160034
-                    },
-                    {
-                        "x": -613.3676039765135,
-                        "y": 528.1758940160034
+                        "x": -747.5868503587851,
+                        "y": 365.91083495683915
                     }
                 ]
             },
             "input": {
-                "inputData": "# Assisted by AI - DigiLocker Get Aadhaar Details Evaluator\nstatements:\n  # Get secrets\n  - context: apiCreds := \"<api_creds>\"\n  - context: apiBaseUrl := \"<api_base_url>\"\n  \n  # Ensure base URL has https:// prefix\n  - context: >\n      fullBaseUrl := context.apiBaseUrl.startsWith(\"http://\") || context.apiBaseUrl.startsWith(\"https://\") ? context.apiBaseUrl : \"https://\" + context.apiBaseUrl\n  \n  # Get requestId from context with null check\n  - context: >\n        requestId := has(context.requestId) && context.requestId != null ? context.requestId : \"\"\n  \n  # Validate requestId is not empty\n  - if:\n      match: >\n        context.requestId == \"\"\n      block:\n        - return: >\n            {\n              \"photo\": \"\",\n              \"name\": \"\",\n              \"dob\": \"\",\n              \"ifErrorAX\": \"true\",\n              \"errordesc\": \"Missing request ID\",\n              \"errCode\": \"ERAX0001\",\n              \"errMessage\": \"requestId cannot be an empty string\"\n            }\n  \n  # Call DigiLocker geteAadhaar API\n  - context: >\n      digilockerResponse := hc.Post(\n        context.fullBaseUrl + \"/api/v3/digilocker-v2/geteAadhaar\",\n        {\n          \"Content-Type\": \"application/json\",\n          \"authorization\": context.apiCreds\n        },\n        jsonToString({\"requestId\": context.requestId})\n      )\n  \n  # Handle 401 - Consent journey not completed yet\n  - if:\n      match: >\n        string(context.digilockerResponse.statusCode) == \"401\"\n      block:\n        - return: >\n            {\n              \"photo\": \"\",\n              \"name\": \"\",\n              \"dob\": \"\",\n              \"ifErrorAX\": \"true\",\n              \"errordesc\": \"Consent journey not completed\",\n              \"errCode\": \"ERAX0002\",\n              \"errMessage\": \"The customer has not completed their digilocker consent journey yet\"\n            }\n  \n  # Handle 409 - Aadhaar not consented (Upstream Down)\n  - if:\n      match: >\n        string(context.digilockerResponse.statusCode) == \"409\"\n      block:\n        - return: >\n            {\n              \"photo\": \"\",\n              \"name\": \"\",\n              \"dob\": \"\",\n              \"ifErrorAX\": \"true\",\n              \"errordesc\": \"Aadhaar not consented\",\n              \"errCode\": \"ERAX0008\",\n              \"errMessage\": \"User did not provide consent for Aadhaar document\"\n            }\n  \n  # Handle 400 - Multiple scenarios\n  - if:\n      match: >\n        string(context.digilockerResponse.statusCode) == \"400\"\n      block:\n        - context: >\n            errorReason := has(context.digilockerResponse.responseBody.error.reason) && context.digilockerResponse.responseBody.error.reason != null ? context.digilockerResponse.responseBody.error.reason : \"\"\n        - context: >\n            errorMessage := has(context.digilockerResponse.responseBody.error.message) && context.digilockerResponse.responseBody.error.message != null ? context.digilockerResponse.responseBody.error.message : \"\"\n        - if:\n            match: >\n              context.errorReason == \"BAD_REQUEST\"\n            block:\n              - return: >\n                  {\n                    \"photo\": \"\",\n                    \"name\": \"\",\n                    \"dob\": \"\",\n                    \"ifErrorAX\": \"true\",\n                    \"errordesc\": \"Invalid request ID\",\n                    \"errCode\": \"ERAX0003\",\n                    \"errMessage\": context.errorMessage\n                  }\n        - if:\n            match: >\n              context.errorMessage.contains(\"denied\")\n            block:\n              - return: >\n                  {\n                    \"photo\": \"\",\n                    \"name\": \"\",\n                    \"dob\": \"\",\n                    \"ifErrorAX\": \"true\",\n                    \"errordesc\": \"User denied consent\",\n                    \"errCode\": \"ERAX0004\",\n                    \"errMessage\": context.errorMessage\n                  }\n        - if:\n            match: >\n              context.errorMessage.contains(\"Expired\")\n            block:\n              - return: >\n                  {\n                    \"photo\": \"\",\n                    \"name\": \"\",\n                    \"dob\": \"\",\n                    \"ifErrorAX\": \"true\",\n                    \"errordesc\": \"Authorization expired\",\n                    \"errCode\": \"ERAX0005\",\n                    \"errMessage\": context.errorMessage\n                  }\n        - return: >\n            {\n              \"photo\": \"\",\n              \"name\": \"\",\n              \"dob\": \"\",\n              \"ifErrorAX\": \"true\",\n              \"errordesc\": \"Validation error\",\n              \"errCode\": \"ERAX0006\",\n              \"errMessage\": context.errorMessage\n            }\n  \n  # Handle non-200 status codes\n  - if:\n      match: >\n        string(context.digilockerResponse.statusCode) != \"200\"\n      block:\n        - return: >\n            {\n              \"photo\": \"\",\n              \"name\": \"\",\n              \"dob\": \"\",\n              \"ifErrorAX\": \"true\",\n              \"errordesc\": \"HTTP error\",\n              \"errCode\": \"ERAX0007\",\n              \"errMessage\": \"HTTP status code is not 200: \" + string(context.digilockerResponse.statusCode)\n            }\n  \n  # Handle 200 - Success, extract Aadhaar details\n  - if:\n      match: >\n        !has(context.digilockerResponse.responseBody) || context.digilockerResponse.responseBody == null\n      block:\n        - return: >\n            {\n              \"photo\": \"\",\n              \"name\": \"\",\n              \"dob\": \"\",\n              \"ifErrorAX\": \"true\",\n              \"errordesc\": \"No response body\",\n              \"errCode\": \"ERAX0009\",\n              \"errMessage\": \"Response body is missing\"\n            }\n  \n  - if:\n      match: >\n        !has(context.digilockerResponse.responseBody.result) || context.digilockerResponse.responseBody.result == null\n      block:\n        - return: >\n            {\n              \"photo\": \"\",\n              \"name\": \"\",\n              \"dob\": \"\",\n              \"ifErrorAX\": \"true\",\n              \"errordesc\": \"No result data\",\n              \"errCode\": \"ERAX0010\",\n              \"errMessage\": \"Result data is missing\"\n            }\n  \n  # Extract Aadhaar details with null checks\n  - context: >\n      photo := has(context.digilockerResponse.responseBody.result.photo) && context.digilockerResponse.responseBody.result.photo != null ? context.digilockerResponse.responseBody.result.photo : \"\"\n  \n  - context: >\n      name := has(context.digilockerResponse.responseBody.result.name) && context.digilockerResponse.responseBody.result.name != null ? context.digilockerResponse.responseBody.result.name : \"\"\n  \n  - context: >\n      dob := has(context.digilockerResponse.responseBody.result.dob) && context.digilockerResponse.responseBody.result.dob != null ? context.digilockerResponse.responseBody.result.dob : \"\"\n  \n  # Return success with Aadhaar details\n  - return: >\n      {\n        \"photo\": context.photo,\n        \"name\": context.name,\n        \"dob\": context.dob,\n        \"ifErrorAX\": \"false\"\n      }\n\n# Error Code Reference:\n# ERAX0001 - Missing request ID (empty string or null)\n# ERAX0002 - Consent journey not completed (401 status)\n# ERAX0003 - Invalid request ID (BAD_REQUEST)\n# ERAX0004 - User denied consent\n# ERAX0005 - Authorization expired\n# ERAX0006 - Other validation errors\n# ERAX0007 - HTTP error (non-200 status code)\n# ERAX0008 - Aadhaar not consented (409 Upstream Down)\n# ERAX0009 - No response body\n# ERAX0010 - No result data in response\n"
+                "inputData": "# Function: fetchAadhaarData\n# Purpose: Fetches Aadhaar XML details from DigiLocker for the given request ID\n#\n# This function:\n# 1. Calls the DigiLocker geteAadhaar API using the requestId validated upstream\n# 2. Returns aadhaar_xml_api_error = true on any non-200 response or missing data\n# 3. Extracts photo, name, and dob from the API response on success\n#\n# Note: requestId presence is guaranteed by the upstream condition point\n#       (callback flow — trnxId and requestId present)\n#\n# Sample Input:\n# context.requestId = \"req_xyz789\"\n#\n# Sample Output (success):\n# {\n#   \"photo\": \"base64string\",\n#   \"name\": \"John Doe\",\n#   \"dob\": \"10-07-1999\",\n#   \"aadhaar_xml_api_error\": \"false\"\n# }\n#\n# Sample Output (error):\n# {\n#   \"photo\": \"\",\n#   \"name\": \"\",\n#   \"dob\": \"\",\n#   \"aadhaar_xml_api_error\": \"true\"\n# }\n\nstatements:\n  # Retrieve API credentials and base URL from secrets\n  - context: apiCreds := \"<api_creds>\"\n  - context: apiBaseUrl := \"<api_base_url>\"\n  \n  # Ensure base URL has https:// prefix\n  - context: >\n      fullBaseUrl := context.apiBaseUrl.startsWith(\"http://\") || context.apiBaseUrl.startsWith(\"https://\") ? context.apiBaseUrl : \"https://\" + context.apiBaseUrl\n  \n  # Call DigiLocker geteAadhaar API\n  - context: >\n      digilockerResponse := hc.Post(\n        context.fullBaseUrl + \"/api/v3/digilocker-v2/geteAadhaar\",\n        {\n          \"Content-Type\": \"application/json\",\n          \"authorization\": context.apiCreds\n        },\n        jsonToString({\"requestId\": context.requestId})\n      )\n  \n  # Return error on any non-200 HTTP status code\n  - if:\n      match: >\n        string(context.digilockerResponse.statusCode) != \"200\"\n      block:\n        - return: >\n            {\n              \"photo\": \"\",\n              \"name\": \"\",\n              \"dob\": \"\",\n              \"aadhaar_xml_api_error\": \"true\"\n            }\n  \n  # Validate response body exists\n  - if:\n      match: >\n        !has(context.digilockerResponse.responseBody) || context.digilockerResponse.responseBody == null\n      block:\n        - return: >\n            {\n              \"photo\": \"\",\n              \"name\": \"\",\n              \"dob\": \"\",\n              \"aadhaar_xml_api_error\": \"true\"\n            }\n  \n  # Validate result data exists\n  - if:\n      match: >\n        !has(context.digilockerResponse.responseBody.result) || context.digilockerResponse.responseBody.result == null\n      block:\n        - return: >\n            {\n              \"photo\": \"\",\n              \"name\": \"\",\n              \"dob\": \"\",\n              \"aadhaar_xml_api_error\": \"true\"\n            }\n  \n  # Extract Aadhaar details with null checks\n  - context: >\n      photo := has(context.digilockerResponse.responseBody.result.photo) && context.digilockerResponse.responseBody.result.photo != null ? context.digilockerResponse.responseBody.result.photo : \"\"\n  \n  - context: >\n      name := has(context.digilockerResponse.responseBody.result.name) && context.digilockerResponse.responseBody.result.name != null ? context.digilockerResponse.responseBody.result.name : \"\"\n  \n  - context: >\n      dob := has(context.digilockerResponse.responseBody.result.dob) && context.digilockerResponse.responseBody.result.dob != null ? context.digilockerResponse.responseBody.result.dob : \"\"\n  \n  # Return Aadhaar details on success\n  - return: >\n      {\n        \"photo\": context.photo,\n        \"name\": context.name,\n        \"dob\": context.dob,\n        \"aadhaar_xml_api_error\": \"false\"\n      }\n"
             },
             "output": [
                 "JSON"
@@ -283,33 +202,33 @@
             "id": "node-17-Function",
             "name": "createUserAccount",
             "position": {
-                "x": -229.2610755487449,
-                "y": 273.6131579423709
+                "x": -323.4148752497415,
+                "y": 73.7882027305418
             },
             "taskType": "Function",
             "next": {
                 "node": "node-41-ConditionPoint",
                 "connectionWayPoints": [
                     {
-                        "x": -135.2610755487449,
-                        "y": 349.6131579423709
+                        "x": -229.4148752497415,
+                        "y": 149.7882027305418
                     },
                     {
-                        "x": -135.2610755487449,
-                        "y": 369.6131579423709
+                        "x": -229.4148752497415,
+                        "y": 169.7882027305418
                     },
                     {
-                        "x": -135.2610755487449,
-                        "y": 354.7276321536481
+                        "x": -229.4148752497415,
+                        "y": 165.34344421838256
                     },
                     {
-                        "x": -135.2610755487449,
-                        "y": 374.7276321536481
+                        "x": -229.4148752497415,
+                        "y": 185.34344421838256
                     }
                 ]
             },
             "input": {
-                "inputData": "statements:\n  - context: crearteUserStatus := createUser(context.userData,{'notifyType':'EMAIL','acceptInitialPassword':'false'})\n  - context: app_login_link := \"https://<app-login-link>\"\n  - return : > \n        {\n            \"crearteUserStatus\" : context.crearteUserStatus,\n            \"app_login_link\" : context.app_login_link\n        }"
+                "inputData": "# Function: mapAndCreateUser\n# Purpose: Combines user form data with DigiLocker validation results and creates the user account\n#\n# This function:\n# 1. Creates additional DigiLocker metadata (timestamp, ID, validation statuses)\n# 2. Merges metadata with existing user data from cache\n# 3. Calls createUser API with the merged data\n# 4. Returns user creation status and application login link\n#\n# Sample Input:\n# context.digi_id = \"DL123456\"\n# context.phone_validation.match_status = \"matched\"\n# context.email_validation.match_status = \"matched\"\n# context.name_validation.match_status = \"matched\"\n# context.dob_validation.match_status = \"matched\"\n# context.cacheData.userData = {\"3\": \"user@example.com\", \"19\": \"John Doe\"}\n#\n# Sample Output:\n# {\n#   \"crearteUserStatus\": {\n#     \"result\": {\"id\": \"user-123\", \"userName\": \"user@example.com\"},\n#     \"error\": \"\"\n#   },\n#   \"app_login_link\": \"https://app.example.com/login\"\n# }\n\nstatements:\n    # ── Step 1: Build DigiLocker metadata ────────────────────────────────────\n    - context : >\n        additional_user_data := {\n            \"digilockerTimestamp\": string(now),\n            \"digilockerId\": (has(context.digi_id) && context.digi_id != null) ? context.digi_id : \"\",\n            \"digilockerStatus\": jsonToString({\n                \"phone_validation\": {\n                    \"match_status\": (has(context.phone_validation) && context.phone_validation != null &&\n                                     has(context.phone_validation.match_status)) ? context.phone_validation.match_status : \"\"\n                },\n                \"email_validation\": {\n                    \"match_status\": (has(context.email_validation) && context.email_validation != null &&\n                                     has(context.email_validation.match_status)) ? context.email_validation.match_status : \"\"\n                },\n                \"name_validation\": {\n                    \"match_status\": (has(context.name_validation) && context.name_validation != null &&\n                                     has(context.name_validation.match_status)) ? context.name_validation.match_status : \"\"\n                },\n                \"dob_validation\": {\n                    \"match_status\": (has(context.dob_validation) && context.dob_validation != null &&\n                                     has(context.dob_validation.match_status)) ? context.dob_validation.match_status : \"\"\n                }\n            })\n        }\n\n    # ── Step 2: Merge metadata into cached user data ─────────────────────────\n    - context : userData := context.cacheData.userData.putAll(context.additional_user_data)\n\n    # ── Step 3: Create user account ──────────────────────────────────────────\n    - context : >\n        crearteUserStatus := createUser(context.userData, {'notifyType': 'EMAIL', 'acceptInitialPassword': 'false'})\n\n    # ── Step 4: Set application login link ───────────────────────────────────\n    - context : app_login_link := \"https://<app-login-link>\"\n\n    # ── Step 5: Return outputs ───────────────────────────────────────────────\n    - return : >\n        {\n            \"crearteUserStatus\" : context.crearteUserStatus,\n            \"app_login_link\"    : context.app_login_link\n        }"
             },
             "output": [
                 "JSON"
@@ -318,23 +237,23 @@
         {
             "id": "node-20-ConditionPoint",
             "position": {
-                "x": -907.4851486689756,
-                "y": 139.75451402208932
+                "x": -1065.7436630600125,
+                "y": -26.51708970520248
             },
             "taskType": "ConditionPoint",
             "branches": [
                 {
                     "next": {
                         "node": "node-25-Function",
-                        "connectionLabel": "if valid and aadhaar consented",
+                        "connectionLabel": "scope check — valid_digilocker = true && aadhaar_consented = true",
                         "connectionWayPoints": [
                             {
-                                "x": -883.4851486689756,
-                                "y": 187.75451402208932
+                                "x": -1041.7436630600125,
+                                "y": 21.48291029479752
                             },
                             {
-                                "x": -883.4851486689756,
-                                "y": 258.5755574736196
+                                "x": -1041.7436630600125,
+                                "y": 86.2941367441365
                             }
                         ]
                     },
@@ -345,14 +264,14 @@
                                 "@context@": [
                                     {
                                         "op": "hasProp",
-                                        "vl": "valid"
+                                        "vl": "valid_digilocker"
                                     },
                                     {
                                         "op": "hasProp",
                                         "vl": "aadhaar_consented"
                                     }
                                 ],
-                                "@context.valid@": [
+                                "@context.valid_digilocker@": [
                                     {
                                         "op": "eq",
                                         "vl": "true"
@@ -373,11 +292,11 @@
                         "node": "node-12-Function",
                         "connectionWayPoints": [
                             {
-                                "x": -883.4851486689756,
-                                "y": 139.75451402208932
+                                "x": -1041.7436630600125,
+                                "y": -26.51708970520248
                             },
                             {
-                                "x": -883.4851486689756,
+                                "x": -1041.7436630600125,
                                 "y": -174.81968380582947
                             },
                             {
@@ -393,20 +312,20 @@
             "id": "node-22-Page",
             "name": "renderSuccessPage",
             "position": {
-                "x": -229.2610755487449,
-                "y": 490.17589401600344
+                "x": -323.4148752497415,
+                "y": 321.9010179546479
             },
             "taskType": "Page",
             "next": {
                 "node": "node-8-End",
                 "connectionWayPoints": [
                     {
-                        "x": -41.26107554874491,
-                        "y": 528.1758940160034
+                        "x": -135.4148752497415,
+                        "y": 359.9010179546479
                     },
                     {
                         "x": 406.11786027556997,
-                        "y": 528.1758940160034
+                        "y": 359.9010179546479
                     },
                     {
                         "x": 406.11786027556997,
@@ -424,33 +343,25 @@
             "id": "node-24-Function",
             "name": "evaluateAuthScopeAndErrors",
             "position": {
-                "x": -1121.1598467806539,
-                "y": 125.75451402208932
+                "x": -1295.4445398442008,
+                "y": -40.51708970520248
             },
             "taskType": "Function",
             "next": {
                 "node": "node-20-ConditionPoint",
                 "connectionWayPoints": [
                     {
-                        "x": -933.1598467806539,
-                        "y": 163.75451402208932
+                        "x": -1107.4445398442008,
+                        "y": -2.51708970520248
                     },
                     {
-                        "x": -913.1598467806539,
-                        "y": 163.75451402208932
-                    },
-                    {
-                        "x": -927.4851486689756,
-                        "y": 163.75451402208932
-                    },
-                    {
-                        "x": -907.4851486689756,
-                        "y": 163.75451402208932
+                        "x": -1065.7436630600125,
+                        "y": -2.51708970520248
                     }
                 ]
             },
             "input": {
-                "inputData": "# Assisted by AI - DigiLocker Scope Evaluator\nstatements:\n  # Get secrets\n  - context: apiCreds := \"<api_creds>\"\n  - context: apiBaseUrl := \"<api_base_url>\"\n  \n  # Ensure base URL has https:// prefix\n  - context: >\n      fullBaseUrl := context.apiBaseUrl.startsWith(\"http://\") || context.apiBaseUrl.startsWith(\"https://\") ? context.apiBaseUrl : \"https://\" + context.apiBaseUrl\n  \n  # Get requestId from context with null check\n  - context: >\n        requestId := has(context.requestId) && context.requestId != null ? context.requestId : \"\"\n  \n  # Validate requestId is not empty\n  - if:\n      match: >\n        context.requestId == \"\"\n      block:\n        - return: >\n            {\n              \"valid\": \"false\",\n              \"aadhaar_consented\": \"false\",\n              \"errordesc\": \"Missing request ID\",\n              \"errCode\": \"ERSP0001\",\n              \"errMessage\": \"Request ID should not be an empty string\"\n            }\n  \n  # Call DigiLocker getScope API\n  - context: >\n      digilockerResponse := hc.Post(\n        context.fullBaseUrl + \"/api/v3/digilocker-v2/getScope\",\n        {\n          \"Content-Type\": \"application/json\",\n          \"authorization\": context.apiCreds\n        },\n        jsonToString({\"requestId\": context.requestId})\n      )\n  \n  # Handle 400 - Could be invalid requestId, user denied, expired, or validation error\n  - if:\n      match: >\n        string(context.digilockerResponse.statusCode) == \"400\"\n      block:\n        - context: >\n            errorReason := has(context.digilockerResponse.responseBody.error.reason) && context.digilockerResponse.responseBody.error.reason != null ? context.digilockerResponse.responseBody.error.reason : \"\"\n        - context: >\n            errorMessage := has(context.digilockerResponse.responseBody.error.message) && context.digilockerResponse.responseBody.error.message != null ? context.digilockerResponse.responseBody.error.message : \"\"\n        - if:\n            match: >\n              context.errorReason == \"BAD_REQUEST\"\n            block:\n              - return: >\n                  {\n                    \"valid\": \"false\",\n                    \"aadhaar_consented\": \"false\",\n                    \"errordesc\": \"Invalid request ID\",\n                    \"errCode\": \"ERSP0002\",\n                    \"errMessage\": context.errorMessage\n                  }\n        - if:\n            match: >\n              context.errorMessage.contains(\"denied\")\n            block:\n              - return: >\n                  {\n                    \"valid\": \"false\",\n                    \"aadhaar_consented\": \"false\",\n                    \"errordesc\": \"User denied consent\",\n                    \"errCode\": \"ERSP0003\",\n                    \"errMessage\": context.errorMessage\n                  }\n        - if:\n            match: >\n              context.errorMessage.contains(\"Expired\")\n            block:\n              - return: >\n                  {\n                    \"valid\": \"false\",\n                    \"aadhaar_consented\": \"false\",\n                    \"errordesc\": \"Authorization expired\",\n                    \"errCode\": \"ERSP0008\",\n                    \"errMessage\": context.errorMessage\n                  }\n        - return: >\n            {\n              \"valid\": \"false\",\n              \"aadhaar_consented\": \"false\",\n              \"errordesc\": \"Validation error\",\n              \"errCode\": \"ERSP0004\",\n              \"errMessage\": context.errorMessage\n            }\n  \n  # Handle 401 - Consent journey not completed yet\n  - if:\n      match: >\n        string(context.digilockerResponse.statusCode) == \"401\"\n      block:\n        - return: >\n            {\n              \"valid\": \"false\",\n              \"aadhaar_consented\": \"false\",\n              \"errordesc\": \"Consent journey not completed\",\n              \"errCode\": \"ERSP0005\",\n              \"errMessage\": \"The customer has not completed their digilocker consent journey yet\"\n            }\n  \n  # Handle 200 - Success, check scope\n  - context: >\n      scopeArray := has(context.digilockerResponse.responseBody.result.scope) && context.digilockerResponse.responseBody.result.scope != null ? context.digilockerResponse.responseBody.result.scope : []\n  \n  # Convert scope array to string for easier checking\n  - context: >\n      scopeString := jsonToString(context.scopeArray)\n  \n  # Check if Aadhaar is in scope (looking for \"ADHAR\" in the scope string)\n  - context: >\n      aadhaarConsented := context.scopeString.contains(\"ADHAR\")\n  \n  # Check if scope is empty\n  - if:\n      match: >\n        size(context.scopeArray) == 0\n      block:\n        - return: >\n            {\n              \"valid\": \"false\",\n              \"aadhaar_consented\": \"false\",\n              \"errordesc\": \"No document selected\",\n              \"errCode\": \"ERSP0006\",\n              \"errMessage\": \"User completed journey without selecting any document\"\n            }\n  \n  # Check if Aadhaar is not consented\n  - if:\n      match: >\n        !context.aadhaarConsented\n      block:\n        - return: >\n            {\n              \"valid\": \"false\",\n              \"aadhaar_consented\": \"false\",\n              \"errordesc\": \"Aadhaar not consented\",\n              \"errCode\": \"ERSP0007\",\n              \"errMessage\": \"User did not provide consent for Aadhaar document\"\n            }\n  \n  # Return success with scope details\n  - return: >\n      {\n        \"valid\": \"true\",\n        \"aadhaar_consented\": \"true\"\n      }\n\n# Error Code Reference:\n# ERSP0001 - Missing request ID (empty string or null)\n# ERSP0002 - Invalid request ID (BAD_REQUEST from API)\n# ERSP0003 - User denied consent (AUTH_FAIL with 400 status)\n# ERSP0004 - Other validation errors (400 status, other reasons)\n# ERSP0005 - Consent journey not completed (401 status)\n# ERSP0006 - No document selected (empty scope array)\n# ERSP0007 - Aadhaar not consented (scope exists but no ADHAR)\n# ERSP0008 - Authorization expired\n"
+                "inputData": "# Function: evaluateAuthScopeAndErrors\n# Purpose: Checks DigiLocker authorization scope to verify Aadhaar consent was granted\n#\n# This function:\n# 1. Calls the DigiLocker getScope API using the requestId validated upstream\n# 2. Returns valid_digilocker = false on any non-200 response\n# 3. Checks the scope array contains \"ADHAR\" (Aadhaar consent)\n# 4. Returns valid_digilocker and aadhaar_consented flags\n#\n# Note: requestId presence is guaranteed by the upstream condition point\n#       (callback flow — trnxId and requestId present)\n#\n# Sample Input:\n# context.requestId = \"req_xyz789\"\n#\n# Sample Output (success):\n# {\n#   \"valid_digilocker\": \"true\",\n#   \"aadhaar_consented\": \"true\"\n# }\n#\n# Sample Output (error):\n# {\n#   \"valid_digilocker\": \"false\",\n#   \"aadhaar_consented\": \"false\"\n# }\n\nstatements:\n  # Retrieve API credentials and base URL from secrets\n  - context: apiCreds := \"<api_creds>\"\n  - context: apiBaseUrl := \"<api_base_url>\"\n  \n  # Ensure base URL has https:// prefix\n  - context: >\n      fullBaseUrl := context.apiBaseUrl.startsWith(\"http://\") || context.apiBaseUrl.startsWith(\"https://\") ? context.apiBaseUrl : \"https://\" + context.apiBaseUrl\n  \n  # Call DigiLocker getScope API\n  - context: >\n      digilockerResponse := hc.Post(\n        context.fullBaseUrl + \"/api/v3/digilocker-v2/getScope\",\n        {\n          \"Content-Type\": \"application/json\",\n          \"authorization\": context.apiCreds\n        },\n        jsonToString({\"requestId\": context.requestId})\n      )\n  \n  # Return error on any non-200 HTTP status code\n  - if:\n      match: >\n        string(context.digilockerResponse.statusCode) != \"200\"\n      block:\n        - return: >\n            {\n              \"valid_digilocker\": \"false\",\n              \"aadhaar_consented\": \"false\"\n            }\n  \n  # Extract scope array from response\n  - context: >\n      scopeArray := has(context.digilockerResponse.responseBody.result.scope) && context.digilockerResponse.responseBody.result.scope != null ? context.digilockerResponse.responseBody.result.scope : []\n  \n  # Return error if scope is empty or Aadhaar not consented\n  - if:\n      match: >\n        size(context.scopeArray) == 0 || !jsonToString(context.scopeArray).contains(\"ADHAR\")\n      block:\n        - return: >\n            {\n              \"valid_digilocker\": \"false\",\n              \"aadhaar_consented\": \"false\"\n            }\n  \n  # Return success — Aadhaar scope confirmed\n  - return: >\n      {\n        \"valid_digilocker\": \"true\",\n        \"aadhaar_consented\": \"true\"\n      }\n"
             },
             "output": [
                 "JSON"
@@ -460,33 +371,33 @@
             "id": "node-25-Function",
             "name": "fetchIdentityProviderData",
             "position": {
-                "x": -977.4851486689756,
-                "y": 258.5755574736196
+                "x": -1135.7436630600125,
+                "y": 86.2941367441365
             },
             "taskType": "Function",
             "next": {
                 "node": "node-27-ConditionPoint",
                 "connectionWayPoints": [
                     {
-                        "x": -789.4851486689756,
-                        "y": 296.5755574736196
+                        "x": -947.7436630600125,
+                        "y": 124.2941367441365
                     },
                     {
-                        "x": -769.4851486689756,
-                        "y": 296.5755574736196
+                        "x": -927.7436630600125,
+                        "y": 124.2941367441365
                     },
                     {
-                        "x": -785.677243830727,
-                        "y": 296.5755574736196
+                        "x": -929.9128518833176,
+                        "y": 124.2941367441365
                     },
                     {
-                        "x": -765.677243830727,
-                        "y": 296.5755574736196
+                        "x": -909.9128518833176,
+                        "y": 124.2941367441365
                     }
                 ]
             },
             "input": {
-                "inputData": "# Assisted by AI - DigiLocker Get Details Evaluator\nstatements:\n  # Get secrets\n  - context: apiCreds := \"<api_creds>\"\n  - context: apiBaseUrl := \"<api_base_url>\"\n  \n  # Ensure base URL has https:// prefix\n  - context: >\n      fullBaseUrl := context.apiBaseUrl.startsWith(\"http://\") || context.apiBaseUrl.startsWith(\"https://\") ? context.apiBaseUrl : \"https://\" + context.apiBaseUrl\n  \n  # Get requestId from context with null check\n  - context: >\n        requestId := has(context.requestId) && context.requestId != null ? context.requestId : \"\"\n  \n  # Validate requestId is not empty\n  - if:\n      match: >\n        context.requestId == \"\"\n      block:\n        - return: >\n            {\n              \"digi_id\": \"\",\n              \"phone\": \"\",\n              \"email\": \"\",\n              \"ifError\": \"true\",\n              \"errordesc\": \"Missing request ID\",\n              \"errCode\": \"ERGD0001\",\n              \"errMessage\": \"requestId cannot be an empty string\"\n            }\n  \n  # Call DigiLocker getDetails API\n  - context: >\n      digilockerResponse := hc.Post(\n        context.fullBaseUrl + \"/api/v3/digilocker-v2/getDetails\",\n        {\n          \"Content-Type\": \"application/json\",\n          \"authorization\": context.apiCreds\n        },\n        jsonToString({\"requestId\": context.requestId})\n      )\n  \n  # Handle 401 - Consent journey not completed yet\n  - if:\n      match: >\n        string(context.digilockerResponse.statusCode) == \"401\"\n      block:\n        - return: >\n            {\n              \"digi_id\": \"\",\n              \"phone\": \"\",\n              \"email\": \"\",\n              \"ifError\": \"true\",\n              \"errordesc\": \"Consent journey not completed\",\n              \"errCode\": \"ERGD0002\",\n              \"errMessage\": \"The customer has not completed their digilocker consent journey yet\"\n            }\n  \n  # Handle 400 - Multiple scenarios\n  - if:\n      match: >\n        string(context.digilockerResponse.statusCode) == \"400\"\n      block:\n        - context: >\n            errorReason := has(context.digilockerResponse.responseBody.error.reason) && context.digilockerResponse.responseBody.error.reason != null ? context.digilockerResponse.responseBody.error.reason : \"\"\n        - context: >\n            errorMessage := has(context.digilockerResponse.responseBody.error.message) && context.digilockerResponse.responseBody.error.message != null ? context.digilockerResponse.responseBody.error.message : \"\"\n        - if:\n            match: >\n              context.errorReason == \"BAD_REQUEST\"\n            block:\n              - return: >\n                  {\n                    \"digi_id\": \"\",\n                    \"phone\": \"\",\n                    \"email\": \"\",\n                    \"ifError\": \"true\",\n                    \"errordesc\": \"Invalid request ID\",\n                    \"errCode\": \"ERGD0003\",\n                    \"errMessage\": context.errorMessage\n                  }\n        - if:\n            match: >\n              context.errorMessage.contains(\"denied\")\n            block:\n              - return: >\n                  {\n                    \"digi_id\": \"\",\n                    \"phone\": \"\",\n                    \"email\": \"\",\n                    \"ifError\": \"true\",\n                    \"errordesc\": \"User denied consent\",\n                    \"errCode\": \"ERGD0004\",\n                    \"errMessage\": context.errorMessage\n                  }\n        - if:\n            match: >\n              context.errorMessage.contains(\"Expired\")\n            block:\n              - return: >\n                  {\n                    \"digi_id\": \"\",\n                    \"phone\": \"\",\n                    \"email\": \"\",\n                    \"ifError\": \"true\",\n                    \"errordesc\": \"Authorization expired\",\n                    \"errCode\": \"ERGD0005\",\n                    \"errMessage\": context.errorMessage\n                  }\n        - return: >\n            {\n              \"digi_id\": \"\",\n              \"phone\": \"\",\n              \"email\": \"\",\n              \"ifError\": \"true\",\n              \"errordesc\": \"Validation error\",\n              \"errCode\": \"ERGD0006\",\n              \"errMessage\": context.errorMessage\n            }\n  \n  # Handle 200 - Success, extract user details\n  - context: >\n      userDetails := has(context.digilockerResponse.responseBody.result.userDetails) && context.digilockerResponse.responseBody.result.userDetails != null ? context.digilockerResponse.responseBody.result.userDetails : {}\n  \n  - context: >\n      digiId := has(context.userDetails.digilockerid) && context.userDetails.digilockerid != null ? context.userDetails.digilockerid : \"\"\n  \n  - context: >\n      phone := has(context.userDetails.mobile) && context.userDetails.mobile != null ? context.userDetails.mobile : \"\"\n  \n  - context: >\n      email := has(context.userDetails.email) && context.userDetails.email != null ? context.userDetails.email : \"\"\n  \n  # Check if files array exists and contains Aadhaar\n  - context: >\n      filesArray := has(context.digilockerResponse.responseBody.result.files) && context.digilockerResponse.responseBody.result.files != null ? context.digilockerResponse.responseBody.result.files : []\n  \n  # Check if files array is empty\n  - if:\n      match: >\n        size(context.filesArray) == 0\n      block:\n        - return: >\n            {\n              \"digi_id\": \"\",\n              \"phone\": \"\",\n              \"email\": \"\",\n              \"ifError\": \"true\",\n              \"errordesc\": \"No documents found\",\n              \"errCode\": \"ERGD0008\",\n              \"errMessage\": \"User completed journey without selecting any document\"\n            }\n  \n  - context: >\n      filesString := jsonToString(context.filesArray)\n  \n  - context: >\n      hasAadhaar := context.filesString.contains(\"ADHAR\")\n  \n  # If no Aadhaar found, return error\n  - if:\n      match: >\n        !context.hasAadhaar\n      block:\n        - return: >\n            {\n              \"digi_id\": \"\",\n              \"phone\": \"\",\n              \"email\": \"\",\n              \"ifError\": \"true\",\n              \"errordesc\": \"Aadhaar not consented\",\n              \"errCode\": \"ERGD0007\",\n              \"errMessage\": \"User did not provide consent for Aadhaar document\"\n            }\n  \n  # Return success with user details\n  - return: >\n      {\n        \"digi_id\": context.digiId,\n        \"phone\": context.phone,\n        \"email\": context.email,\n        \"ifError\": \"false\"\n      }\n\n# Error Code Reference:\n# ERGD0001 - Missing request ID (empty string or null)\n# ERGD0002 - Consent journey not completed (401 status)\n# ERGD0003 - Invalid request ID (BAD_REQUEST)\n# ERGD0004 - User denied consent\n# ERGD0005 - Authorization expired\n# ERGD0006 - Other validation errors\n# ERGD0007 - Aadhaar not consented (no ADHAR in files array)\n# ERGD0008 - No documents found (empty files array)\n"
+                "inputData": "# Function: fetchIdentityProviderData\n# Purpose: Fetches DigiLocker identity details (ID, phone, email) for the given request ID\n#\n# This function:\n# 1. Calls the DigiLocker getDetails API using the requestId validated upstream\n# 2. Returns aadhaar_api_error = true on any non-200 response or missing Aadhaar in scope\n# 3. Extracts digi_id, phone, and email from the API response on success\n#\n# Note: requestId presence is guaranteed by the upstream condition point\n#       (callback flow — trnxId and requestId present)\n#\n# Sample Input:\n# context.requestId = \"req_xyz789\"\n#\n# Sample Output (success):\n# {\n#   \"digi_id\": \"DL123456\",\n#   \"phone\": \"+919876543210\",\n#   \"email\": \"user@example.com\",\n#   \"aadhaar_api_error\": \"false\"\n# }\n#\n# Sample Output (error):\n# {\n#   \"digi_id\": \"\",\n#   \"phone\": \"\",\n#   \"email\": \"\",\n#   \"aadhaar_api_error\": \"true\"\n# }\n\nstatements:\n  # Retrieve API credentials and base URL from secrets\n  - context: apiCreds := \"<api_creds>\"\n  - context: apiBaseUrl := \"<api_base_url>\"\n  \n  # Ensure base URL has https:// prefix\n  - context: >\n      fullBaseUrl := context.apiBaseUrl.startsWith(\"http://\") || context.apiBaseUrl.startsWith(\"https://\") ? context.apiBaseUrl : \"https://\" + context.apiBaseUrl\n  \n  # Call DigiLocker getDetails API\n  - context: >\n      digilockerResponse := hc.Post(\n        context.fullBaseUrl + \"/api/v3/digilocker-v2/getDetails\",\n        {\n          \"Content-Type\": \"application/json\",\n          \"authorization\": context.apiCreds\n        },\n        jsonToString({\"requestId\": context.requestId})\n      )\n  \n  # Return error on any non-200 HTTP status code\n  - if:\n      match: >\n        string(context.digilockerResponse.statusCode) != \"200\"\n      block:\n        - return: >\n            {\n              \"digi_id\": \"\",\n              \"phone\": \"\",\n              \"email\": \"\",\n              \"aadhaar_api_error\": \"true\"\n            }\n  \n  # Extract user details from response\n  - context: >\n      userDetails := has(context.digilockerResponse.responseBody.result.userDetails) && context.digilockerResponse.responseBody.result.userDetails != null ? context.digilockerResponse.responseBody.result.userDetails : {}\n  \n  - context: >\n      digiId := has(context.userDetails.digilockerid) && context.userDetails.digilockerid != null ? context.userDetails.digilockerid : \"\"\n  \n  - context: >\n      phone := has(context.userDetails.mobile) && context.userDetails.mobile != null ? context.userDetails.mobile : \"\"\n  \n  - context: >\n      email := has(context.userDetails.email) && context.userDetails.email != null ? context.userDetails.email : \"\"\n  \n  # Check files array contains Aadhaar scope\n  - context: >\n      filesArray := has(context.digilockerResponse.responseBody.result.files) && context.digilockerResponse.responseBody.result.files != null ? context.digilockerResponse.responseBody.result.files : []\n  \n  # Return error if no files or Aadhaar not in scope\n  - if:\n      match: >\n        size(context.filesArray) == 0 || !jsonToString(context.filesArray).contains(\"ADHAR\")\n      block:\n        - return: >\n            {\n              \"digi_id\": \"\",\n              \"phone\": \"\",\n              \"email\": \"\",\n              \"aadhaar_api_error\": \"true\"\n            }\n  \n  # Return identity details on success\n  - return: >\n      {\n        \"digi_id\": context.digiId,\n        \"phone\": context.phone,\n        \"email\": context.email,\n        \"aadhaar_api_error\": \"false\"\n      }\n"
             },
             "output": [
                 "JSON"
@@ -496,20 +407,28 @@
             "id": "node-26-Page",
             "name": "renderConsentPage",
             "position": {
-                "x": -229.2610755487449,
-                "y": -51.32528313254304
+                "x": -323.4148752497415,
+                "y": -155.49544450385838
             },
             "taskType": "Page",
             "next": {
                 "node": "node-39-ConditionPoint",
                 "connectionWayPoints": [
                     {
-                        "x": -135.2610755487449,
-                        "y": 24.674716867456958
+                        "x": -229.4148752497415,
+                        "y": -79.49544450385838
                     },
                     {
-                        "x": -135.2610755487449,
-                        "y": 73.49354936809281
+                        "x": -229.4148752497415,
+                        "y": -59.49544450385838
+                    },
+                    {
+                        "x": -229.4148752497415,
+                        "y": -70.7093353438601
+                    },
+                    {
+                        "x": -229.4148752497415,
+                        "y": -50.709335343860104
                     }
                 ]
             },
@@ -522,23 +441,23 @@
         {
             "id": "node-27-ConditionPoint",
             "position": {
-                "x": -765.677243830727,
-                "y": 272.5755574736196
+                "x": -909.9128518833176,
+                "y": 100.2941367441365
             },
             "taskType": "ConditionPoint",
             "branches": [
                 {
                     "next": {
                         "node": "node-34-Function",
-                        "connectionLabel": "ifError = false",
+                        "connectionLabel": "identity fetch — aadhaar_api_error = false",
                         "connectionWayPoints": [
                             {
-                                "x": -741.677243830727,
-                                "y": 320.5755574736196
+                                "x": -885.9128518833176,
+                                "y": 148.2941367441365
                             },
                             {
-                                "x": -741.677243830727,
-                                "y": 387.3119439929691
+                                "x": -885.9128518833176,
+                                "y": 221.04034026567723
                             }
                         ]
                     },
@@ -549,10 +468,10 @@
                                 "@context@": [
                                     {
                                         "op": "hasProp",
-                                        "vl": "ifError"
+                                        "vl": "aadhaar_api_error"
                                     }
                                 ],
-                                "@context.ifError@": [
+                                "@context.aadhaar_api_error@": [
                                     {
                                         "op": "eq",
                                         "vl": "false"
@@ -567,11 +486,11 @@
                         "node": "node-12-Function",
                         "connectionWayPoints": [
                             {
-                                "x": -741.677243830727,
-                                "y": 272.5755574736196
+                                "x": -885.9128518833176,
+                                "y": 100.2941367441365
                             },
                             {
-                                "x": -741.677243830727,
+                                "x": -885.9128518833176,
                                 "y": -174.81968380582947
                             },
                             {
@@ -587,33 +506,33 @@
             "id": "node-28-Function",
             "name": "validatePhoneNumber",
             "position": {
-                "x": -459.6327730810549,
-                "y": 490.17589401600344
+                "x": -586.7404185317396,
+                "y": 321.9010179546479
             },
             "taskType": "Function",
             "next": {
                 "node": "node-30-Function",
                 "connectionWayPoints": [
                     {
-                        "x": -365.6327730810549,
-                        "y": 490.17589401600344
+                        "x": -492.7404185317396,
+                        "y": 321.9010179546479
                     },
                     {
-                        "x": -365.6327730810549,
-                        "y": 470.17589401600344
+                        "x": -492.7404185317396,
+                        "y": 301.9010179546479
                     },
                     {
-                        "x": -365.6327730810549,
-                        "y": 483.3119439929691
+                        "x": -492.7404185317396,
+                        "y": 317.04034026567723
                     },
                     {
-                        "x": -365.6327730810549,
-                        "y": 463.3119439929691
+                        "x": -492.7404185317396,
+                        "y": 297.04034026567723
                     }
                 ]
             },
             "input": {
-                "inputData": "statements:\n  # Get DigiLocker phone with null check\n  - context: >\n      digiPhone := has(context.phone) && context.phone != null ? context.phone : \"\"\n#   - context: >\n#       digiPhone := \"\"\n  \n  # Extract mobile phone with null checks\n  - context: >\n      mobilePhone := has(context.profile_mobile) && context.profile_mobile != null ? context.profile_mobile : \"\"\n#   - context: >\n#       mobilePhone := \"\"\n  \n  # Extract last 10 digits from DigiLocker phone - FIXED: substring(start, end)\n  - context: >\n      digiLast10 := context.digiPhone != \"\" && context.digiPhone.size() >= 10 ? context.digiPhone.substring(context.digiPhone.size() - 10, context.digiPhone.size()) : context.digiPhone\n  \n  # Extract last 10 digits from mobile phone - FIXED: substring(start, end)\n  - context: >\n      mobileLast10 := context.mobilePhone != \"\" && context.mobilePhone.size() >= 10 ? context.mobilePhone.substring(context.mobilePhone.size() - 10, context.mobilePhone.size()) : context.mobilePhone\n  \n  # Check if mobile phone has India country code\n  - context: >\n      mobileHasIndiaCode := context.mobilePhone != \"\" && (context.mobilePhone.contains(\"+91\") || context.mobilePhone.contains(\"0091\") || (context.mobilePhone.size() > 10 && context.mobilePhone.startsWith(\"91\")))\n  \n  # Check mobile phone match - exact, contains, or last 10 digits\n  - context: >\n      mobilePhoneMatch := context.digiPhone == \"\" || context.mobilePhone == \"\" ? \"no_match\" : (context.digiPhone == context.mobilePhone ? \"exact_match\" : (context.mobilePhone.contains(context.digiPhone) ? \"exact_match\" : (context.digiLast10.size() == 10 && context.mobileLast10.size() == 10 && context.digiLast10 == context.mobileLast10 ? (context.mobileHasIndiaCode ? \"matched\" : \"partial_match\") : (context.mobilePhone.endsWith(context.digiPhone) ? \"matched\" : \"no_match\"))))\n  \n  # Overall phone match status\n  - context: >\n      phoneMatchStatus := context.digiPhone == \"\" ? \"digi_missing\" : (context.mobilePhone == \"\" ? \"profile_missing\" : (context.mobilePhoneMatch == \"exact_match\" ? \"matched\" :  \"invalid\"))\n  \n  # Return phone validation result\n  - return: >\n      {\"phone_validation\": {\"digi_phone_no\": context.digiPhone, \"profile_phone_mobile\": context.mobilePhone, \"match_status\": context.phoneMatchStatus}}\n"
+                "inputData": "# Function: validatePhoneNumber\n# Purpose: Validates phone number match between DigiLocker and user profile\n#\n# This function:\n# 1. Extracts phone numbers from DigiLocker data and user profile with null guards\n# 2. Returns early with a descriptive status if either value is missing\n# 3. Performs a direct string comparison — phone formatting is normalised by the form\n#\n# Sample Input:\n# context.phone          = \"+919876543210\"\n# context.profile_mobile = \"+919876543210\"\n#\n# Sample Output:\n# {\n#   \"phone_validation\": {\n#     \"digi_phone_no\":        \"+919876543210\",\n#     \"profile_phone_mobile\": \"+919876543210\",\n#     \"match_status\": \"matched\"\n#   }\n# }\n\nstatements:\n  # Extract DigiLocker phone number with null guard\n  - context: >\n        digiPhone := has(context.phone) && context.phone != null ? context.phone : \"\"\n  \n  # Extract profile mobile number with null guard\n  - context: >\n        mobilePhone := has(context.profile_mobile) && context.profile_mobile != null ? context.profile_mobile : \"\"\n  \n  # Early return if either value is missing\n  - context: >\n      phoneMatchStatus := context.digiPhone == \"\" ? \"digi_missing\" : (context.mobilePhone == \"\" ? \"profile_missing\" : \"\")\n  \n  - if:\n      match: context.phoneMatchStatus != \"\"\n      block:\n          - return: >\n              {\"phone_validation\": {\"digi_phone_no\": context.digiPhone, \"profile_phone_mobile\": context.mobilePhone, \"match_status\": context.phoneMatchStatus}}\n  \n  # Compare DigiLocker phone against profile mobile — form ensures consistent formatting\n  - context: >\n      phoneMatchStatus := context.digiPhone == context.mobilePhone ? \"matched\" : \"invalid\"\n  \n  # Return phone validation result\n  - return: >\n      {\"phone_validation\": {\"digi_phone_no\": context.digiPhone, \"profile_phone_mobile\": context.mobilePhone, \"match_status\": context.phoneMatchStatus}}\n"
             },
             "output": [
                 "JSON"
@@ -622,23 +541,31 @@
         {
             "id": "node-29-ConditionPoint",
             "position": {
-                "x": -613.3676039765135,
-                "y": 504.17589401600344
+                "x": -747.5868503587851,
+                "y": 341.91083495683915
             },
             "taskType": "ConditionPoint",
             "branches": [
                 {
                     "next": {
                         "node": "node-28-Function",
-                        "connectionLabel": "ifErrorAdharXml = false",
+                        "connectionLabel": "aadhaar xml fetch — aadhaar_xml_api_error = false",
                         "connectionWayPoints": [
                             {
-                                "x": -565.3676039765135,
-                                "y": 528.1758940160034
+                                "x": -699.5868503587851,
+                                "y": 365.91083495683915
                             },
                             {
-                                "x": -459.6327730810549,
-                                "y": 528.1758940160034
+                                "x": -643.1636344452623,
+                                "y": 365.91083495683915
+                            },
+                            {
+                                "x": -643.1636344452623,
+                                "y": 359.9010179546479
+                            },
+                            {
+                                "x": -586.7404185317396,
+                                "y": 359.9010179546479
                             }
                         ]
                     },
@@ -649,10 +576,10 @@
                                 "@context@": [
                                     {
                                         "op": "hasProp",
-                                        "vl": "ifErrorAX"
+                                        "vl": "aadhaar_xml_api_error"
                                     }
                                 ],
-                                "@context.ifErrorAX@": [
+                                "@context.aadhaar_xml_api_error@": [
                                     {
                                         "op": "eq",
                                         "vl": "false"
@@ -667,11 +594,11 @@
                         "node": "node-12-Function",
                         "connectionWayPoints": [
                             {
-                                "x": -589.3676039765135,
-                                "y": 504.17589401600344
+                                "x": -723.5868503587851,
+                                "y": 341.91083495683915
                             },
                             {
-                                "x": -589.3676039765135,
+                                "x": -723.5868503587851,
                                 "y": -174.81968380582947
                             },
                             {
@@ -687,33 +614,33 @@
             "id": "node-30-Function",
             "name": "validateEmail",
             "position": {
-                "x": -459.6327730810549,
-                "y": 387.3119439929691
+                "x": -586.7404185317396,
+                "y": 221.04034026567723
             },
             "taskType": "Function",
             "next": {
                 "node": "node-32-Function",
                 "connectionWayPoints": [
                     {
-                        "x": -365.6327730810549,
-                        "y": 387.3119439929691
+                        "x": -492.7404185317396,
+                        "y": 221.04034026567723
                     },
                     {
-                        "x": -365.6327730810549,
-                        "y": 367.3119439929691
+                        "x": -492.7404185317396,
+                        "y": 201.04034026567723
                     },
                     {
-                        "x": -365.6327730810549,
-                        "y": 369.6131579423709
+                        "x": -492.7404185317396,
+                        "y": 220.3563110913479
                     },
                     {
-                        "x": -365.6327730810549,
-                        "y": 349.6131579423709
+                        "x": -492.7404185317396,
+                        "y": 200.3563110913479
                     }
                 ]
             },
             "input": {
-                "inputData": "statements:\n  # Get DigiLocker email with null check\n  - context: >\n      digiEmail := has(context.email) && context.email != null ? context.email : \"\"\n#   - context: >\n#       digiEmail := \"visheshamin99@gmail.com\"\n  \n  # Get user profile emails with null checks\n  - context: >\n      workEmail := has(context.profile_email) && context.profile_email != null ? context.profile_email : \"\"\n#   - context: >\n#       workEmail := \"visheshamin99@gmail.com\"\n  \n\n  # Email validation - case insensitive using regex\n  - context: >\n      emailMatchStatus := context.digiEmail == \"\" ? \"digi_missing\" : (context.workEmail == \"\" ? \"profile_missing\" : (context.digiEmail == context.workEmail || context.workEmail.matches(\"(?i)\" + context.digiEmail) ? \"matched\" : \"invalid\"))\n  \n  # Return email validation result\n  - return: >\n      {\"email_validation\": {\"digi_email\": context.digiEmail, \"profile_email\": context.workEmail, \"match_status\": context.emailMatchStatus}}\n"
+                "inputData": "# Function: validateEmail\n# Purpose: Validates email address match between DigiLocker and user profile\n#\n# This function:\n# 1. Extracts email from DigiLocker data and user profile with null guards\n# 2. Returns early with a descriptive status if either value is missing\n# 3. Performs a case-insensitive comparison\n#\n# Sample Input:\n# context.email = \"user@example.com\"\n# context.profile_email = \"User@Example.com\"\n#\n# Sample Output:\n# {\n#   \"email_validation\": {\n#     \"digi_email\": \"user@example.com\",\n#     \"profile_email\": \"User@Example.com\",\n#     \"match_status\": \"matched\"\n#   }\n# }\n\nstatements:\n  # Extract emails with simplified null checks\n  - context: >\n        digiEmail := has(context.email) && context.email != null ? context.email : \"\"\n  - context: >\n        workEmail := has(context.profile_email) && context.profile_email != null ? context.profile_email : \"\"\n  \n  # Perform case-insensitive email validation\n  - context: >\n      emailMatchStatus := context.digiEmail == \"\" ? \"digi_missing\" : \n                          context.workEmail == \"\" ? \"profile_missing\" : \n                          (context.digiEmail == context.workEmail || context.workEmail.matches(\"(?i)\" + context.digiEmail)) ? \"matched\" : \"invalid\"\n  \n  # Return validation result\n  - return: >\n      {\"email_validation\": {\"digi_email\": context.digiEmail, \"profile_email\": context.workEmail, \"match_status\": context.emailMatchStatus}}\n"
             },
             "output": [
                 "JSON"
@@ -723,33 +650,33 @@
             "id": "node-32-Function",
             "name": "validateFullName",
             "position": {
-                "x": -459.6327730810549,
-                "y": 273.6131579423709
+                "x": -586.7404185317396,
+                "y": 124.35631109134789
             },
             "taskType": "Function",
             "next": {
                 "node": "node-33-Function",
                 "connectionWayPoints": [
                     {
-                        "x": -365.6327730810549,
-                        "y": 273.6131579423709
+                        "x": -492.7404185317396,
+                        "y": 124.35631109134789
                     },
                     {
-                        "x": -365.6327730810549,
-                        "y": 253.6131579423709
+                        "x": -492.7404185317396,
+                        "y": 104.35631109134789
                     },
                     {
-                        "x": -365.6327730810549,
-                        "y": 267.01057355606304
+                        "x": -492.7404185317396,
+                        "y": 122.77496550347252
                     },
                     {
-                        "x": -365.6327730810549,
-                        "y": 247.010573556063
+                        "x": -492.7404185317396,
+                        "y": 102.77496550347252
                     }
                 ]
             },
             "input": {
-                "inputData": "statements:\n  # Get DigiLocker name with null check\n  - context: >\n      digiName := has(context.name) && context.name != null ? context.name : \"\"\n#   - context: >\n#       digiName := \"vishesh p amin\"\n  \n  # Get user profile name with null checks\n  - context: >\n      userName := (has(context.profile_formatted_name) && (context.profile_formatted_name != null)) ? context.profile_formatted_name : \"\"\n#   - context: >\n#       userName := null\n  \n  # Name validation - case insensitive using regex\n  - context: >\n      nameMatchStatus := context.digiName == \"\" ? \"digi_missing\" : (context.userName == \"\" ? \"profile_missing\" : (context.digiName == context.userName || context.userName.matches(\"(?i)\" + context.digiName) ? \"matched\" : \"invalid\"))\n  \n  # Return name validation result\n  - return: >\n      {\"name_validation\": {\"digi_name\": context.digiName, \"profile_name\": context.userName, \"match_status\": context.nameMatchStatus}}\n"
+                "inputData": "# Function: validateFullName\n# Purpose: Validates full name match between DigiLocker and user profile\n#\n# This function:\n# 1. Extracts full names from DigiLocker data and user profile\n# 2. Performs case-insensitive comparison using regex\n# 3. Returns validation status: \"matched\", \"digi_missing\", \"profile_missing\", or \"invalid\"\n#\n# Sample Input:\n# context.name = \"John Doe\"\n# context.profile_formatted_name = \"john doe\"\n#\n# Sample Output:\n# {\n#   \"name_validation\": {\n#     \"digi_name\": \"John Doe\",\n#     \"profile_name\": \"john doe\",\n#     \"match_status\": \"matched\"\n#   }\n# }\n\nstatements:\n  # Extract DigiLocker name with null check\n  - context: >\n      digiName := has(context.name) && context.name != null ? context.name : \"\"\n  \n  # Extract user profile formatted name with null check\n  - context: >\n      userName := (has(context.profile_formatted_name) && (context.profile_formatted_name != null)) ? context.profile_formatted_name : \"\"\n  \n  # Perform name validation - case insensitive comparison using regex\n  - context: >\n      nameMatchStatus := context.digiName == \"\" ? \"digi_missing\" : (context.userName == \"\" ? \"profile_missing\" : (context.digiName == context.userName || context.userName.matches(\"(?i)\" + context.digiName) ? \"matched\" : \"invalid\"))\n  \n  # Return name validation result\n  - return: >\n      {\"name_validation\": {\"digi_name\": context.digiName, \"profile_name\": context.userName, \"match_status\": context.nameMatchStatus}}\n"
             },
             "output": [
                 "JSON"
@@ -759,33 +686,33 @@
             "id": "node-33-Function",
             "name": "validateDateOfBirth",
             "position": {
-                "x": -459.6327730810549,
-                "y": 171.010573556063
+                "x": -586.7404185317396,
+                "y": 26.774965503472522
             },
             "taskType": "Function",
             "next": {
                 "node": "node-62-Function",
                 "connectionWayPoints": [
                     {
-                        "x": -365.6327730810549,
-                        "y": 171.010573556063
+                        "x": -492.7404185317396,
+                        "y": 26.774965503472522
                     },
                     {
-                        "x": -365.6327730810549,
-                        "y": 151.010573556063
+                        "x": -492.7404185317396,
+                        "y": 6.774965503472522
                     },
                     {
-                        "x": -365.6327730810549,
-                        "y": 155.49354936809283
+                        "x": -492.7404185317396,
+                        "y": 25.280847653948626
                     },
                     {
-                        "x": -365.6327730810549,
-                        "y": 135.49354936809283
+                        "x": -492.7404185317396,
+                        "y": 5.280847653948626
                     }
                 ]
             },
             "input": {
-                "inputData": "statements:\n  # Get DigiLocker DOB with null check\n  - context: >\n      digiDob := has(context.dob) && context.dob != null ? context.dob : \"\"\n#   - context: >\n#       digiDob := \"10-07-1999\"\n  \n  # Try to get DOB from standard SCIM birthDate field if it exists\n  - context: >\n      userDob := has(context.profile_dob) && context.profile_dob != null ? context.profile_dob : \"\"\n#   - context: >\n#       userDob := \"10-07-1999\"\n  \n  # DOB validation\n  - context: >\n      dobMatchStatus := context.digiDob == \"\" ? \"digi_missing\" : (context.userDob == \"\" ? \"profile_missing\" : (context.digiDob == context.userDob ? \"matched\" : \"invalid\"))\n  \n  # Return DOB validation result\n  - return: >\n      {\"dob_validation\": {\"digi_dob\": context.digiDob, \"profile_dob\": context.userDob, \"match_status\": context.dobMatchStatus}}\n"
+                "inputData": "# Function: validateDateOfBirth\n# Purpose: Validates date of birth match between DigiLocker and user profile\n#\n# This function:\n# 1. Extracts date of birth from DigiLocker data (context.dob)\n#    and from the cached user profile (context.profile_dob, set by extractUserDetails)\n# 2. Performs an exact string comparison\n# 3. Returns validation status: \"matched\", \"digi_missing\", \"profile_missing\", or \"invalid\"\n#\n# Sample Input:\n# context.dob         = \"10-07-1999\"   (from DigiLocker geteAadhaar response)\n# context.profile_dob = \"10-07-1999\"   (from cached userData field \"dob\")\n#\n# Sample Output:\n# {\n#   \"dob_validation\": {\n#     \"digi_dob\": \"10-07-1999\",\n#     \"profile_dob\": \"10-07-1999\",\n#     \"match_status\": \"matched\"\n#   }\n# }\n\nstatements:\n  # Extract DigiLocker date of birth with null check\n  - context: >\n      digiDob := has(context.dob) && context.dob != null ? context.dob : \"\"\n  \n  # Extract cached user profile date of birth with null check\n  - context: >\n      userDob := has(context.profile_dob) && context.profile_dob != null ? context.profile_dob : \"\"\n  \n  # Perform DOB validation — exact string match\n  - context: >\n      dobMatchStatus := context.digiDob == \"\" ? \"digi_missing\" : (context.userDob == \"\" ? \"profile_missing\" : (context.digiDob == context.userDob ? \"matched\" : \"invalid\"))\n  \n  # Return DOB validation result\n  - return: >\n      {\"dob_validation\": {\"digi_dob\": context.digiDob, \"profile_dob\": context.userDob, \"match_status\": context.dobMatchStatus}}"
             },
             "output": [
                 "JSON"
@@ -795,33 +722,33 @@
             "id": "node-34-Function",
             "name": "extractUserDetails",
             "position": {
-                "x": -835.677243830727,
-                "y": 387.3119439929691
+                "x": -979.9128518833176,
+                "y": 221.04034026567723
             },
             "taskType": "Function",
             "next": {
                 "node": "node-13-Function",
                 "connectionWayPoints": [
                     {
-                        "x": -741.677243830727,
-                        "y": 463.3119439929691
+                        "x": -885.9128518833176,
+                        "y": 297.04034026567723
                     },
                     {
-                        "x": -741.677243830727,
-                        "y": 483.3119439929691
+                        "x": -885.9128518833176,
+                        "y": 317.04034026567723
                     },
                     {
-                        "x": -741.677243830727,
-                        "y": 470.17589401600344
+                        "x": -885.9128518833176,
+                        "y": 307.91083495683915
                     },
                     {
-                        "x": -741.677243830727,
-                        "y": 490.17589401600344
+                        "x": -885.9128518833176,
+                        "y": 327.91083495683915
                     }
                 ]
             },
             "input": {
-                "inputData": "statements:\n    # \"userData\": {\n    #   \"3\": \"email@email.com\",\n    #   \"11\": \"+91XXXXXXXXXX\",\n    #   \"19\": \"full name box\",\n    #   \"32\": \"email@email.com\", (\"32\" -  username )\n    #   \"dob\": \"XX-YY-YYYY\"\n    # }\n    # extract profile_formatted_name, profile_email, profile_mobile, profile_dob\n    - context : >\n        profile_formatted_name := (has(context.cacheData) && has(context.cacheData.userData) && has(context.cacheData.userData,\"19\")) ? context.cacheData.userData[\"19\"] : \"\"\n    - context : >\n        profile_email := (has(context.cacheData) && has(context.cacheData.userData) && has(context.cacheData.userData,\"3\")) ? context.cacheData.userData[\"3\"] : \"\"\n    - context : >\n        profile_mobile := (has(context.cacheData) && has(context.cacheData.userData) && has(context.cacheData.userData,\"11\")) ? context.cacheData.userData[\"11\"] : \"\"\n    - context : >\n        profile_dob := (has(context.cacheData) && has(context.cacheData.userData) && has(context.cacheData.userData,\"dob\")) ? context.cacheData.userData[\"dob\"] : \"\"\n    - return : > \n        {\n            \"profile_formatted_name\" : context.profile_formatted_name,\n            \"profile_email\" : context.profile_email,\n            \"profile_mobile\" : context.profile_mobile,\n            \"profile_dob\" : context.profile_dob\n        }"
+                "inputData": "# Function: extractUserDetails\n# Purpose: Extracts user profile details from cached session data\n#\n# This function:\n# 1. Retrieves user data from cache (stored during form submission)\n# 2. Extracts specific fields using form field IDs:\n#    - Field \"3\"  : Email address\n#    - Field \"11\" : Mobile phone number (format: +91XXXXXXXXXX)\n#    - Field \"19\" : Full name\n#    - Field \"dob\": Date of birth (format: DD/MM/YYYY)\n# 3. Returns extracted profile data for downstream validation\n#\n# Sample Input:\n# context.cacheData.userData = {\n#   \"3\":   \"user@example.com\",\n#   \"11\":  \"+919876543210\",\n#   \"19\":  \"John Doe\",\n#   \"dob\": \"10/07/1999\"\n# }\n#\n# Sample Output:\n# {\n#   \"profile_formatted_name\": \"John Doe\",\n#   \"profile_email\": \"user@example.com\",\n#   \"profile_mobile\": \"+919876543210\",\n#   \"profile_dob\": \"10/07/1999\"\n# }\n\nstatements:\n    # Extract full name from field ID \"19\"\n    - context : >\n        profile_formatted_name := (has(context.cacheData) && has(context.cacheData.userData) && has(context.cacheData.userData,\"19\")) ? context.cacheData.userData[\"19\"] : \"\"\n    \n    # Extract email from field ID \"3\"\n    - context : >\n        profile_email := (has(context.cacheData) && has(context.cacheData.userData) && has(context.cacheData.userData,\"3\")) ? context.cacheData.userData[\"3\"] : \"\"\n    \n    # Extract mobile phone from field ID \"11\"\n    - context : >\n        profile_mobile := (has(context.cacheData) && has(context.cacheData.userData) && has(context.cacheData.userData,\"11\")) ? context.cacheData.userData[\"11\"] : \"\"\n    \n    # Extract date of birth from field \"dob\" (stored as DD/MM/YYYY)\n    - context : >\n        profile_dob := (has(context.cacheData) && has(context.cacheData.userData) && has(context.cacheData.userData,\"dob\")) ? context.cacheData.userData[\"dob\"] : \"\"\n    \n    # Return extracted profile details\n    - return : > \n        {\n            \"profile_formatted_name\" : context.profile_formatted_name,\n            \"profile_email\" : context.profile_email,\n            \"profile_mobile\" : context.profile_mobile,\n            \"profile_dob\" : context.profile_dob\n        }"
             },
             "output": [
                 "JSON"
@@ -830,23 +757,42 @@
         {
             "id": "node-39-ConditionPoint",
             "position": {
-                "x": -159.2610755487449,
-                "y": 73.49354936809281
+                "x": -253.4148752497415,
+                "y": -50.709335343860104
             },
             "taskType": "ConditionPoint",
             "branches": [
                 {
                     "next": {
-                        "node": "node-40-Function",
-                        "connectionLabel": "consented user",
+                        "node": "node-12-Function",
                         "connectionWayPoints": [
                             {
-                                "x": -135.2610755487449,
-                                "y": 121.49354936809281
+                                "x": -205.4148752497415,
+                                "y": -26.709335343860104
                             },
                             {
-                                "x": -135.2610755487449,
-                                "y": 176.44925362866172
+                                "x": 8.292955146325454,
+                                "y": -26.709335343860104
+                            },
+                            {
+                                "x": 8.292955146325454,
+                                "y": -136.81968380582947
+                            }
+                        ]
+                    }
+                },
+                {
+                    "next": {
+                        "node": "node-17-Function",
+                        "connectionLabel": "consent flow — user_consent = yes",
+                        "connectionWayPoints": [
+                            {
+                                "x": -229.4148752497415,
+                                "y": -2.709335343860104
+                            },
+                            {
+                                "x": -229.4148752497415,
+                                "y": 73.7882027305418
                             }
                         ]
                     },
@@ -869,84 +815,29 @@
                             }
                         ]
                     }
-                },
-                {
-                    "next": {
-                        "node": "node-12-Function",
-                        "connectionWayPoints": [
-                            {
-                                "x": -111.26107554874491,
-                                "y": 97.49354936809281
-                            },
-                            {
-                                "x": 8.292955146325454,
-                                "y": 97.49354936809281
-                            },
-                            {
-                                "x": 8.292955146325454,
-                                "y": -136.81968380582947
-                            }
-                        ]
-                    }
                 }
-            ]
-        },
-        {
-            "id": "node-40-Function",
-            "name": "mapValidatedDataToUser",
-            "position": {
-                "x": -229.2610755487449,
-                "y": 176.44925362866172
-            },
-            "taskType": "Function",
-            "next": {
-                "node": "node-17-Function",
-                "connectionWayPoints": [
-                    {
-                        "x": -135.2610755487449,
-                        "y": 252.44925362866172
-                    },
-                    {
-                        "x": -135.2610755487449,
-                        "y": 272.4492536286617
-                    },
-                    {
-                        "x": -135.2610755487449,
-                        "y": 253.6131579423709
-                    },
-                    {
-                        "x": -135.2610755487449,
-                        "y": 273.6131579423709
-                    }
-                ]
-            },
-            "input": {
-                "inputData": "statements:\n    - context : >\n        additional_user_data := {\n            \"digilockerTimestamp\": string(now),\n            \"digilockerId\": context.digi_id,\n            \"digilockerStatus\": jsonToString({\n                \"phone_validation\": \n                {\n                    \"match_status\" : (has(context.phone_validation) && has(context.phone_validation.match_status)) ? context.phone_validation.match_status : \"\"\n                },\n                \"email_validation\": \n                {\n                    \"match_status\" : (has(context.email_validation) && has(context.email_validation.match_status)) ? context.email_validation.match_status : \"\"\n                },\n                \"name_validation\": \n                {\n                    \"match_status\" : (has(context.name_validation) && has(context.name_validation.match_status)) ? context.name_validation.match_status : \"\"\n                },\n                \"dob_validation\": \n                {\n                    \"match_status\" : (has(context.dob_validation) && has(context.dob_validation.match_status)) ? context.dob_validation.match_status : \"\"\n                }\n            })\n        }\n    - context : userData :=  (context.cacheData.userData.putAll(context.additional_user_data))\n    \n    - return : > \n        {\n            \"userData\" : context.userData\n        }"
-            },
-            "output": [
-                "JSON"
             ]
         },
         {
             "id": "node-41-ConditionPoint",
             "position": {
-                "x": -159.2610755487449,
-                "y": 374.7276321536481
+                "x": -253.4148752497415,
+                "y": 185.34344421838256
             },
             "taskType": "ConditionPoint",
             "branches": [
                 {
                     "next": {
                         "node": "node-22-Page",
-                        "connectionLabel": "if sucess update",
+                        "connectionLabel": "user created — crearteUserStatus.result.id exists",
                         "connectionWayPoints": [
                             {
-                                "x": -135.2610755487449,
-                                "y": 422.7276321536481
+                                "x": -229.4148752497415,
+                                "y": 233.34344421838256
                             },
                             {
-                                "x": -135.2610755487449,
-                                "y": 490.17589401600344
+                                "x": -229.4148752497415,
+                                "y": 321.9010179546479
                             }
                         ]
                     },
@@ -981,12 +872,12 @@
                         "node": "node-12-Function",
                         "connectionWayPoints": [
                             {
-                                "x": -111.26107554874491,
-                                "y": 398.7276321536481
+                                "x": -205.4148752497415,
+                                "y": 209.34344421838256
                             },
                             {
                                 "x": 8.292955146325454,
-                                "y": 398.7276321536481
+                                "y": 209.34344421838256
                             },
                             {
                                 "x": 8.292955146325454,
@@ -1045,7 +936,7 @@
                 {
                     "next": {
                         "node": "isv_redirect_1767865179148_customId",
-                        "connectionLabel": "cache set",
+                        "connectionLabel": "session stored — cache_set.isSuccessful = true",
                         "connectionWayPoints": [
                             {
                                 "x": -468.7404185317396,
@@ -1115,7 +1006,7 @@
                 {
                     "next": {
                         "node": "node-57-Function",
-                        "connectionLabel": "status 200",
+                        "connectionLabel": "auth initiated — http_status = 200",
                         "connectionWayPoints": [
                             {
                                 "x": -806.993382606086,
@@ -1169,61 +1060,25 @@
             ]
         },
         {
-            "id": "node-49-Function",
-            "name": "fetchSessionCache",
-            "position": {
-                "x": -1411.487134482828,
-                "y": -96.9761588427845
-            },
-            "taskType": "Function",
-            "next": {
-                "node": "node-58-ConditionPoint",
-                "connectionWayPoints": [
-                    {
-                        "x": -1223.487134482828,
-                        "y": -58.9761588427845
-                    },
-                    {
-                        "x": -1203.487134482828,
-                        "y": -58.9761588427845
-                    },
-                    {
-                        "x": -1222.1312600198364,
-                        "y": -58.9761588427845
-                    },
-                    {
-                        "x": -1202.1312600198364,
-                        "y": -58.9761588427845
-                    }
-                ]
-            },
-            "input": {
-                "inputData": "statements:\n    # check cache exsists\n    - context : cache_exists := cache.Exists(context.trnxId)\n    # get cache data  (if cache does not exsist it will give error and we have cache_exists to differenciate errors)\n    # - context : cache_get := (cache.GetAndDelete(context.trnxId))\n    - context : cache_get := cache.Get(context.trnxId)\n    # craete a valid_cache boolean variable for future error refrence\n    - context : >\n        valid_cache := (has(context.cache_exists) && has(context.cache_get) && (context.cache_exists.isSuccessful == true) && (context.cache_exists.value == \"true\") && (context.cache_get.isSuccessful == true) && has(context.cache_get.value)) ? true : false\n    - return : >\n        {\n            \"valid_cache\" : context.valid_cache,\n            \"cache_get\" : context.cache_get\n        }"
-            },
-            "output": [
-                "JSON"
-            ]
-        },
-        {
             "id": "node-50-ConditionPoint",
             "position": {
-                "x": -1051.1598467806539,
-                "y": 21.237275249954628
+                "x": -1225.4445398442008,
+                "y": -146.7346031201718
             },
             "taskType": "ConditionPoint",
             "branches": [
                 {
                     "next": {
                         "node": "node-24-Function",
-                        "connectionLabel": "is a valid session",
+                        "connectionLabel": "valid cache session — valid_session = true",
                         "connectionWayPoints": [
                             {
-                                "x": -1027.1598467806539,
-                                "y": 69.23727524995462
+                                "x": -1201.4445398442008,
+                                "y": -98.73460312017181
                             },
                             {
-                                "x": -1027.1598467806539,
-                                "y": 125.75451402208932
+                                "x": -1201.4445398442008,
+                                "y": -40.51708970520248
                             }
                         ]
                     },
@@ -1252,11 +1107,11 @@
                         "node": "node-12-Function",
                         "connectionWayPoints": [
                             {
-                                "x": -1027.1598467806539,
-                                "y": 21.237275249954628
+                                "x": -1201.4445398442008,
+                                "y": -146.7346031201718
                             },
                             {
-                                "x": -1027.1598467806539,
+                                "x": -1201.4445398442008,
                                 "y": -174.81968380582947
                             },
                             {
@@ -1298,70 +1153,10 @@
                 ]
             },
             "input": {
-                "inputData": "statements: \n    # setting  email as uername \n    - context: updatedDataWithEnabled_1 := context.userFormData.userData.put(\"userName\", context.userFormData.userData[context.userFormData.usernameAttribute])\n    - context: updatedDataWithEnabled_2 := context.userFormData.userData.put(\"6\", context.userFormData.userData[\"19\"])\n    - context: updatedData := context.userFormData.put(\"userData\",context.updatedDataWithEnabled_2)\n    - return : >\n        {\n            \"userFormData\" : context.updatedData\n        }"
+                "inputData": "# Function: updateUsername\n# Purpose: Derives and injects system fields into userData before user creation\n#\n# This function:\n# 1. Adds \"userName\" to userData — set to the value of the usernameAttribute field\n#    (e.g. if usernameAttribute = \"3\", userName = userData[\"3\"] = the email address)\n# 2. Adds field \"6\" (display name) to userData — set to the value of field \"19\" (full name)\n# 3. Wraps the updated userData back into userFormData\n# 4. Returns the updated userFormData\n#\n# Note: Both fields are added by chaining .put() on the SAME base object so\n#       neither value is lost (a single .put() returns a new copy; chaining\n#       ensures all additions are present in the final object).\n#\n# Sample Input:\n# context.userFormData = {\n#   \"usernameAttribute\": \"3\",\n#   \"userData\": {\n#     \"3\": \"user@example.com\",\n#     \"19\": \"John Doe\"\n#   }\n# }\n#\n# Sample Output:\n# {\n#   \"userFormData\": {\n#     \"usernameAttribute\": \"3\",\n#     \"userData\": {\n#       \"3\": \"user@example.com\",\n#       \"19\": \"John Doe\",\n#       \"userName\": \"user@example.com\",\n#       \"6\": \"John Doe\"\n#     }\n#   }\n# }\n\nstatements: \n    # Step 1 & 2: Add userName and display name (\"6\") in a single chained put\n    # .put() returns a new copy — chaining ensures both fields are present together\n    - context: updatedUserData := context.userFormData.userData.put(\"userName\", context.userFormData.userData[context.userFormData.usernameAttribute]).put(\"6\", context.userFormData.userData[\"19\"])\n\n    # Step 3: Wrap updated userData back into userFormData\n    - context: updatedData := context.userFormData.put(\"userData\", context.updatedUserData)\n\n    # Step 4: Return updated form data\n    - return : >\n        {\n            \"userFormData\" : context.updatedData\n        }"
             },
             "output": [
                 "JSON"
-            ]
-        },
-        {
-            "id": "node-56-ConditionPoint",
-            "position": {
-                "x": -1341.487134482828,
-                "y": -198.81968380582947
-            },
-            "taskType": "ConditionPoint",
-            "branches": [
-                {
-                    "next": {
-                        "node": "node-49-Function",
-                        "connectionLabel": "requestId available",
-                        "connectionWayPoints": [
-                            {
-                                "x": -1317.487134482828,
-                                "y": -150.81968380582947
-                            },
-                            {
-                                "x": -1317.487134482828,
-                                "y": -96.9761588427845
-                            }
-                        ]
-                    },
-                    "condition": {
-                        "type": "basic",
-                        "condition": [
-                            {
-                                "@context@": [
-                                    {
-                                        "op": "hasProp",
-                                        "vl": "requestId"
-                                    }
-                                ],
-                                "@context.requestId@": [
-                                    {
-                                        "op": "notEmpty",
-                                        "vl": ""
-                                    }
-                                ]
-                            }
-                        ]
-                    }
-                },
-                {
-                    "next": {
-                        "node": "node-12-Function",
-                        "connectionWayPoints": [
-                            {
-                                "x": -1293.487134482828,
-                                "y": -174.81968380582947
-                            },
-                            {
-                                "x": -85.70704485367455,
-                                "y": -174.81968380582947
-                            }
-                        ]
-                    }
-                }
             ]
         },
         {
@@ -1394,7 +1189,7 @@
                 ]
             },
             "input": {
-                "inputData": "statements:\n    # - context : cacheData := {\"A\":\"AAA\",\"B\":\"BBB\"}\n    - context : cacheData := {\"userData\":context.userFormData.userData,\"digilocker_request_id\":context.digilocker_request_id}\n    # craete cache with usera nd digilocker data with 30 min ttl\n    - context : cache_set := cache.Set(context.trnxId, jsonToString(context.cacheData), \"1800\")\n    # - context : session_exists := cache.Exists(context.trnxId)\n    # - context : session_get := (cache.GetAndDelete(context.trnxId))\n    - return : >\n        {\n            \"cache_set\" : context.cache_set,\n            \"cacheData\" : context.cacheData\n        }"
+                "inputData": "# Function: storeUserSessionData\n# Purpose: Stores user form data and DigiLocker request ID in cache for session management\n#\n# This function:\n# 1. Creates a cache data object containing:\n#    - userData (raw form fields submitted during registration):\n#        - Field \"3\"  : Email address\n#        - Field \"11\" : Mobile number (format: +91XXXXXXXXXX)\n#        - Field \"19\" : Full name\n#        - Field \"dob\": Date of birth (format: DD/MM/YYYY)\n#    - digilocker_request_id: used for callback session validation\n# 2. Serialises the object to a JSON string and stores it in cache\n#    using the transaction ID (trnxId) as the cache key\n# 3. Sets TTL to 1800 seconds (30 minutes)\n# 4. Returns the cache operation status\n#\n# Note: userData stored here contains only the original form fields.\n#       DigiLocker metadata (userName, field \"6\", digilockerId, etc.) is\n#       added later by updateUsername and mapAndCreateUser.\n#\n# Sample Input:\n# context.trnxId                = \"550e8400-e29b-41d4-a716-446655440000\"\n# context.userFormData.userData = {\n#   \"3\":   \"user@example.com\",\n#   \"11\":  \"+919876543210\",\n#   \"19\":  \"John Doe\",\n#   \"dob\": \"10/07/1999\"\n# }\n# context.digilocker_request_id = \"req_xyz789\"\n#\n# Sample Output:\n# {\n#   \"cache_set\": {\n#     \"isSuccessful\": true\n#   }\n# }\n\nstatements:\n    # Build cache payload: raw userData + DigiLocker request ID\n    - context : cacheData := {\"userData\":context.userFormData.userData,\"digilocker_request_id\":context.digilocker_request_id}\n    \n    # Store serialised payload in cache with 30-minute TTL (1800 seconds)\n    - context : cache_set := cache.Set(context.trnxId, jsonToString(context.cacheData), \"1800\")\n    \n    # Return cache operation status only — cacheData is not needed downstream from this node\n    - return : >\n        {\n            \"cache_set\" : context.cache_set\n        }"
             },
             "output": [
                 "JSON"
@@ -1404,23 +1199,23 @@
             "id": "node-58-ConditionPoint",
             "name": "",
             "position": {
-                "x": -1202.1312600198364,
-                "y": -82.9761588427845
+                "x": -1428.9162099266355,
+                "y": -255.25757957226762
             },
             "taskType": "ConditionPoint",
             "branches": [
                 {
                     "next": {
                         "node": "node-59-Function",
-                        "connectionLabel": "valid cache",
+                        "connectionLabel": "callback flow — trnxId and requestId present",
                         "connectionWayPoints": [
                             {
-                                "x": -1178.1312600198364,
-                                "y": -34.9761588427845
+                                "x": -1404.9162099266355,
+                                "y": -207.25757957226762
                             },
                             {
-                                "x": -1178.1312600198364,
-                                "y": 7.237275249954628
+                                "x": -1404.9162099266355,
+                                "y": -160.7346031201718
                             }
                         ]
                     },
@@ -1431,12 +1226,22 @@
                                 "@context@": [
                                     {
                                         "op": "hasProp",
-                                        "vl": "valid_cache"
+                                        "vl": "trnxId"
+                                    },
+                                    {
+                                        "op": "hasProp",
+                                        "vl": "requestId"
                                     }
                                 ],
-                                "@context.valid_cache@": [
+                                "@context.trnxId@": [
                                     {
-                                        "op": "isTrue",
+                                        "op": "notEmpty",
+                                        "vl": ""
+                                    }
+                                ],
+                                "@context.requestId@": [
+                                    {
+                                        "op": "notEmpty",
                                         "vl": ""
                                     }
                                 ]
@@ -1446,19 +1251,16 @@
                 },
                 {
                     "next": {
-                        "node": "node-12-Function",
+                        "node": "node-44-UserForm",
+                        "connectionLabel": "initiate flow — callback params absent",
                         "connectionWayPoints": [
                             {
-                                "x": -1178.1312600198364,
-                                "y": -82.9761588427845
+                                "x": -1404.9162099266355,
+                                "y": -255.25757957226762
                             },
                             {
-                                "x": -1178.1312600198364,
-                                "y": -174.81968380582947
-                            },
-                            {
-                                "x": -85.70704485367455,
-                                "y": -174.81968380582947
+                                "x": -1404.9162099266355,
+                                "y": -306.77710204950654
                             }
                         ]
                     }
@@ -1469,33 +1271,25 @@
             "id": "node-59-Function",
             "name": "validateSessionCache",
             "position": {
-                "x": -1272.1312600198364,
-                "y": 7.237275249954628
+                "x": -1498.9162099266355,
+                "y": -160.7346031201718
             },
             "taskType": "Function",
             "next": {
                 "node": "node-50-ConditionPoint",
                 "connectionWayPoints": [
                     {
-                        "x": -1084.1312600198364,
-                        "y": 45.23727524995463
+                        "x": -1310.9162099266355,
+                        "y": -122.73460312017181
                     },
                     {
-                        "x": -1064.1312600198364,
-                        "y": 45.23727524995463
-                    },
-                    {
-                        "x": -1071.1598467806539,
-                        "y": 45.23727524995463
-                    },
-                    {
-                        "x": -1051.1598467806539,
-                        "y": 45.23727524995463
+                        "x": -1225.4445398442008,
+                        "y": -122.73460312017181
                     }
                 ]
             },
             "input": {
-                "inputData": "statements:\n    # if cache is valid extract cache data as a json\n    - context : cacheData := stringToJson(context.cache_get.value)\n    # validate if session is valid by checking digilocker id from cache and from url redirected by digilocker\n    - context : >\n        valid_session := (has(context.cacheData) && has(context.cacheData.digilocker_request_id) && has(context.requestId) && (context.requestId == context.cacheData.digilocker_request_id)) ? true : false\n    - return : >\n        {\n            \"cacheData\" : context.cacheData,\n            \"valid_session\" : context.valid_session\n        }"
+                "inputData": "# Function: validateSessionCache\n# Purpose: Retrieves cached session data and validates the DigiLocker session in one step\n#\n# This function:\n# 1. Checks if a cache entry exists for the given transaction ID (trnxId)\n# 2. Early-returns if the cache entry is absent — prevents an unnecessary Get operation\n# 3. Retrieves the cached JSON string and validates the Get operation succeeded\n# 4. Parses the cached JSON payload into a usable object (cacheData)\n# 5. Compares the DigiLocker request ID stored in cache against the one\n#    received in the callback URL — prevents session hijacking\n# 6. Returns valid_session and cacheData\n#\n# Session is considered valid only when ALL of the following are true:\n#   - cacheData exists and is not null\n#   - cacheData contains a digilocker_request_id\n#   - context.requestId exists and is not null\n#   - context.requestId matches cacheData.digilocker_request_id\n#\n# Sample Input:\n# context.trnxId    = \"550e8400-e29b-41d4-a716-446655440000\"\n# context.requestId = \"req_xyz789\"\n#\n# Sample Output (valid session):\n# {\n#   \"valid_session\": true,\n#   \"cacheData\": {\n#     \"userData\": {...},\n#     \"digilocker_request_id\": \"req_xyz789\"\n#   }\n# }\n#\n# Sample Output (cache missing or session mismatch):\n# {\n#   \"valid_session\": false,\n#   \"cacheData\": {}\n# }\n\nstatements:\n    # ── Step 1: Check whether a cache entry exists for this transaction ──────\n    # Uses cache.Exists to avoid an unnecessary Get when the entry is absent\n    - context : cache_exists := cache.Exists(context.trnxId)\n\n    # Validate the Exists operation succeeded and the entry is present\n    - context : >\n        cacheExistsValid := has(context.cache_exists) && context.cache_exists != null &&\n                            has(context.cache_exists.isSuccessful) && context.cache_exists.isSuccessful == true &&\n                            has(context.cache_exists.value) && context.cache_exists.value == \"true\"\n\n    # Early return — cache entry absent, session cannot be valid\n    - if:\n        match: \"!context.cacheExistsValid\"\n        block:\n            - return: >\n                {\n                    \"valid_session\" : false,\n                    \"cacheData\"     : {}\n                }\n\n    # ── Step 2: Retrieve and validate the cached data ────────────────────────\n    # Cache entry confirmed present — now fetch the actual value\n    - context : cache_get := cache.Get(context.trnxId)\n\n    # Validate the Get operation succeeded and the value payload is present\n    - context : >\n        cacheGetValid := has(context.cache_get) && context.cache_get != null &&\n                         has(context.cache_get.isSuccessful) && context.cache_get.isSuccessful == true &&\n                         has(context.cache_get.value)\n\n    # Early return — Get failed or value missing, session cannot be valid\n    - if:\n        match: \"!context.cacheGetValid\"\n        block:\n            - return: >\n                {\n                    \"valid_session\" : false,\n                    \"cacheData\"     : {}\n                }\n\n    # ── Step 3: Parse the cached JSON payload ───────────────────────────────\n    # cache.Get returns the value as a JSON string — parse it into an object\n    - context : cacheData := stringToJson(context.cache_get.value)\n\n    # ── Step 4: Validate session by comparing DigiLocker request IDs ─────────\n    # The digilocker_request_id was stored in cache when the session was initiated\n    # (see storeUserSessionData). It must match the requestId in the callback URL.\n    # A mismatch indicates a replay attack or a stale/mismatched callback.\n    - context : >\n        valid_session := (has(context.cacheData) && context.cacheData != null &&\n                          has(context.cacheData.digilocker_request_id) &&\n                          has(context.requestId) && context.requestId != null &&\n                          context.requestId == context.cacheData.digilocker_request_id) ? true : false\n\n    # ── Step 5: Return session validation result and parsed cache data ────────\n    - return : >\n        {\n            \"valid_session\" : context.valid_session,\n            \"cacheData\"     : context.cacheData\n        }"
             },
             "output": [
                 "JSON"
@@ -1504,23 +1298,31 @@
         {
             "id": "node-61-ConditionPoint",
             "position": {
-                "x": -389.6327730810549,
-                "y": -37.32528313254304
+                "x": -516.7404185317396,
+                "y": -146.7346031201718
             },
             "taskType": "ConditionPoint",
             "branches": [
                 {
                     "next": {
                         "node": "node-26-Page",
-                        "connectionLabel": "validation success",
+                        "connectionLabel": "profile validated — valid_digi_profile_match = true",
                         "connectionWayPoints": [
                             {
-                                "x": -341.6327730810549,
-                                "y": -13.325283132543042
+                                "x": -468.7404185317396,
+                                "y": -122.73460312017181
                             },
                             {
-                                "x": -229.2610755487449,
-                                "y": -13.325283132543042
+                                "x": -396.07764689074054,
+                                "y": -122.73460312017181
+                            },
+                            {
+                                "x": -396.07764689074054,
+                                "y": -117.49544450385838
+                            },
+                            {
+                                "x": -323.4148752497415,
+                                "y": -117.49544450385838
                             }
                         ]
                     },
@@ -1549,11 +1351,11 @@
                         "node": "node-12-Function",
                         "connectionWayPoints": [
                             {
-                                "x": -365.6327730810549,
-                                "y": -37.32528313254304
+                                "x": -492.7404185317396,
+                                "y": -146.7346031201718
                             },
                             {
-                                "x": -365.6327730810549,
+                                "x": -492.7404185317396,
                                 "y": -174.81968380582947
                             },
                             {
@@ -1569,25 +1371,33 @@
             "id": "node-62-Function",
             "name": "validateRequiredFields",
             "position": {
-                "x": -459.6327730810549,
-                "y": 59.493549368092815
+                "x": -586.7404185317396,
+                "y": -70.71915234605137
             },
             "taskType": "Function",
             "next": {
                 "node": "node-61-ConditionPoint",
                 "connectionWayPoints": [
                     {
-                        "x": -365.6327730810549,
-                        "y": 59.493549368092815
+                        "x": -492.7404185317396,
+                        "y": -70.71915234605137
                     },
                     {
-                        "x": -365.6327730810549,
-                        "y": 10.674716867456958
+                        "x": -492.7404185317396,
+                        "y": -90.71915234605137
+                    },
+                    {
+                        "x": -492.7404185317396,
+                        "y": -78.73460312017181
+                    },
+                    {
+                        "x": -492.7404185317396,
+                        "y": -98.73460312017181
                     }
                 ]
             },
             "input": {
-                "inputData": "statements:\n  # Get DigiLocker DOB with null check digi_missing matched\n  - context: >\n      valid_digi_profile_match := (has(context.email_validation) && has(context.email_validation.match_status) \n                                    && (context.email_validation.match_status == \"digi_missing\" || context.email_validation.match_status == \"matched\")\n                                    && has(context.dob_validation) && has(context.dob_validation.match_status) \n                                    && (context.dob_validation.match_status == \"digi_missing\" || context.dob_validation.match_status == \"matched\")\n                                    && has(context.name_validation) && has(context.name_validation.match_status) \n                                    && (context.name_validation.match_status == \"digi_missing\" || context.name_validation.match_status == \"matched\")\n                                    && has(context.phone_validation)) && has(context.phone_validation.match_status)\n                                    && (context.phone_validation.match_status == \"digi_missing\" || context.phone_validation.match_status == \"matched\") \n                                    ? true : false\n\n  - return: >\n      {\"valid_digi_profile_match\": context.valid_digi_profile_match}\n"
+                "inputData": "# Function: validateRequiredFields\n# Purpose: Performs final validation check on all required fields before user creation\n#\n# This function:\n# 1. Uses a helper lambda to check each field's validation status\n# 2. Valid statuses are \"digi_missing\" (DigiLocker did not provide the field) or \"matched\"\n# 3. Returns a single boolean — true only if all four fields pass\n#\n# Valid statuses: \"digi_missing\" (acceptable) or \"matched\" (validated)\n# Invalid statuses: \"invalid\" or \"profile_missing\"\n#\n# Sample Input:\n# context.email_validation.match_status = \"matched\"\n# context.dob_validation.match_status = \"matched\"\n# context.name_validation.match_status = \"matched\"\n# context.phone_validation.match_status = \"matched\"\n#\n# Sample Output:\n# {\n#   \"valid_digi_profile_match\": true\n# }\n\nstatements:\n  # Helper function: check if status is valid (digi_missing or matched)\n  - context: >\n      isValidStatus := (status) => status == \"digi_missing\" || status == \"matched\"\n  \n  # Extract validation statuses with safe access\n  - context: >\n        emailStatus := has(context.email_validation.match_status) ? context.email_validation.match_status : \"\"\n  - context: >\n        dobStatus := has(context.dob_validation.match_status) ? context.dob_validation.match_status : \"\"\n  - context: >\n        nameStatus := has(context.name_validation.match_status) ? context.name_validation.match_status : \"\"\n  - context: >\n        phoneStatus := has(context.phone_validation.match_status) ? context.phone_validation.match_status : \"\"\n  \n  # Validate all fields using helper function\n  - context: >\n      valid_digi_profile_match := context.isValidStatus(context.emailStatus) && \n                                   context.isValidStatus(context.dobStatus) && \n                                   context.isValidStatus(context.nameStatus) && \n                                   context.isValidStatus(context.phoneStatus)\n  \n  # Return overall validation status\n  - return: >\n      {\"valid_digi_profile_match\": context.valid_digi_profile_match}\n"
             },
             "output": [
                 "JSON"
