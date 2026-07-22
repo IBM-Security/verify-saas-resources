@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <base href="/" />
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" type="image/x-icon" href="/ui/assets/img/favicon.ico" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="shortcut icon" type="image/x-icon" href="usc/favicon.ico" />
+        <link rel="stylesheet" href="usc/css/stateless.css" />
+        <!-- Optionally override carbon styles using the common theme.css (common/page_components/default/page_style.css in Theme files) -->
+        <link rel="stylesheet" href="/template/v1.0/static/theme.css?themeId=@THEME_ID@" />
+        <!---->
+        <title>Select Identity Source</title>
+    </head>
+    <body>
+        <div class="cs-content login">
+            <div class='heading' style="margin-top: 250px;">
+            </div>
+            <h3>Select Identity Source</h3>
+            <p>You are logging in with <strong>@context.org_name@</strong></p>
+            <div class="login-main">
+                <form id="identitySourceForm" class="login-fields input-centered" method="POST" action="@WORKFLOW_CALLBACK_URL@">
+                    <label class="label" id="identitySource_label">Identity Source</label>
+                    <div class="bx--select" style="margin-bottom: 20px">
+                        <select id="identitySource" name="identitySource" class="bx--select-input" required>
+                            <option value="">Select an identity source</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Cloud Directory username/password fields (hidden by default) -->
+                    <div id="cloudDirectoryFields" style="display: none;">
+                        <div class="bx--form-item bx--text-input-wrapper" style="margin-bottom: 20px">
+                            <label for="username" class="bx--label">Username</label>
+                            <div class="bx--text-input__field-wrapper">
+                                <input id="username" type="text" class="bx--text-input" name="username" placeholder="Enter username" />
+                            </div>
+                        </div>
+                        
+                        <div class="bx--form-item bx--text-input-wrapper bx--password-input-wrapper" style="margin-bottom: 20px">
+                            <label for="password" class="bx--label">Password</label>
+                            <div class="bx--text-input__field-outer-wrapper">
+                                <div class="bx--text-input__field-wrapper">
+                                    <input id="password" name="password" placeholder="Enter password" type="password" class="bx--text-input bx--password-input" autocomplete="off" />
+                                    <button type="button" id="show-pwd-btn" class="bx--text-input--password__visibility__toggle bx--btn bx--btn--icon-only bx--tooltip__trigger bx--tooltip--a11y bx--tooltip--bottom bx--tooltip--align-center pwd-icon-button">
+                                        <span class="bx--assistive-text">Show password</span>
+                                        <svg class="bx--icon-visibility-on" focusable="false" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" fill="currentColor" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
+                                            <path d="M15.5,7.8C14.3,4.7,11.3,2.6,8,2.5C4.7,2.6,1.7,4.7,0.5,7.8c0,0.1,0,0.2,0,0.3c1.2,3.1,4.1,5.2,7.5,5.3c3.3-0.1,6.3-2.2,7.5-5.3C15.5,8.1,15.5,7.9,15.5,7.8z M8,12.5c-2.7,0-5.4-2-6.5-4.5c1-2.5,3.8-4.5,6.5-4.5s5.4,2,6.5,4.5C13.4,10.5,10.6,12.5,8,12.5M8,5C6.3,5,5,6.3,5,8s1.3,3,3,3s3-1.3,3-3S9.7,5,8,5z M8,10c-1.1,0-2-0.9-2-2s0.9-2,2-2s2,0.9,2,2S9.1,10,8,10z"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <input type="hidden" name="operation" value="verify" />
+                        <input type="hidden" name="error_redirect_support" value="true" />
+                    </div>
+                    
+                    <!-- Hidden field to store the instance_id -->
+                    <input type="hidden" id="instance_id" name="instance_id" value="" />
+                    <input type="hidden" id="idpName" name="idpName" value="" />
+                    
+                    <button class="button" id="continue-button" value="continue" class="button-1 ease-in-anim-fast login"
+                        type="submit" cs-attach="submitButton">Continue</button>
+                </form>
+            </div>
+            @PAGE_FOOTER@
+        </div>
+        <script type="text/javascript" src="/profile/static/carbon-components.min.js"></script>
+        <script type="text/javascript" src="/usc/js/ieCheck.js"></script>
+        <!---->
+        <!-- Safely embed JSON data -->
+        <script id="idpListData" type="application/json">@context.idp_list@</script>
+        <script type="text/javascript">
+            // Helper function to decode HTML entities
+            function decodeHtmlEntities(text) {
+                const textarea = document.createElement('textarea');
+                textarea.innerHTML = text;
+                return textarea.value;
+            }
+
+            // Identity Sources JSON data
+            let identitySourcesData;
+            try {
+                // Get the raw data from the context variable (may contain HTML entities like ")
+                // Using a script tag with type="application/json" to safely embed the data
+                const rawData = document.getElementById('idpListData').textContent;
+                console.log('Raw data:', rawData);
+                
+                // Decode HTML entities (workflow engine encodes quotes as ")
+                const decodedData = decodeHtmlEntities(rawData);
+                console.log('Decoded data:', decodedData);
+                 
+                // Parse the decoded JSON
+                identitySourcesData = JSON.parse(decodedData);
+                console.log('Successfully parsed identity sources:', identitySourcesData);
+            } catch (error) {
+                console.error('Error parsing identity sources data:', error);
+                console.error('Failed to parse data from context variable');
+                identitySourcesData = { bindings: [] };
+            }
+
+            // Populate the dropdown with identity sources
+            function populateIdentitySources() {
+                const selectElement = document.getElementById('identitySource');
+                
+                // Validate data structure
+                if (!identitySourcesData || !identitySourcesData.bindings || !Array.isArray(identitySourcesData.bindings)) {
+                    console.error('Invalid identity sources data structure');
+                    return;
+                }
+                
+                const bindings = identitySourcesData.bindings;
+
+                bindings.forEach(binding => {
+                    const option = document.createElement('option');
+                    option.value = binding.idpId; // Store the idpId as the value
+                    option.textContent = binding.idpName; // Display the idpName
+                    option.dataset.instanceId = binding.idpId; // Store idpId in data attribute
+                    option.dataset.idpName = binding.idpName; // Store idpName in data attribute
+                    selectElement.appendChild(option);
+                });
+            }
+
+            // Handle identity source selection change
+            document.getElementById('identitySource').addEventListener('change', function() {
+                const selectedOption = this.options[this.selectedIndex];
+                const idpName = selectedOption.dataset.idpName || '';
+                const cloudDirectoryFields = document.getElementById('cloudDirectoryFields');
+                const idpNameInput = document.getElementById('idpName');
+                
+                console.log('Selected identity source:', idpName);
+                
+                // Store the idpName in hidden field
+                idpNameInput.value = idpName;
+                
+                // Show/hide Cloud Directory fields based on selection
+                if (idpName === 'Cloud Directory') {
+                    console.log('Cloud Directory selected - showing username/password fields');
+                    cloudDirectoryFields.style.display = 'block';
+                    // Make username and password required for Cloud Directory
+                    document.getElementById('username').required = true;
+                    document.getElementById('password').required = true;
+                } else {
+                    console.log('Other identity source selected - hiding username/password fields');
+                    cloudDirectoryFields.style.display = 'none';
+                    // Remove required attribute for non-Cloud Directory
+                    document.getElementById('username').required = false;
+                    document.getElementById('password').required = false;
+                }
+            });
+
+            // Handle password visibility toggle
+            document.getElementById('show-pwd-btn').addEventListener('click', function() {
+                const passwordInput = document.getElementById('password');
+                const isPassword = passwordInput.type === 'password';
+                passwordInput.type = isPassword ? 'text' : 'password';
+                this.querySelector('.bx--assistive-text').textContent = isPassword ? 'Hide password' : 'Show password';
+            });
+
+            // Handle form submission
+            document.getElementById('identitySourceForm').addEventListener('submit', function(event) {
+                const selectElement = document.getElementById('identitySource');
+                const hiddenInput = document.getElementById('instance_id');
+                const idpNameInput = document.getElementById('idpName');
+                const selectedOption = selectElement.options[selectElement.selectedIndex];
+                const idpName = selectedOption.dataset.idpName || '';
+                
+                if (!selectElement.value) {
+                    event.preventDefault();
+                    alert('Please select an identity source');
+                    return false;
+                }
+                
+                // Store the selected instance_id in the hidden field
+                hiddenInput.value = selectElement.value;
+                idpNameInput.value = idpName;
+                
+                // For Cloud Directory, validate username and password
+                if (idpName === 'Cloud Directory') {
+                    const username = document.getElementById('username').value;
+                    const password = document.getElementById('password').value;
+                    
+                    if (!username || !password) {
+                        event.preventDefault();
+                        alert('Please enter username and password for Cloud Directory');
+                        return false;
+                    }
+                    
+                    console.log('Submitting Cloud Directory authentication with username:', username);
+                    // Form will submit with username, password, operation=verify, and error_redirect_support=true
+                } else {
+                    console.log('Submitting for external identity source:', idpName);
+                    // Form will submit with instance_id for external IdP redirect
+                }
+            });
+
+            // Initialize the page
+            document.addEventListener('DOMContentLoaded', function() {
+                populateIdentitySources();
+            });
+        </script>
+    </body>
+</html>

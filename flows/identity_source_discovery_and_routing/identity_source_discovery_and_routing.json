@@ -1,0 +1,659 @@
+{
+    "model": [
+        {
+            "id": "Event_0onayf9",
+            "name": "Start",
+            "next": {
+                "node": "isv_function_1699426561605_customId",
+                "connectionLabel": "",
+                "connectionWayPoints": [
+                    {
+                        "x": -544.8510811764795,
+                        "y": -49.49764044167863
+                    },
+                    {
+                        "x": -445.20398861273316,
+                        "y": -49.49764044167863
+                    },
+                    {
+                        "x": -445.20398861273316,
+                        "y": 53.18720505520983
+                    }
+                ]
+            },
+            "position": {
+                "x": -670.8510811764795,
+                "y": -69.49764044167863
+            },
+            "taskType": "Start"
+        },
+        {
+            "id": "isv_page_1699422324292_customId",
+            "name": "Prompt: Login Identifier",
+            "next": {
+                "node": "node-22-Function",
+                "connectionWayPoints": [
+                    {
+                        "x": -445.20398861273316,
+                        "y": 283.3475690249513
+                    },
+                    {
+                        "x": -445.20398861273316,
+                        "y": 356.9796303703952
+                    }
+                ]
+            },
+            "input": {
+                "themeId": "4568b33a-9ec4-42e9-a205-99b8cf8a3223",
+                "templateName": "custom_page1",
+                "actionRequired": true
+            },
+            "position": {
+                "x": -539.2039886127332,
+                "y": 207.34756902495133
+            },
+            "taskType": "Page"
+        },
+        {
+            "id": "Event_1gu7ste_customId",
+            "name": "End",
+            "position": {
+                "x": 482.02779833755676,
+                "y": 805.6887531954997
+            },
+            "taskType": "End"
+        },
+        {
+            "id": "isv_function_1699426561605_customId",
+            "name": "Set Vars",
+            "next": {
+                "node": "isv_page_1699422324292_customId",
+                "connectionWayPoints": [
+                    {
+                        "x": -445.20398861273316,
+                        "y": 129.18720505520983
+                    },
+                    {
+                        "x": -445.20398861273316,
+                        "y": 207.34756902495133
+                    }
+                ]
+            },
+            "input": {
+                "inputData": "statements:\n- return: >\n    {\n        \"client_id\": \"<client_id>\",\n        \"client_secret\": \"<client_secret>\",\n        \"tenant_baseUrl\": \"https://\"+ ctx.__tenantid\n    }"
+            },
+            "output": [
+                "JSON"
+            ],
+            "position": {
+                "x": -539.2039886127332,
+                "y": 53.18720505520983
+            },
+            "taskType": "Function"
+        },
+        {
+            "id": "isv_redirect_1699426633525_customId",
+            "name": "Redirect to IDP",
+            "next": {
+                "node": "Event_1gu7ste_customId",
+                "connectionLabel": "",
+                "connectionWayPoints": [
+                    {
+                        "x": 433.67092870161565,
+                        "y": 825.6887531954997
+                    },
+                    {
+                        "x": 482.02779833755676,
+                        "y": 825.6887531954997
+                    }
+                ]
+            },
+            "input": {
+                "redirectUrl": "${S(workflow_context).prop(\"loginURL\").stringValue()}",
+                "actionRequired": false
+            },
+            "position": {
+                "x": 245.67092870161565,
+                "y": 787.6887531954997
+            },
+            "taskType": "Redirect"
+        },
+        {
+            "id": "Gateway_1561rkk_customId",
+            "name": "",
+            "branches": [
+                {
+                    "next": {
+                        "node": "isv_function_1762795541943_customId",
+                        "connectionLabel": "No",
+                        "connectionWayPoints": [
+                            {
+                                "x": 28.778968351490168,
+                                "y": 41.45983379501384
+                            },
+                            {
+                                "x": 28.778968351490164,
+                                "y": 167.28768367491978
+                            }
+                        ]
+                    }
+                },
+                {
+                    "next": {
+                        "node": "node-30-Function",
+                        "connectionLabel": "Yes",
+                        "connectionWayPoints": [
+                            {
+                                "x": 52.778968351490164,
+                                "y": 17.459833795013843
+                            },
+                            {
+                                "x": 545.0277983375568,
+                                "y": 17.459833795013843
+                            },
+                            {
+                                "x": 545.0277983375568,
+                                "y": 79.64660266919672
+                            }
+                        ]
+                    },
+                    "condition": {
+                        "type": "basic",
+                        "condition": [
+                            {
+                                "@context@": [
+                                    {
+                                        "op": "hasProp",
+                                        "vl": "isTenantUser"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                }
+            ],
+            "position": {
+                "x": 4.7789683514901675,
+                "y": -6.540166204986157
+            },
+            "taskType": "ConditionPoint"
+        },
+        {
+            "id": "Gateway_1ydiui8_customId",
+            "name": "",
+            "branches": [
+                {
+                    "next": {
+                        "node": "node-18-Function",
+                        "connectionLabel": "User does not exist",
+                        "connectionWayPoints": [
+                            {
+                                "x": -445.20398861273316,
+                                "y": 777.9130891194112
+                            },
+                            {
+                                "x": -445.20398861273316,
+                                "y": 897.0465988397541
+                            },
+                            {
+                                "x": -307.15733892415494,
+                                "y": 897.0465988397541
+                            }
+                        ]
+                    }
+                },
+                {
+                    "next": {
+                        "node": "node-14-Function",
+                        "connectionLabel": "User exist",
+                        "connectionWayPoints": [
+                            {
+                                "x": -421.20398861273316,
+                                "y": 753.9130891194112
+                            },
+                            {
+                                "x": -196.71964318123372,
+                                "y": 753.9130891194112
+                            },
+                            {
+                                "x": -196.71964318123372,
+                                "y": 55.45983379501384
+                            }
+                        ]
+                    },
+                    "condition": {
+                        "type": "basic",
+                        "condition": [
+                            {
+                                "@context.user_found@": [
+                                    {
+                                        "op": "isTrue",
+                                        "vl": ""
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                }
+            ],
+            "position": {
+                "x": -469.20398861273316,
+                "y": 729.9130891194112
+            },
+            "taskType": "ConditionPoint"
+        },
+        {
+            "id": "isv_function_1762795541943_customId",
+            "name": "Fetch Org Identity Sources",
+            "next": {
+                "node": "node-26-ConditionPoint",
+                "connectionWayPoints": [
+                    {
+                        "x": 28.778968351490164,
+                        "y": 243.28768367491978
+                    },
+                    {
+                        "x": 28.778968351490168,
+                        "y": 333.9338325913362
+                    }
+                ]
+            },
+            "input": {
+                "inputData": "statements:\n- context: ids_endpoint := context.tenant_baseUrl + \"/v2.0/identitysources/bindings?orgId=\"+ context.org_id\n- context: bearerTokenFormatted := \"Bearer \" + context.bearerToken\n- context: idp_response := hc.GetAsJson(context.ids_endpoint, {\"Authorization\":context.bearerTokenFormatted})\n\n# Fetch Cloud Directory identity source\n- context: cloud_dir_endpoint := context.tenant_baseUrl + \"/v2.0/identitysources/property/realm/cloudIdentityRealm\"\n- context: cloud_dir_response := hc.GetAsJson(context.cloud_dir_endpoint, {\"Authorization\":context.bearerTokenFormatted})\n- debug: '\"=== DEBUG: Cloud Directory response ===\" + jsonToString(context.cloud_dir_response)'\n\n# Extract Cloud Directory instance ID\n- context: 'has_cloud_dir := has(context.cloud_dir_response.identitySources) && size(context.cloud_dir_response.identitySources) > 0'\n- context: 'cloud_dir_instance_id := context.has_cloud_dir ? context.cloud_dir_response.identitySources[0].id : \"NA\"'\n- debug: '\"=== DEBUG: Cloud Directory instance ID ===\" + context.cloud_dir_instance_id'\n\n# Count identity source bindings\n- context: 'idp_count := has(context.idp_response.bindings) ? size(context.idp_response.bindings) : 0'\n\n# Check if single IDP is Cloud Directory\n- context: 'single_idp_instance_id := (context.idp_count == 1 && has(context.idp_response.bindings)) ? context.idp_response.bindings[0].idpId : \"\"'\n- context: 'is_single_cloud_dir := context.idp_count == 1 && context.single_idp_instance_id == context.cloud_dir_instance_id'\n- debug: '\"=== DEBUG: Single IDP instance ID ===\" + context.single_idp_instance_id'\n- debug: '\"=== DEBUG: Is single Cloud Directory ===\" + string(context.is_single_cloud_dir)'\n\n# Return response - set is_single_idp only if it's single IDP and NOT Cloud Directory\n- return: >\n    (context.idp_count == 1 && !context.is_single_cloud_dir) ?\n        {\n            \"idp_list\": context.idp_response,\n            \"is_single_idp\": true\n        } :\n        {\n            \"idp_list\": context.idp_response\n        }"
+            },
+            "output": [
+                "JSON"
+            ],
+            "position": {
+                "x": -65.22103164850984,
+                "y": 167.28768367491978
+            },
+            "taskType": "Function"
+        },
+        {
+            "id": "isv_function_1762795549524_customId",
+            "name": "BuildLoginUrl ",
+            "next": {
+                "node": "isv_redirect_1699426633525_customId",
+                "connectionWayPoints": [
+                    {
+                        "x": 339.67092870161565,
+                        "y": 685.7320791229514
+                    },
+                    {
+                        "x": 339.67092870161565,
+                        "y": 787.6887531954997
+                    }
+                ]
+            },
+            "input": {
+                "inputData": "statements:\n- context: >\n    loginUrl := context.tenant_baseUrl\n    + \"/idaas/mtfim/sps/idaas/login?identity_source_id=\"\n    + context.instance_id +\"&orgId=\"+context.org_id +\"&runtime=true\"\n- context: \"loginUrl = has(ctx.Target) && ctx.Target != '' ? context.loginUrl + '&Target=' + encodeURIComponent(ctx.Target) : context.loginUrl\"\n- return: >\n    {\n        \"loginURL\": context.loginUrl\n    }"
+            },
+            "output": [
+                "JSON"
+            ],
+            "position": {
+                "x": 245.67092870161565,
+                "y": 609.7320791229514
+            },
+            "taskType": "Function"
+        },
+        {
+            "id": "node-14-Function",
+            "name": "is Tenant User",
+            "next": {
+                "node": "Gateway_1561rkk_customId",
+                "connectionWayPoints": [
+                    {
+                        "x": -102.71964318123372,
+                        "y": 17.459833795013843
+                    },
+                    {
+                        "x": 4.7789683514901675,
+                        "y": 17.459833795013843
+                    }
+                ]
+            },
+            "input": {
+                "inputData": "statements:\n- context: 'is_tenant := context.org_id == \"tenant\"'\n- debug: '\"=== DEBUG: Organization ID ===\" + context.org_id'\n- debug: '\"=== DEBUG: Is tenant user ===\" + string(context.is_tenant)'\n- return: >\n    context.is_tenant ? {\"isTenantUser\": true} : {}\n"
+            },
+            "output": [
+                "JSON"
+            ],
+            "position": {
+                "x": -290.7196431812337,
+                "y": -20.540166204986157
+            },
+            "taskType": "Function"
+        },
+        {
+            "id": "node-15-Redirect",
+            "name": "Redirect to tenant LSP ",
+            "next": {
+                "node": "Event_1gu7ste_customId",
+                "connectionWayPoints": [
+                    {
+                        "x": 545.0277983375568,
+                        "y": 302.68570158343147
+                    },
+                    {
+                        "x": 545.0277983375568,
+                        "y": 805.6887531954997
+                    }
+                ]
+            },
+            "input": {
+                "redirectUrl": "${S(workflow_context).prop(\"loginURL\").stringValue()}",
+                "actionRequired": false
+            },
+            "position": {
+                "x": 451.02779833755676,
+                "y": 226.68570158343147
+            },
+            "taskType": "Redirect"
+        },
+        {
+            "id": "node-16-Page",
+            "name": "Org IDP selection page",
+            "next": {
+                "node": "isv_function_1762795549524_customId",
+                "connectionWayPoints": [
+                    {
+                        "x": 339.67092870161565,
+                        "y": 478.983730535348
+                    },
+                    {
+                        "x": 339.67092870161565,
+                        "y": 609.7320791229514
+                    }
+                ]
+            },
+            "input": {
+                "themeId": "4568b33a-9ec4-42e9-a205-99b8cf8a3223",
+                "templateName": "custom_page2",
+                "actionRequired": true
+            },
+            "position": {
+                "x": 245.67092870161565,
+                "y": 402.983730535348
+            },
+            "taskType": "Page"
+        },
+        {
+            "id": "node-18-Function",
+            "name": "Get Identity Sources for Email domain",
+            "next": {
+                "node": "node-28-ConditionPoint",
+                "connectionWayPoints": [
+                    {
+                        "x": -119.15733892415494,
+                        "y": 897.0465988397541
+                    },
+                    {
+                        "x": 4.778968351490164,
+                        "y": 897.0465988397541
+                    }
+                ]
+            },
+            "input": {
+                "inputData": "statements:\n# Check if username is an email (contains @)\n- context: 'is_email := context.username.contains(\"@\")'\n- debug: '\"=== DEBUG: Username ===\" + context.username'\n- debug: '\"=== DEBUG: Is email ===\" + string(context.is_email)'\n\n# Extract domain from email username (will be empty string if not email)\n- context: 'email_domain := context.is_email ? context.username.split(\"@\")[1] : \"\"'\n- debug: '\"=== DEBUG: Email domain ===\" + context.email_domain'\n\n# Only make API call if username is an email\n- context: 'ids_endpoint := context.is_email ? context.tenant_baseUrl + \"/v2.0/identitysources/bindings/domains/\"+ context.email_domain : \"\"'\n- debug: '\"=== DEBUG: IDS endpoint ===\" + context.ids_endpoint'\n\n- context: bearerTokenFormatted := \"Bearer \" + context.bearerToken\n\n# Make API call only if username is email, otherwise set empty response\n- context: 'idp_response := context.is_email ? hc.GetAsJson(context.ids_endpoint, {\"Authorization\":context.bearerTokenFormatted}) : {}'\n- debug: '\"=== DEBUG: API Response ===\" + jsonToString(context.idp_response)'\n\n# Extract bindings array from response — assumes at most one identity source match\n- context: 'bindings := has(context.idp_response.bindings) ? context.idp_response.bindings : []'\n- debug: '\"=== DEBUG: Bindings count ===\" + string(size(context.bindings))'\n\n# Flag when an identity source matched the domain (at most one assumed)\n- context: 'domain_found := size(context.bindings) > 0'\n- debug: '\"=== DEBUG: Domain found ===\" + string(context.domain_found)'\n\n# Extract org details from the single binding\n- context: 'org_id := context.domain_found ? context.bindings[0].orgId : \"\"'\n- context: 'org_name := context.domain_found ? context.bindings[0].orgName : \"\"'\n- debug: '\"=== DEBUG: Org ID ===\" + context.org_id'\n- debug: '\"=== DEBUG: Org name ===\" + context.org_name'\n\n# Return domain_found flag; when found, include org details and idp_list so callers can read bindings[0]\n- return: >\n    !context.domain_found ?\n        {\"domain_found\": false} :\n        {\"domain_found\": true, \"org_id\": context.org_id, \"org_name\": context.org_name, \"idp_list\": context.idp_response}\n"
+            },
+            "output": [
+                "JSON"
+            ],
+            "position": {
+                "x": -307.15733892415494,
+                "y": 859.0465988397541
+            },
+            "taskType": "Function"
+        },
+        {
+            "id": "node-21-Function",
+            "name": "Search User Using LoginIdentifier",
+            "next": {
+                "node": "Gateway_1ydiui8_customId",
+                "connectionWayPoints": [
+                    {
+                        "x": -445.20398861273316,
+                        "y": 595.0615773151137
+                    },
+                    {
+                        "x": -445.20398861273316,
+                        "y": 729.9130891194112
+                    }
+                ]
+            },
+            "input": {
+                "inputData": "statements:\n- context: searchTerm := context.username\n- context: encodedFilter := \"userName%20sw%20%22\" + context.searchTerm + \"%22\"\n- context: users_endpoint := context.tenant_baseUrl + \"/v2.0/Users?filter=\" + context.encodedFilter\n- context: bearerTokenFormatted := \"Bearer \" + context.bearerToken\n- context: user_response := hc.GetAsJson(context.users_endpoint, {\"Authorization\":context.bearerTokenFormatted})\n- debug: '\"=== DEBUG: API Response ===\" + jsonToString(context.user_response)'\n\n# Extract resources array from SCIM response\n- context: 'resources := has(context.user_response.Resources) ? context.user_response.Resources : []'\n- debug: '\"=== DEBUG: Resources size ===\" + string(size(context.resources))'\n\n# Flag whether the user exists at all\n- context: 'user_found := size(context.resources) > 0'\n- debug: '\"=== DEBUG: User found ===\" + string(context.user_found)'\n\n# Grab the first (and assumed only) matched user\n- context: 'matched_user := context.user_found ? context.resources[0] : {}'\n- debug: '\"=== DEBUG: Matched user ===\" + jsonToString(context.matched_user)'\n\n# Check if the user has the IBM extension with at least one organization\n- context: 'ibm_ext_key := \"urn:ietf:params:scim:schemas:extension:ibm:2.0:User\"'\n- context: 'has_ibm_ext := context.user_found && context.ibm_ext_key in context.matched_user'\n- context: 'ibm_ext := context.has_ibm_ext ? context.matched_user[context.ibm_ext_key] : {}'\n- context: 'has_org_membership := context.has_ibm_ext && \"organizations\" in context.ibm_ext && size(context.ibm_ext.organizations) > 0'\n- debug: '\"=== DEBUG: Has IBM ext ===\" + string(context.has_ibm_ext)'\n- debug: '\"=== DEBUG: Has org membership ===\" + string(context.has_org_membership)'\n\n# Determine if this is a tenant user (exists but no org membership)\n- context: 'is_tenant_user := context.user_found && !context.has_org_membership'\n- debug: '\"=== DEBUG: Is tenant user ===\" + string(context.is_tenant_user)'\n\n# Extract org details from the first organization entry (single org assumed)\n- context: 'first_org := context.has_org_membership ? context.ibm_ext.organizations[0] : {}'\n- context: 'org_id := context.has_org_membership ? (\"value\" in context.first_org ? context.first_org.value : \"\") : \"\"'\n- context: 'org_name := context.has_org_membership ? (\"displayName\" in context.first_org ? context.first_org.displayName : \"\") : \"\"'\n- debug: '\"=== DEBUG: Org ID ===\" + context.org_id'\n- debug: '\"=== DEBUG: Org name ===\" + context.org_name'\n\n# Return: not found | tenant user | org member\n- return: >\n    !context.user_found ?\n        {\"user_found\": false} :\n    context.is_tenant_user ?\n        {\"user_found\": true, \"org_id\": \"tenant\", \"org_name\": \"Tenant\"} :\n        {\"user_found\": true, \"org_id\": context.org_id, \"org_name\": context.org_name}\n"
+            },
+            "output": [
+                "JSON"
+            ],
+            "position": {
+                "x": -539.2039886127332,
+                "y": 519.0615773151137
+            },
+            "taskType": "Function"
+        },
+        {
+            "id": "node-22-Function",
+            "name": "Get Token",
+            "next": {
+                "node": "node-21-Function",
+                "connectionWayPoints": [
+                    {
+                        "x": -445.20398861273316,
+                        "y": 432.9796303703952
+                    },
+                    {
+                        "x": -445.20398861273316,
+                        "y": 519.0615773151137
+                    }
+                ]
+            },
+            "input": {
+                "inputData": "statements:\n- context: token_endpoint := context.tenant_baseUrl + \"/oauth2/token\"\n- context: bearerToken := oauth.GetBearerToken(context.token_endpoint, context.client_id, context.client_secret)\n- return: >\n        {\n            \"bearerToken\": context.bearerToken\n        }"
+            },
+            "output": [
+                "JSON"
+            ],
+            "position": {
+                "x": -539.2039886127332,
+                "y": 356.9796303703952
+            },
+            "taskType": "Function"
+        },
+        {
+            "id": "node-26-ConditionPoint",
+            "branches": [
+                {
+                    "next": {
+                        "node": "node-16-Page",
+                        "connectionWayPoints": [
+                            {
+                                "x": 52.778968351490164,
+                                "y": 357.9338325913362
+                            },
+                            {
+                                "x": 339.67092870161565,
+                                "y": 357.9338325913362
+                            },
+                            {
+                                "x": 339.67092870161565,
+                                "y": 402.983730535348
+                            }
+                        ]
+                    }
+                },
+                {
+                    "next": {
+                        "node": "node-27-Function",
+                        "connectionLabel": "is_single_idp",
+                        "connectionWayPoints": [
+                            {
+                                "x": 28.778968351490168,
+                                "y": 381.9338325913362
+                            },
+                            {
+                                "x": 28.778968351490164,
+                                "y": 609.7320791229514
+                            }
+                        ]
+                    },
+                    "condition": {
+                        "type": "basic",
+                        "condition": [
+                            {
+                                "@context@": [
+                                    {
+                                        "op": "hasProp",
+                                        "vl": "is_single_idp"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                }
+            ],
+            "position": {
+                "x": 4.7789683514901675,
+                "y": 333.9338325913362
+            },
+            "taskType": "ConditionPoint"
+        },
+        {
+            "id": "node-27-Function",
+            "name": "Set IDP context",
+            "next": {
+                "node": "isv_function_1762795549524_customId",
+                "connectionWayPoints": [
+                    {
+                        "x": 122.77896835149016,
+                        "y": 647.7320791229514
+                    },
+                    {
+                        "x": 245.67092870161565,
+                        "y": 647.7320791229514
+                    }
+                ]
+            },
+            "input": {
+                "inputData": "statements:\n# Extract instance_id from the single identity source\n# Assumes idp_list contains the response from FetchIdentitySources with exactly one identity source\n- context: 'instance_id := context.idp_list.bindings[0].idpId'\n- context: 'idp_name := context.idp_list.bindings[0].idpName'\n- debug: '\"=== DEBUG: Extracted instance_id ===\" + context.instance_id'\n- debug: '\"=== DEBUG: Extracted idp_name ===\" + context.idp_name'\n- return: >\n    {\n        \"instance_id\": context.instance_id,\n        \"idp_name\": context.idp_name\n    }\n"
+            },
+            "output": [
+                "JSON"
+            ],
+            "position": {
+                "x": -65.22103164850984,
+                "y": 609.7320791229514
+            },
+            "taskType": "Function"
+        },
+        {
+            "id": "node-28-ConditionPoint",
+            "branches": [
+                {
+                    "next": {
+                        "node": "node-30-Function",
+                        "connectionLabel": "No matching domain",
+                        "connectionWayPoints": [
+                            {
+                                "x": 52.778968351490164,
+                                "y": 897.0465988397541
+                            },
+                            {
+                                "x": 659.0277983375568,
+                                "y": 897.0465988397541
+                            },
+                            {
+                                "x": 659.0277983375568,
+                                "y": 117.64660266919672
+                            },
+                            {
+                                "x": 639.0277983375568,
+                                "y": 117.64660266919672
+                            }
+                        ]
+                    },
+                    "condition": {
+                        "type": "basic",
+                        "condition": [
+                            {
+                                "@context.domain_found@": [
+                                    {
+                                        "op": "isFalse",
+                                        "vl": ""
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                },
+                {
+                    "next": {
+                        "node": "node-27-Function",
+                        "connectionLabel": "domain exist",
+                        "connectionWayPoints": [
+                            {
+                                "x": 28.778968351490164,
+                                "y": 873.0465988397541
+                            },
+                            {
+                                "x": 28.778968351490164,
+                                "y": 685.7320791229514
+                            }
+                        ]
+                    },
+                    "condition": {
+                        "type": "basic",
+                        "condition": [
+                            {
+                                "@context.domain_found@": [
+                                    {
+                                        "op": "isTrue",
+                                        "vl": ""
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                }
+            ],
+            "position": {
+                "x": 4.778968351490164,
+                "y": 873.0465988397541
+            },
+            "taskType": "ConditionPoint"
+        },
+        {
+            "id": "node-30-Function",
+            "name": "BuildTenantLSP URL",
+            "next": {
+                "node": "node-15-Redirect",
+                "connectionWayPoints": [
+                    {
+                        "x": 545.0277983375568,
+                        "y": 155.64660266919674
+                    },
+                    {
+                        "x": 545.0277983375568,
+                        "y": 226.68570158343147
+                    }
+                ]
+            },
+            "input": {
+                "inputData": "statements:\n- context: >\n    loginUrl := context.tenant_baseUrl\n    + \"/idaas/mtfim/sps/idaas/login?runtime=true\"\n- context: \"loginUrl = has(ctx.Target) && ctx.Target != '' ? context.loginUrl + '&Target=' + encodeURIComponent(ctx.Target) : context.loginUrl\"\n- return: >\n    {\n        \"loginURL\": context.loginUrl\n    }"
+            },
+            "output": [
+                "JSON"
+            ],
+            "position": {
+                "x": 451.02779833755676,
+                "y": 79.64660266919672
+            },
+            "taskType": "Function"
+        }
+    ],
+    "reference": "organization_ifa",
+    "propertiesSchemaVersion": 5
+}
