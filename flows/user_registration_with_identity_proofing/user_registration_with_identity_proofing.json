@@ -1,0 +1,339 @@
+{
+  "reference": "user_registration_with_identity_proofing",
+  "propertiesSchemaVersion": 5.0,
+  "model": [
+    {
+      "id": "Event_0onayf9",
+      "name": "Start",
+      "taskType": "Start",
+      "next": {
+        "node": "isv_user_form_1740071237668_customId",
+        "connectionLabel": "",
+        "connectionWayPoints": [
+          {
+            "x": 249.0,
+            "y": 160.0
+          },
+          {
+            "x": 249.0,
+            "y": 232.0
+          }
+        ]
+      },
+      "position": {
+        "x": 186.0,
+        "y": 120.0
+      }
+    },
+    {
+      "id": "Event_0yan7ej_customId",
+      "name": "End",
+      "taskType": "End",
+      "position": {
+        "x": 1187.0,
+        "y": 840.0
+      }
+    },
+    {
+      "id": "isv_page_1697523312770_customId",
+      "name": "Account creation confirmation",
+      "taskType": "Page",
+      "input": {
+        "templateName": "custom_page5",
+        "themeId": "8aeacca5-2cf6-4815-982c-fef1a7f49a8d",
+        "actionRequired": false
+      },
+      "next": {
+        "node": "Event_0yan7ej_customId",
+        "connectionLabel": "",
+        "connectionWayPoints": [
+          {
+            "x": 1094.0,
+            "y": 860.0
+          },
+          {
+            "x": 1187.0,
+            "y": 860.0
+          }
+        ]
+      },
+      "position": {
+        "x": 906.0,
+        "y": 822.0
+      }
+    },
+    {
+      "id": "isv_create_user_1698873553666_customId",
+      "name": "Create user",
+      "taskType": "CreateUser",
+      "output": [
+        "user"
+      ],
+      "next": {
+        "node": "Gateway_13gelji_customId",
+        "connectionLabel": "",
+        "connectionWayPoints": [
+          {
+            "x": 674.0,
+            "y": 860.0
+          },
+          {
+            "x": 745.0,
+            "y": 860.0
+          }
+        ]
+      },
+      "position": {
+        "x": 486.0,
+        "y": 822.0
+      }
+    },
+    {
+      "id": "Gateway_13gelji_customId",
+      "name": "",
+      "taskType": "ConditionPoint",
+      "branches": [
+        {
+          "condition": {
+            "type": "basic",
+            "condition": [
+              {
+                "@context@": [
+                  {
+                    "op": "hasProp",
+                    "vl": "user"
+                  }
+                ]
+              }
+            ]
+          },
+          "next": {
+            "node": "isv_page_1697523312770_customId",
+            "connectionLabel": "",
+            "connectionWayPoints": [
+              {
+                "x": 795.0,
+                "y": 860.0
+              },
+              {
+                "x": 906.0,
+                "y": 860.0
+              }
+            ]
+          }
+        },
+        {
+          "next": {
+            "node": "isv_page_1700919590195_customId",
+            "connectionLabel": "",
+            "connectionWayPoints": [
+              {
+                "x": 770.0,
+                "y": 885.0
+              },
+              {
+                "x": 770.0,
+                "y": 980.0
+              },
+              {
+                "x": 906.0,
+                "y": 980.0
+              }
+            ]
+          }
+        }
+      ],
+      "position": {
+        "x": 745.0,
+        "y": 835.0
+      }
+    },
+    {
+      "id": "isv_page_1700919590195_customId",
+      "name": "Error Page",
+      "taskType": "Page",
+      "input": {
+        "templateName": "custom_page4",
+        "themeId": "8aeacca5-2cf6-4815-982c-fef1a7f49a8d",
+        "actionRequired": false
+      },
+      "next": {
+        "node": "Event_0yan7ej_customId",
+        "connectionLabel": "",
+        "connectionWayPoints": [
+          {
+            "x": 1094.0,
+            "y": 1000.0
+          },
+          {
+            "x": 1250.0,
+            "y": 1000.0
+          },
+          {
+            "x": 1250.0,
+            "y": 880.0
+          }
+        ]
+      },
+      "position": {
+        "x": 906.0,
+        "y": 962.0
+      }
+    },
+    {
+      "id": "isv_user_form_1740071237668_customId",
+      "name": "User Attribute Collection Form",
+      "taskType": "UserForm",
+      "input": {
+        "formId": "ba7bf02b-0113-4aeb-a04a-40156a4b51ba",
+        "actionRequired": true
+      },
+      "output": [
+        "userFormData"
+      ],
+      "next": {
+        "node": "isv_identity_proofing_1740071272790_customId",
+        "connectionLabel": "",
+        "connectionWayPoints": [
+          {
+            "x": 249.0,
+            "y": 308.0
+          },
+          {
+            "x": 249.0,
+            "y": 352.0
+          }
+        ]
+      },
+      "position": {
+        "x": 155.0,
+        "y": 232.0
+      },
+      "metadata": {
+        "messageCatchEventOutWaypoints": [
+          {
+            "x": 249.0,
+            "y": 388.0
+          },
+          {
+            "x": 249.0,
+            "y": 422.0
+          }
+        ],
+        "messageCatchEventPosition": {
+          "x": 231.0,
+          "y": 352.0
+        },
+        "messageCatchEventRef": "user_registration_with_identity_proofing_1740071258091"
+      }
+    },
+    {
+      "id": "isv_identity_proofing_1740071272790_customId",
+      "name": "Identity Proofing Flow",
+      "taskType": "IdentityProofing",
+      "input": {
+        "actionRequired": true,
+        "flowId": "b51480e1-3f01-4c3c-a527-98742572e2a2"
+      },
+      "output": [
+        "identityProofingData",
+        "idpStatus"
+      ],
+      "next": {
+        "node": "Gateway_147ijsf_customId",
+        "connectionLabel": "",
+        "connectionWayPoints": [
+          {
+            "x": 249.0,
+            "y": 498.0
+          },
+          {
+            "x": 249.0,
+            "y": 552.0
+          }
+        ]
+      },
+      "position": {
+        "x": 155.0,
+        "y": 422.0
+      },
+      "metadata": {
+        "messageCatchEventOutWaypoints": [
+          {
+            "x": 249.0,
+            "y": 588.0
+          },
+          {
+            "x": 249.0,
+            "y": 835.0
+          }
+        ],
+        "messageCatchEventPosition": {
+          "x": 231.0,
+          "y": 552.0
+        },
+        "messageCatchEventRef": "user_registration_with_identity_proofing_1740071282642"
+      }
+    },
+    {
+      "id": "Gateway_147ijsf_customId",
+      "name": "",
+      "taskType": "ConditionPoint",
+      "branches": [
+        {
+          "condition": {
+            "type": "basic",
+            "condition": [
+              {
+                "@context.idpStatus@": [
+                  {
+                    "op": "eq",
+                    "vl": "approve"
+                  }
+                ]
+              }
+            ]
+          },
+          "next": {
+            "node": "isv_create_user_1698873553666_customId",
+            "connectionLabel": "Valid User",
+            "connectionWayPoints": [
+              {
+                "x": 274.0,
+                "y": 860.0
+              },
+              {
+                "x": 486.0,
+                "y": 860.0
+              }
+            ]
+          }
+        },
+        {
+          "next": {
+            "node": "isv_page_1700919590195_customId",
+            "connectionLabel": "Invalid User",
+            "connectionWayPoints": [
+              {
+                "x": 249.0,
+                "y": 885.0
+              },
+              {
+                "x": 249.0,
+                "y": 1020.0
+              },
+              {
+                "x": 906.0,
+                "y": 1020.0
+              }
+            ]
+          }
+        }
+      ],
+      "position": {
+        "x": 224.0,
+        "y": 835.0
+      }
+    }
+  ]
+}
