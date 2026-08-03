@@ -1,0 +1,346 @@
+{
+    "reference": "passkeyifa",
+    "propertiesSchemaVersion": 5,
+    "model": [
+        {
+            "id": "node-1-Start",
+            "name": "Start",
+            "position": {
+                "x": 200,
+                "y": 50
+            },
+            "taskType": "Start",
+            "next": {
+                "node": "node-2-Function",
+                "connectionWayPoints": [
+                    {
+                        "x": 263,
+                        "y": 90
+                    },
+                    {
+                        "x": 263,
+                        "y": 110
+                    },
+                    {
+                        "x": 263,
+                        "y": 105.90775106227514
+                    },
+                    {
+                        "x": 263,
+                        "y": 125.90775106227514
+                    }
+                ]
+            }
+        },
+        {
+            "id": "node-2-Function",
+            "name": "isAuthenticated",
+            "position": {
+                "x": 169,
+                "y": 125.90775106227514
+            },
+            "taskType": "Function",
+            "next": {
+                "node": "node-3-ConditionPoint",
+                "connectionWayPoints": [
+                    {
+                        "x": 263,
+                        "y": 201.90775106227514
+                    },
+                    {
+                        "x": 263,
+                        "y": 255.05304986264878
+                    }
+                ]
+            },
+            "input": {
+                "inputData": "statements:\n   - context: >\n       theme := has(ctx.themeId) ? ctx.themeId : \"\"\n   - context: >\n       postUrl := has(ctx.Target) && ctx.Target != \"\" ? ctx.Target : \"https://\" + ctx.__tenantid + \"/usc\"\n   - context: >\n       postUrl = context.postUrl.startsWith(\"/\") ? \"https://\" + ctx.__tenantid + context.postUrl : context.postUrl\n   - return: >\n       {\n           \"auth\": (has(idsuser.uid) ? \"true\" : \"false\"),\n           \"post_url\": context.postUrl\n       }\n"
+            },
+            "output": [
+                "JSON"
+            ]
+        },
+        {
+            "id": "node-3-ConditionPoint",
+            "name": "isAuthenticated",
+            "position": {
+                "x": 239,
+                "y": 255.05304986264878
+            },
+            "taskType": "ConditionPoint",
+            "branches": [
+                {
+                    "next": {
+                        "node": "node-5-Page",
+                        "connectionLabel": "No",
+                        "connectionWayPoints": [
+                            {
+                                "x": 263,
+                                "y": 303.0530498626488
+                            },
+                            {
+                                "x": 263,
+                                "y": 369.43589640112094
+                            }
+                        ]
+                    },
+                    "condition": {
+                        "type": "basic",
+                        "condition": [
+                            {
+                                "@context.auth@": [
+                                    {
+                                        "op": "eq",
+                                        "vl": "false"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                },
+                {
+                    "next": {
+                        "node": "node-7-Redirect",
+                        "connectionLabel": "Yes",
+                        "connectionWayPoints": [
+                            {
+                                "x": 239,
+                                "y": 279.0530498626488
+                            },
+                            {
+                                "x": -60.29655837266651,
+                                "y": 279.0530498626488
+                            },
+                            {
+                                "x": -60.29655837266651,
+                                "y": 465.2751175887122
+                            }
+                        ]
+                    },
+                    "condition": {
+                        "type": "basic",
+                        "condition": [
+                            {
+                                "@context.auth@": [
+                                    {
+                                        "op": "eq",
+                                        "vl": "true"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "id": "node-5-Page",
+            "name": "PromptForUsernameOrPasskey",
+            "position": {
+                "x": 169,
+                "y": 369.43589640112094
+            },
+            "taskType": "Page",
+            "next": {
+                "node": "node-9-Function",
+                "connectionWayPoints": [
+                    {
+                        "x": 263,
+                        "y": 445.43589640112094
+                    },
+                    {
+                        "x": 263,
+                        "y": 511.6681391529547
+                    }
+                ]
+            },
+            "input": {
+                "themeId": "default",
+                "templateName": "custom_page1",
+                "actionRequired": true
+            }
+        },
+        {
+            "id": "node-7-Redirect",
+            "name": "Redirect",
+            "position": {
+                "x": -154.2965583726665,
+                "y": 465.2751175887122
+            },
+            "taskType": "Redirect",
+            "next": {
+                "node": "node-12-End",
+                "connectionWayPoints": [
+                    {
+                        "x": -60.29655837266651,
+                        "y": 541.2751175887122
+                    },
+                    {
+                        "x": -60.29655837266651,
+                        "y": 885.8785180514211
+                    },
+                    {
+                        "x": 200,
+                        "y": 885.8785180514211
+                    }
+                ]
+            },
+            "input": {
+                "redirectUrl": "@context.post_url@",
+                "actionRequired": true
+            }
+        },
+        {
+            "id": "node-9-Function",
+            "name": "ProcessUserNameOrDoneNow",
+            "position": {
+                "x": 169,
+                "y": 511.6681391529547
+            },
+            "taskType": "Function",
+            "next": {
+                "node": "node-10-ConditionPoint",
+                "connectionWayPoints": [
+                    {
+                        "x": 263,
+                        "y": 587.6681391529547
+                    },
+                    {
+                        "x": 263,
+                        "y": 666.8891281368379
+                    }
+                ]
+            },
+            "input": {
+                "inputData": "statements:\n   - context: >\n       theme := has(ctx.themeId) ? ctx.themeId : \"\"\n   - context: >\n       submittedUsername := has(ctx.username) ? ctx.username : \"\"\n   - return: >\n       {\n           \"workflowDone\": (has(ctx.done) ? \"true\" : \"false\"),\n           \"loginUrl\": \"https://\" + ctx.__tenantid + \"/authsvc/mtfim/sps/authsvc?PolicyId=urn:ibm:security:authentication:asf:basicldapuser&login_hint=\" + context.submittedUsername + \"&themeId=\" + context.theme\n       }"
+            },
+            "output": [
+                "JSON"
+            ]
+        },
+        {
+            "id": "node-10-ConditionPoint",
+            "name": "isDone",
+            "position": {
+                "x": 239,
+                "y": 666.8891281368379
+            },
+            "taskType": "ConditionPoint",
+            "branches": [
+                {
+                    "next": {
+                        "node": "node-13-Redirect",
+                        "connectionLabel": "No",
+                        "connectionWayPoints": [
+                            {
+                                "x": 287,
+                                "y": 690.8891281368379
+                            },
+                            {
+                                "x": 410.0846830550547,
+                                "y": 690.8891281368379
+                            }
+                        ]
+                    },
+                    "condition": {
+                        "type": "basic",
+                        "condition": [
+                            {
+                                "@context.workflowDone@": [
+                                    {
+                                        "op": "eq",
+                                        "vl": "false"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                },
+                {
+                    "next": {
+                        "node": "node-11-Redirect",
+                        "connectionWayPoints": [
+                            {
+                                "x": 263,
+                                "y": 714.8891281368379
+                            },
+                            {
+                                "x": 263,
+                                "y": 781.7576438715971
+                            },
+                            {
+                                "x": 410.0846830550547,
+                                "y": 781.7576438715971
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "id": "node-11-Redirect",
+            "name": "RedirectToTarget",
+            "position": {
+                "x": 410.0846830550547,
+                "y": 781.7576438715971
+            },
+            "taskType": "Redirect",
+            "next": {
+                "node": "node-12-End",
+                "connectionWayPoints": [
+                    {
+                        "x": 504.0846830550547,
+                        "y": 857.7576438715971
+                    },
+                    {
+                        "x": 504.0846830550547,
+                        "y": 885.8785180514211
+                    },
+                    {
+                        "x": 326,
+                        "y": 885.8785180514211
+                    }
+                ]
+            },
+            "input": {
+                "redirectUrl": "@context.post_url@",
+                "actionRequired": false
+            }
+        },
+        {
+            "id": "node-12-End",
+            "name": "End",
+            "position": {
+                "x": 200,
+                "y": 865.8785180514211
+            },
+            "taskType": "End"
+        },
+        {
+            "id": "node-13-Redirect",
+            "name": "RedirectForLogin",
+            "position": {
+                "x": 410.0846830550547,
+                "y": 652.8891281368379
+            },
+            "taskType": "Redirect",
+            "next": {
+                "node": "node-11-Redirect",
+                "connectionWayPoints": [
+                    {
+                        "x": 504.0846830550547,
+                        "y": 728.8891281368379
+                    },
+                    {
+                        "x": 504.0846830550547,
+                        "y": 781.7576438715971
+                    }
+                ]
+            },
+            "input": {
+                "redirectUrl": "@context.loginUrl@&Target=WORKFLOW_CALLBACK_URL",
+                "actionRequired": true
+            }
+        }
+    ]
+}
