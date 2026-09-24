@@ -1,0 +1,280 @@
+{
+    "reference": "ldap_to_okta_migration",
+    "propertiesSchemaVersion": 5,
+    "model": [
+        {
+            "id": "Event_0onayf9",
+            "name": "Start",
+            "position": {
+                "x": 225,
+                "y": 0
+            },
+            "taskType": "Start",
+            "next": {
+                "node": "isv_function_1700885828231_customId",
+                "connectionLabel": "",
+                "connectionWayPoints": [
+                    {
+                        "x": 288,
+                        "y": 40
+                    },
+                    {
+                        "x": 288,
+                        "y": 115
+                    }
+                ]
+            }
+        },
+        {
+            "id": "isv_function_1700885828231_customId",
+            "name": "SetVars",
+            "position": {
+                "x": 194,
+                "y": 115
+            },
+            "taskType": "Function",
+            "next": {
+                "node": "isv_render_html_1697696636038_customId",
+                "connectionLabel": "",
+                "connectionWayPoints": [
+                    {
+                        "x": 288,
+                        "y": 191
+                    },
+                    {
+                        "x": 288,
+                        "y": 266
+                    }
+                ]
+            },
+            "input": {
+                "inputData": "{\n\"okta_tenant\" : \"https://<okta-hostname>\" ,\n\"onprem_realm\" : \"<onprem-realm>\"\n}"
+            },
+            "output": [
+                "JSON"
+            ]
+        },
+        {
+            "id": "isv_render_html_1697696636038_customId",
+            "name": "Ask for username",
+            "position": {
+                "x": 194,
+                "y": 266
+            },
+            "taskType": "Page",
+            "next": {
+                "node": "isv_fetch_user_1697696698558_customId",
+                "connectionLabel": "",
+                "connectionWayPoints": [
+                    {
+                        "x": 288,
+                        "y": 342
+                    },
+                    {
+                        "x": 288,
+                        "y": 417
+                    }
+                ]
+            },
+            "input": {
+                "themeId": "<theme-id>",
+                "templateName": "custom_page1",
+                "actionRequired": true
+            }
+        },
+        {
+            "id": "isv_fetch_user_1697696698558_customId",
+            "name": "Fetch user",
+            "position": {
+                "x": 194,
+                "y": 417
+            },
+            "taskType": "FetchUser",
+            "next": {
+                "node": "Gateway_1leq78m_customId",
+                "connectionLabel": "",
+                "connectionWayPoints": [
+                    {
+                        "x": 288,
+                        "y": 493
+                    },
+                    {
+                        "x": 288,
+                        "y": 568
+                    }
+                ]
+            },
+            "input": {
+                "userid": "@context.username@"
+            },
+            "output": [
+                "user"
+            ]
+        },
+        {
+            "id": "Gateway_1leq78m_customId",
+            "name": "",
+            "position": {
+                "x": 264,
+                "y": 568
+            },
+            "taskType": "ConditionPoint",
+            "branches": [
+                {
+                    "next": {
+                        "node": "isv_custom_rule_1697696726396_customId",
+                        "connectionLabel": "User found",
+                        "connectionWayPoints": [
+                            {
+                                "x": 264,
+                                "y": 592
+                            },
+                            {
+                                "x": 94,
+                                "y": 592
+                            },
+                            {
+                                "x": 94,
+                                "y": 691
+                            }
+                        ]
+                    },
+                    "condition": {
+                        "type": "basic",
+                        "condition": [
+                            {
+                                "@context@": [
+                                    {
+                                        "op": "hasProp",
+                                        "vl": "user"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                },
+                {
+                    "next": {
+                        "node": "isv_page_1701141519155_customId",
+                        "connectionLabel": "User not found / invalid username",
+                        "connectionWayPoints": [
+                            {
+                                "x": 312,
+                                "y": 592
+                            },
+                            {
+                                "x": 482,
+                                "y": 592
+                            },
+                            {
+                                "x": 482,
+                                "y": 842
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "id": "isv_custom_rule_1697696726396_customId",
+            "name": "Resolve IdP",
+            "position": {
+                "x": 0,
+                "y": 691
+            },
+            "taskType": "Function",
+            "next": {
+                "node": "isv_redirect_1697696974029_customId",
+                "connectionLabel": "",
+                "connectionWayPoints": [
+                    {
+                        "x": 94,
+                        "y": 767
+                    },
+                    {
+                        "x": 94,
+                        "y": 842
+                    }
+                ]
+            },
+            "input": {
+                "inputData": "statements:\n- context: \"theme := has(ctx.themeId) ? ctx.themeId : ''\"\n- context: \"identitySourceIds := has(ctx.identity_source_ids) ? ctx.identity_source_ids : ''\"\n- context: \"postUrl := has(ctx.Target) && ctx.Target != '' ? ctx.Target : 'https://' + ctx.__tenantid + '/usc'\"\n- context: \"realm := user != null && user.getCustomValue('migratedToOkta') == 'true' ? ctx.okta_tenant : ctx.onprem_realm\"\n- return: >\n    {\n        'loginUrl': 'https://' + ctx.__tenantid + '/idaas/mtfim/sps/idaas/login?runtime=true&login_hint=' + ctx.username + '&realm_hint=' + context.realm + '&themeId=' + context.theme + '&identity_source_ids=' + context.identitySourceIds,\n        \"post_url\": context.postUrl,\n        'realm': context.realm\n    }"
+            },
+            "output": [
+                "JSON"
+            ]
+        },
+        {
+            "id": "isv_redirect_1697696974029_customId",
+            "name": "User authentication",
+            "position": {
+                "x": 0,
+                "y": 842
+            },
+            "taskType": "Redirect",
+            "next": {
+                "node": "Event_0z486zv_customId",
+                "connectionLabel": "",
+                "connectionWayPoints": [
+                    {
+                        "x": 94,
+                        "y": 918
+                    },
+                    {
+                        "x": 94,
+                        "y": 1013
+                    },
+                    {
+                        "x": 225,
+                        "y": 1013
+                    }
+                ]
+            },
+            "input": {
+                "redirectUrl": "@context.loginUrl@&Target=@context.post_url@",
+                "actionRequired": false
+            }
+        },
+        {
+            "id": "isv_page_1701141519155_customId",
+            "name": "Error Page",
+            "position": {
+                "x": 388,
+                "y": 842
+            },
+            "taskType": "Page",
+            "next": {
+                "node": "Event_0z486zv_customId",
+                "connectionLabel": "",
+                "connectionWayPoints": [
+                    {
+                        "x": 482,
+                        "y": 918
+                    },
+                    {
+                        "x": 482,
+                        "y": 1013
+                    },
+                    {
+                        "x": 351,
+                        "y": 1013
+                    }
+                ]
+            },
+            "input": {
+                "themeId": "<theme-id>",
+                "templateName": "custom_page2",
+                "actionRequired": false
+            }
+        },
+        {
+            "id": "Event_0z486zv_customId",
+            "name": "End",
+            "position": {
+                "x": 225,
+                "y": 993
+            },
+            "taskType": "End"
+        }
+    ]
+}
