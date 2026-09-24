@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <base href="/" />
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" type="image/x-icon" href="/ui/assets/img/favicon.ico" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="shortcut icon" type="image/x-icon" href="usc/favicon.ico" />
+        <link rel="stylesheet" href="usc/css/stateless.css" />
+        <!-- Optionally override carbon styles using the common theme.css (common/page_components/default/page_style.css in Theme files) -->
+        <link rel="stylesheet" href="/template/v1.0/static/theme.css?themeId=@THEME_ID@" />
+        <!---->
+        <title>Email Verification Error</title>
+        <style>
+            .error-alert {
+                background-color: #fff1f1;
+                border-left: 3px solid #da1e28;
+                padding: 1rem;
+                margin-bottom: 1.5rem;
+                border-radius: 4px;
+                display: flex;
+                align-items: flex-start;
+            }
+            
+            .error-alert-icon {
+                flex-shrink: 0;
+                margin-right: 0.75rem;
+                margin-top: 0.125rem;
+            }
+            
+            .error-alert-icon svg {
+                width: 20px;
+                height: 20px;
+                fill: #da1e28;
+            }
+            
+            .error-alert-content {
+                flex: 1;
+            }
+            
+            .error-alert-title {
+                font-size: 0.875rem;
+                font-weight: 600;
+                color: #da1e28;
+                margin-bottom: 0.25rem;
+            }
+            
+            .error-alert-message {
+                font-size: 0.875rem;
+                color: #525252;
+                line-height: 1.4;
+            }
+            
+            .email-details {
+                background-color: #f4f4f4;
+                padding: 0.75rem;
+                margin-top: 0.75rem;
+                border-radius: 4px;
+                font-size: 0.875rem;
+            }
+            
+            .email-details strong {
+                color: #161616;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="cs-content login">
+            <div class='heading' style="margin-top: 250px;">
+            </div>
+            
+            <!-- Error Alert -->
+            <div class="error-alert">
+                <div class="error-alert-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+                        <path d="M16,2A14,14,0,1,0,30,16,14,14,0,0,0,16,2Zm0,26A12,12,0,1,1,28,16,12,12,0,0,1,16,28Z"/>
+                        <path d="M15,8h2v11H15Z"/>
+                        <circle cx="16" cy="22" r="1.5"/>
+                    </svg>
+                </div>
+                <div class="error-alert-content">
+                    <div class="error-alert-title" id="error-title">Email Verification Failed</div>
+                    <div class="error-alert-message" id="error-message">
+                        The email address you provided does not match the email address associated with this invitation.
+                        <div class="email-details" id="email-details">
+                            <div><strong>Invitation Email:</strong> <span id="invite-email">@context.invite_email@</span></div>
+                            <div><strong>Provided Email:</strong> <span id="user-email">@context.user_email@</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="login-main">
+                <form method="POST" action="@WORKFLOW_CALLBACK_URL@">
+                    <input type="hidden" name="action" value="restart" />
+                    <button class="button button-1 ease-in-anim-fast login" type="submit" style="margin-bottom: 1rem;">
+                        Close
+                    </button>
+                </form>
+                
+                <div style="text-align: center; margin-top: 1rem;">
+                    <p style="font-size: 0.875rem; color: #525252;">
+                        Please ensure you use the email address that received the invitation.
+                    </p>
+                </div>
+            </div>
+            
+            @PAGE_FOOTER@
+        </div>
+        <script type="text/javascript" src="/profile/static/carbon-components.min.js"></script>
+        <script type="text/javascript" src="/usc/js/ieCheck.js"></script>
+        <!---->
+        <script type="text/javascript">
+            // Check if context variables are available and show appropriate error message
+            document.addEventListener('DOMContentLoaded', function() {
+                const inviteEmailElement = document.getElementById('invite-email');
+                const userEmailElement = document.getElementById('user-email');
+                const emailDetailsElement = document.getElementById('email-details');
+                const errorMessageElement = document.getElementById('error-message');
+                const errorTitleElement = document.getElementById('error-title');
+                
+                // Get the text content and check if it contains the placeholder pattern
+                const inviteEmail = inviteEmailElement.textContent.trim();
+                const userEmail = userEmailElement.textContent.trim();
+                
+                // Check if either email is missing or still contains the placeholder pattern
+                const isInviteEmailMissing = !inviteEmail || inviteEmail.includes('@context.') || inviteEmail === '';
+                const isUserEmailMissing = !userEmail || userEmail.includes('@context.') || userEmail === '';
+                
+                if (isInviteEmailMissing || isUserEmailMissing) {
+                    // Show generic error message
+                    errorTitleElement.textContent = 'Invitation Error';
+                    errorMessageElement.innerHTML = 'Error while processing invitation request. Please contact your administrator or try again later.';
+                    console.log('Context variables missing - showing generic error message');
+                } else {
+                    console.log('Context variables available - showing detailed error message');
+                }
+            });
+        </script>
+    </body>
+</html>

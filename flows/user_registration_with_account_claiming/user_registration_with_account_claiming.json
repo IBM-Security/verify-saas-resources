@@ -1,0 +1,439 @@
+{
+    "reference": "user_registration_with_account_claiming",
+    "propertiesSchemaVersion": 5,
+    "model": [
+        {
+            "id": "Event_0onayf9",
+            "name": "Start",
+            "position": {
+                "x": 225,
+                "y": 0
+            },
+            "taskType": "Start",
+            "next": {
+                "node": "isv_user_form_1697198558555_customId",
+                "connectionLabel": "",
+                "connectionWayPoints": [
+                    {
+                        "x": 288,
+                        "y": 40
+                    },
+                    {
+                        "x": 288,
+                        "y": 115
+                    }
+                ]
+            }
+        },
+        {
+            "id": "isv_user_form_1697198558555_customId",
+            "name": "Registration form (gather policy id )",
+            "position": {
+                "x": 194,
+                "y": 115
+            },
+            "taskType": "UserForm",
+            "next": {
+                "node": "isv_function_1700887117091_customId",
+                "connectionWayPoints": [
+                    {
+                        "x": 288,
+                        "y": 191
+                    },
+                    {
+                        "x": 288,
+                        "y": 266
+                    }
+                ]
+            },
+            "input": {
+                "formId": "<your-gather-policy-id-form-id>",
+                "actionRequired": true
+            },
+            "output": [
+                "userFormData"
+            ]
+        },
+        {
+            "id": "isv_function_1700887117091_customId",
+            "name": "Set Vars",
+            "position": {
+                "x": 194,
+                "y": 266
+            },
+            "taskType": "Function",
+            "next": {
+                "node": "isv_function_1697383610348_customId",
+                "connectionLabel": "",
+                "connectionWayPoints": [
+                    {
+                        "x": 288,
+                        "y": 342
+                    },
+                    {
+                        "x": 288,
+                        "y": 417
+                    }
+                ]
+            },
+            "input": {
+                "inputData": "statements:\n- return: >\n        {\n            \"thirdPartyIdentitySource\": \"<your-third-party-tenant-hostname>\",\n            \"client_id\": \"<your-client-id>\",\n            \"client_secret\": \"<your-client-secret>\"\n        }"
+            },
+            "output": [
+                "JSON"
+            ]
+        },
+        {
+            "id": "isv_function_1697383610348_customId",
+            "name": "Fetch user owning the policy",
+            "position": {
+                "x": 194,
+                "y": 417
+            },
+            "taskType": "Function",
+            "next": {
+                "node": "Gateway_106iuup_customId",
+                "connectionLabel": "",
+                "connectionWayPoints": [
+                    {
+                        "x": 288,
+                        "y": 493
+                    },
+                    {
+                        "x": 288,
+                        "y": 568
+                    }
+                ]
+            },
+            "input": {
+                "inputData": "statements:\n  - return: >\n      {\n        \"existingUser\": hc.GetAsJson(\n          \"https://\" + ctx.thirdPartyIdentitySource +\n          \"/v2.0/Users?filter=%28urn%3Aietf%3Aparams%3Ascim%3Aschemas%3Aextension%3Aibm%3A2.0%3AUser%3AcustomAttributes.policyid%20eq%20%22\" +\n          ctx.userFormData.userData.policyId +\n          \"%22%29\",\n          {\n            \"Authorization\": \"Bearer \" +\n              hc.Post(\n                \"https://\" + ctx.thirdPartyIdentitySource + \"/v1.0/endpoint/default/token\",\n                {\"Content-Type\": \"application/x-www-form-urlencoded\"},\n                \"client_id=\" + ctx.client_id +\n                \"&client_secret=\" + ctx.client_secret +\n                \"&grant_type=client_credentials\"\n              ).responseBody.access_token,\n            \"Accept\": \"application/scim+json\"\n          }\n        )\n      }"
+            },
+            "output": [
+                "JSON"
+            ]
+        },
+        {
+            "id": "Gateway_106iuup_customId",
+            "name": "",
+            "position": {
+                "x": 264,
+                "y": 568
+            },
+            "taskType": "ConditionPoint",
+            "branches": [
+                {
+                    "next": {
+                        "node": "isv_function_1697715148278_customId",
+                        "connectionLabel": "Valid Policy",
+                        "connectionWayPoints": [
+                            {
+                                "x": 264,
+                                "y": 592
+                            },
+                            {
+                                "x": 154,
+                                "y": 592
+                            },
+                            {
+                                "x": 154,
+                                "y": 691
+                            }
+                        ]
+                    },
+                    "condition": {
+                        "type": "basic",
+                        "condition": [
+                            {
+                                "@context@": [
+                                    {
+                                        "op": "hasProp",
+                                        "vl": "existingUser"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                },
+                {
+                    "next": {
+                        "node": "isv_page_1700919590195_customId",
+                        "connectionLabel": "Invalid Policy",
+                        "connectionWayPoints": [
+                            {
+                                "x": 312,
+                                "y": 592
+                            },
+                            {
+                                "x": 517,
+                                "y": 592
+                            },
+                            {
+                                "x": 517,
+                                "y": 1380.5
+                            },
+                            {
+                                "x": 482,
+                                "y": 1380.5
+                            },
+                            {
+                                "x": 482,
+                                "y": 1418
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "id": "isv_function_1697715148278_customId",
+            "name": "Map user details to context",
+            "position": {
+                "x": 60,
+                "y": 691
+            },
+            "taskType": "Function",
+            "next": {
+                "node": "isv_user_form_1697467264068_customId",
+                "connectionLabel": "",
+                "connectionWayPoints": [
+                    {
+                        "x": 154,
+                        "y": 767
+                    },
+                    {
+                        "x": 154,
+                        "y": 842
+                    }
+                ]
+            },
+            "input": {
+                "inputData": "statements:\n  - context: userName := ctx.existingUser.Resources[0].userName\n  - context: givenName := ctx.existingUser.Resources[0].name.givenName\n  - context: familyName := ctx.existingUser.Resources[0].name.familyName\n  - context: updateddata := ctx.existingUser.Resources[0]['urn:ietf:params:scim:schemas:extension:ibm:2.0:User'].remove(\"pwdReset\").remove(\"twoFactorAuthentication\").remove(\"customAttributes\")\n  - context: updateddataname := ctx.existingUser.Resources[0]['name']\n  - context: updatedEmail := ctx.existingUser.Resources[0].emails[0].value\n  - if:\n      match: has(ctx.userFormData.userData)\n      block:\n        - context: updatedData :=  ctx.userFormData.userData.putAll(context.updateddata)\n        - context: updatedDataWithUserName := ctx.userFormData.userData.put(\"32\", context.userName)\n        - context: updatedDataWithEmail := ctx.userFormData.userData.put(\"3\", context.updatedEmail)\n        - context: updatedDataWithGivenName := ctx.userFormData.userData.put(\"6\", context.givenName)\n        - context: updatedDataWithFamilyName := ctx.userFormData.userData.put(\"7\", context.familyName)\n        - context: updatedDataWithName :=  ctx.userFormData.userData.putAll(context.updateddataname)\n        - statement: ctx.put('userFormData.userData',context.updatedDataWithName)\n        - context: payload := {}.put('userFormData',ctx.userFormData)\n        - return: context.payload"
+            },
+            "output": [
+                "JSON"
+            ]
+        },
+        {
+            "id": "isv_user_form_1697467264068_customId",
+            "name": "User registration form",
+            "position": {
+                "x": 60,
+                "y": 842
+            },
+            "taskType": "UserForm",
+            "next": {
+                "node": "isv_user_form_1698873412984_customId",
+                "connectionLabel": "",
+                "connectionWayPoints": [
+                    {
+                        "x": 154,
+                        "y": 918
+                    },
+                    {
+                        "x": 154,
+                        "y": 993
+                    }
+                ]
+            },
+            "input": {
+                "formId": "<your-user-registration-form-id>",
+                "actionRequired": true
+            },
+            "output": [
+                "userFormData"
+            ]
+        },
+        {
+            "id": "isv_user_form_1698873412984_customId",
+            "name": "User registration form - Additional",
+            "position": {
+                "x": 60,
+                "y": 993
+            },
+            "taskType": "UserForm",
+            "next": {
+                "node": "isv_create_user_1698873553666_customId",
+                "connectionWayPoints": [
+                    {
+                        "x": 154,
+                        "y": 1069
+                    },
+                    {
+                        "x": 154,
+                        "y": 1144
+                    }
+                ]
+            },
+            "input": {
+                "formId": "<your-user-registration-additional-form-id>",
+                "actionRequired": true
+            },
+            "output": [
+                "userFormData"
+            ]
+        },
+        {
+            "id": "isv_create_user_1698873553666_customId",
+            "name": "Create user",
+            "position": {
+                "x": 60,
+                "y": 1144
+            },
+            "taskType": "CreateUser",
+            "next": {
+                "node": "Gateway_13gelji_customId",
+                "connectionLabel": "",
+                "connectionWayPoints": [
+                    {
+                        "x": 154,
+                        "y": 1220
+                    },
+                    {
+                        "x": 154,
+                        "y": 1295
+                    }
+                ]
+            },
+            "output": [
+                "user"
+            ]
+        },
+        {
+            "id": "Gateway_13gelji_customId",
+            "name": "",
+            "position": {
+                "x": 130,
+                "y": 1295
+            },
+            "taskType": "ConditionPoint",
+            "branches": [
+                {
+                    "next": {
+                        "node": "isv_page_1697523312770_customId",
+                        "connectionLabel": "",
+                        "connectionWayPoints": [
+                            {
+                                "x": 130,
+                                "y": 1319
+                            },
+                            {
+                                "x": 94,
+                                "y": 1319
+                            },
+                            {
+                                "x": 94,
+                                "y": 1418
+                            }
+                        ]
+                    },
+                    "condition": {
+                        "type": "basic",
+                        "condition": [
+                            {
+                                "@context@": [
+                                    {
+                                        "op": "hasProp",
+                                        "vl": "user"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                },
+                {
+                    "next": {
+                        "node": "isv_page_1700919590195_customId",
+                        "connectionLabel": "",
+                        "connectionWayPoints": [
+                            {
+                                "x": 178,
+                                "y": 1319
+                            },
+                            {
+                                "x": 482,
+                                "y": 1319
+                            },
+                            {
+                                "x": 482,
+                                "y": 1418
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "id": "isv_page_1697523312770_customId",
+            "name": "Account creation confirmition",
+            "position": {
+                "x": 0,
+                "y": 1418
+            },
+            "taskType": "Page",
+            "next": {
+                "node": "Event_0yan7ej_customId",
+                "connectionLabel": "",
+                "connectionWayPoints": [
+                    {
+                        "x": 94,
+                        "y": 1494
+                    },
+                    {
+                        "x": 94,
+                        "y": 1589
+                    },
+                    {
+                        "x": 225,
+                        "y": 1589
+                    }
+                ]
+            },
+            "input": {
+                "themeId": "<your-theme-id>",
+                "templateName": "custom_page5",
+                "actionRequired": false
+            }
+        },
+        {
+            "id": "isv_page_1700919590195_customId",
+            "name": "Error Page",
+            "position": {
+                "x": 388,
+                "y": 1418
+            },
+            "taskType": "Page",
+            "next": {
+                "node": "Event_0yan7ej_customId",
+                "connectionLabel": "",
+                "connectionWayPoints": [
+                    {
+                        "x": 482,
+                        "y": 1494
+                    },
+                    {
+                        "x": 482,
+                        "y": 1589
+                    },
+                    {
+                        "x": 351,
+                        "y": 1589
+                    }
+                ]
+            },
+            "input": {
+                "themeId": "<your-theme-id>",
+                "templateName": "custom_page4",
+                "actionRequired": false
+            }
+        },
+        {
+            "id": "Event_0yan7ej_customId",
+            "name": "End",
+            "position": {
+                "x": 225,
+                "y": 1569
+            },
+            "taskType": "End"
+        }
+    ]
+}

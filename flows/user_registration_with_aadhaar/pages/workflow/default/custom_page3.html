@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <base href="/" />
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="shortcut icon" type="image/x-icon" href="/ui/assets/img/favicon.ico" />
+    <link rel="stylesheet" href="/usc/css/stateless.css" />
+    <link rel="stylesheet" href="/template/v1.0/static/theme.css?themeId=@THEME_ID@" />
+    <title>TrustMe Insurance - Error</title>
+    <style>
+        :root {
+            --trustme-primary: #00468C;
+            --trustme-secondary: #5cb3cc;
+            --trustme-dark: #1a1a1a;
+            --trustme-text: #4a4a4a;
+            --trustme-light-bg: #f8f9fa;
+            --trustme-border: #e0e0e0;
+            --error-bg: #fff1f1;
+            --error-border: #f2c6c6;
+            --error-text: #a2191f;
+            --error-gradient: linear-gradient(180deg, #ff6b6b, #d12727);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            margin: 0;
+            font-family: 'IBM Plex Sans', 'Open Sans', Arial, sans-serif;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e8f4f8 100%);
+            color: var(--trustme-dark);
+        }
+
+        .error-wrapper {
+            min-height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 30px 20px;
+        }
+
+        .error-container {
+            width: 100%;
+            max-width: 900px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0, 70, 140, 0.15);
+            overflow: hidden;
+        }
+
+        /* Header Section */
+        .error-header {
+            background: linear-gradient(135deg, var(--trustme-primary) 0%, var(--trustme-secondary) 100%);
+            padding: 25px 30px;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .trustme-logo svg {
+            width: 180px;
+            height: 35px;
+        }
+
+        .header-title {
+            flex: 1;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        /* Error Content */
+        .error-content {
+            padding: 30px;
+        }
+
+        .error-banner {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 20px;
+            border-radius: 8px;
+            background: var(--error-bg);
+            border: 2px solid var(--error-border);
+            margin-bottom: 20px;
+        }
+
+        .error-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--error-gradient);
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(209, 39, 39, 0.3);
+        }
+
+        .error-icon::before {
+            content: "!";
+            color: white;
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .error-message {
+            flex: 1;
+        }
+
+        .error-title {
+            color: var(--error-text);
+            font-weight: 700;
+            font-size: 18px;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+
+        .error-description {
+            color: var(--trustme-text);
+            font-size: 14px;
+            line-height: 1.6;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            word-break: break-word;
+        }
+
+        /* Action Bar */
+        .action-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px 20px;
+            background: var(--trustme-light-bg);
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--trustme-secondary) 0%, var(--trustme-primary) 100%);
+            color: white;
+            box-shadow: 0 2px 8px rgba(0, 70, 140, 0.2);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 70, 140, 0.3);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--trustme-primary);
+            border: 2px solid var(--trustme-primary);
+        }
+
+        .btn-secondary:hover {
+            background: var(--trustme-light-bg);
+        }
+
+        .details-toggle {
+            background: none;
+            border: none;
+            color: var(--trustme-primary);
+            cursor: pointer;
+            padding: 8px 12px;
+            font-size: 13px;
+            font-weight: 600;
+            text-decoration: underline;
+            transition: color 0.3s ease;
+        }
+
+        .details-toggle:hover {
+            color: var(--trustme-secondary);
+        }
+
+        /* Details Panel */
+        .details-panel {
+            display: none;
+            padding: 20px;
+            border-radius: 8px;
+            background: var(--trustme-light-bg);
+            border: 1px solid var(--trustme-border);
+            margin-top: 20px;
+        }
+
+        .details-panel.show {
+            display: block;
+        }
+
+        .detail-item {
+            margin-bottom: 15px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .detail-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: var(--trustme-primary);
+            margin-bottom: 5px;
+        }
+
+        .detail-value {
+            color: var(--trustme-text);
+        }
+
+        .support-link {
+            color: var(--trustme-primary);
+            text-decoration: none;
+            font-weight: 600;
+            word-break: break-all;
+        }
+
+        .support-link:hover {
+            text-decoration: underline;
+        }
+
+        .reference-code {
+            background: white;
+            padding: 10px 15px;
+            border-radius: 6px;
+            border: 1px solid var(--trustme-border);
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            color: var(--trustme-dark);
+            margin-top: 8px;
+        }
+
+        /* Footer */
+        .error-footer {
+            padding: 20px 30px;
+            background: var(--trustme-light-bg);
+            border-top: 1px solid var(--trustme-border);
+            text-align: center;
+            font-size: 13px;
+            color: var(--trustme-text);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .error-header {
+                flex-direction: column;
+                text-align: center;
+                padding: 20px;
+            }
+
+            .error-content {
+                padding: 20px;
+            }
+
+            .error-banner {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .action-bar {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .action-buttons {
+                width: 100%;
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                text-align: center;
+            }
+
+            .error-title {
+                font-size: 16px;
+            }
+
+            .error-description {
+                font-size: 13px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="error-wrapper">
+        <div class="error-container" role="alert" aria-live="assertive">
+            <!-- Header -->
+            <div class="error-header">
+                <div class="trustme-logo">
+                    <svg width="100%" height="35" viewBox="0 0 280 40" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMid meet">
+                        <text x="0" y="30" font-family="'Open Sans', sans-serif" font-size="28" font-weight="700" fill="#ffffff">TrustMe</text>
+                        <text x="125" y="30" font-family="'Open Sans', sans-serif" font-size="20" font-weight="400" fill="#ffffff">Insurance</text>
+                    </svg>
+                </div>
+                <div class="header-title">Something went wrong</div>
+            </div>
+
+            <!-- Error Content -->
+            <div class="error-content">
+                <div class="error-banner">
+                    <div class="error-icon" aria-hidden="true"></div>
+                    <div class="error-message">
+                        <div class="error-title" id="mainErrorMsg">
+                            @context.message_id@ @context.message_description@
+                        </div>
+                        <div class="error-description">
+                            We encountered an issue while processing your request. Please try again or contact support if the problem persists.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="action-bar">
+                    <div></div>
+                    <button id="detailsButton" class="details-toggle" aria-expanded="false">
+                        View Technical Details
+                    </button>
+                </div>
+
+                <div id="detailsPanel" class="details-panel" aria-hidden="true">
+                    <div class="detail-item">
+                        <div class="detail-label">Error Reference Code:</div>
+                        <div class="reference-code" id="errorCode">@context.message_id@</div>
+                    </div>
+
+                    <div class="detail-item">
+                        <div class="detail-label">Occurred at:</div>
+                        <div class="detail-value" id="timestamp">@TIMESTAMP@</div>
+                    </div>
+
+                    <div class="detail-item">
+                        <div class="detail-label">Need Help?</div>
+                        <div class="detail-value">
+                            If you continue to experience issues, please contact our support team:
+                            <br>
+                            <a class="support-link" href="https://www-01.ibm.com/software/security/ibm-saas/support/index.html" target="_blank" rel="noopener">
+                                IBM Security Support Portal
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="detail-item">
+                        <div class="detail-value" style="font-size: 12px; color: var(--trustme-text);">
+                            <strong>Tip:</strong> When contacting support, please provide the error reference code shown above to help us assist you more quickly.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="error-footer">
+                © 2024 TrustMe Insurance. All rights reserved.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // Toggle details panel
+            var detailsButton = document.getElementById('detailsButton');
+            var detailsPanel = document.getElementById('detailsPanel');
+            
+            detailsButton.addEventListener('click', function() {
+                var isExpanded = detailsButton.getAttribute('aria-expanded') === 'true';
+                
+                detailsButton.setAttribute('aria-expanded', String(!isExpanded));
+                detailsPanel.classList.toggle('show');
+                detailsPanel.setAttribute('aria-hidden', String(isExpanded));
+                detailsButton.textContent = isExpanded ? 'View Technical Details' : 'Hide Technical Details';
+            });
+
+            // Replace timestamp token with current time
+            var timestampElement = document.getElementById('timestamp');
+            if (timestampElement && timestampElement.textContent.indexOf('@TIMESTAMP@') !== -1) {
+                timestampElement.textContent = new Date().toLocaleString();
+            }
+        })();
+    </script>
+</body>
+</html>

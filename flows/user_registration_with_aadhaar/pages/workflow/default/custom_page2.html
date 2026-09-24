@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <base href="/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="shortcut icon" href="/ui/assets/img/favicon.ico" />
+    <title>TrustMeInsurance - Registration Successful</title>
+    <style>
+        :root {
+            --trustme-primary: #00468C;
+            --trustme-secondary: #5cb3cc;
+            --trustme-dark: #1a1a1a;
+            --trustme-text: #4a4a4a;
+            --trustme-light-bg: #f8f9fa;
+            --trustme-border: #e0e0e0;
+            --success-bg: #defbe6;
+            --success-text: #0b803a;
+            --success-gradient: linear-gradient(180deg, #daf8e4, #c6f0d8);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            margin: 0;
+            font-family: 'IBM Plex Sans', 'Open Sans', Arial, sans-serif;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e8f4f8 100%);
+            color: var(--trustme-dark);
+        }
+
+        .success-wrapper {
+            min-height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 30px 20px;
+        }
+
+        .success-container {
+            background: white;
+            max-width: 800px;
+            width: 100%;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0, 70, 140, 0.15);
+            overflow: hidden;
+        }
+
+        /* Header Section */
+        .success-header {
+            background: linear-gradient(135deg, var(--trustme-primary) 0%, var(--trustme-secondary) 100%);
+            padding: 25px 30px;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .trustme-logo svg {
+            width: 180px;
+            height: 35px;
+        }
+
+        .header-title {
+            flex: 1;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        /* Success Content */
+        .success-content {
+            padding: 40px;
+        }
+
+        .success-banner {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 25px;
+            border-radius: 8px;
+            background: var(--success-bg);
+            border: 2px solid #c6f0d8;
+            margin-bottom: 30px;
+        }
+
+        .success-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: var(--success-gradient);
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--success-text);
+            font-size: 36px;
+            font-weight: 700;
+            box-shadow: 0 4px 12px rgba(11, 128, 58, 0.3);
+        }
+
+        .success-message {
+            flex: 1;
+        }
+
+        .success-title {
+            color: var(--success-text);
+            font-weight: 700;
+            font-size: 22px;
+            margin-bottom: 8px;
+        }
+
+        .success-description {
+            color: var(--trustme-text);
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        /* Data Grid */
+        .data-section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--trustme-primary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 15px;
+        }
+
+        .data-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .data-item {
+            padding: 15px;
+            border-radius: 8px;
+            background: var(--trustme-light-bg);
+            border: 1px solid var(--trustme-border);
+        }
+
+        .data-label {
+            font-size: 12px;
+            color: var(--trustme-text);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            margin-bottom: 8px;
+        }
+
+        .data-value {
+            font-size: 15px;
+            color: var(--trustme-dark);
+            font-weight: 500;
+            word-break: break-word;
+        }
+
+        /* Action Section */
+        .action-section {
+            background: var(--trustme-light-bg);
+            padding: 25px;
+            border-radius: 8px;
+            border: 2px solid var(--trustme-border);
+            text-align: center;
+        }
+
+        .action-message {
+            font-size: 14px;
+            color: var(--trustme-text);
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 14px 40px;
+            border-radius: 6px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--trustme-secondary) 0%, var(--trustme-primary) 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(0, 70, 140, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 70, 140, 0.4);
+        }
+
+        .redirect-note {
+            margin-top: 15px;
+            font-size: 13px;
+            color: var(--trustme-text);
+        }
+
+        /* Footer */
+        .success-footer {
+            padding: 20px 30px;
+            background: var(--trustme-light-bg);
+            border-top: 1px solid var(--trustme-border);
+            text-align: center;
+            font-size: 13px;
+            color: var(--trustme-text);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .success-header {
+                flex-direction: column;
+                text-align: center;
+                padding: 20px;
+            }
+
+            .success-content {
+                padding: 25px 20px;
+            }
+
+            .success-banner {
+                flex-direction: column;
+                text-align: center;
+                padding: 20px;
+            }
+
+            .data-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .success-title {
+                font-size: 20px;
+            }
+
+            .success-description {
+                font-size: 14px;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="success-wrapper">
+        <div class="success-container" role="status" aria-live="polite">
+            <!-- Header -->
+            <div class="success-header">
+                <div class="trustme-logo">
+                    <svg width="100%" height="35" viewBox="0 0 280 40" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMid meet">
+                        <text x="0" y="30" font-family="'Open Sans', sans-serif">
+                          <tspan font-size="30" font-weight="700" fill="#ffffff">TrustMe</tspan><tspan font-size="32" font-weight="400" fill="#ffffff">Insurance</tspan>
+                        </text>
+                        <!--<text x="0" y="30" font-family="'Open Sans', sans-serif" font-size="28" font-weight="700" fill="#ffffff">TrustMe</text>-->
+                        <!--<text x="125" y="30" font-family="'Open Sans', sans-serif" font-size="20" font-weight="400" fill="#ffffff">Insurance</text>-->
+                    </svg>
+                </div>
+                <div class="header-title">Welcome to TrustMeInsurance</div>
+            </div>
+
+            <!-- Success Content -->
+            <div class="success-content">
+                <div class="success-banner">
+                    <div class="success-icon" aria-hidden="true">✓</div>
+                    <div class="success-message">
+                        <div class="success-title">Registration Successful!</div>
+                        <div class="success-description">
+                            Your DigiLocker has been successfully linked to your TrustMeInsurance account. Your identity has been verified and your profile is now complete.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Verified Data Section -->
+                <div class="data-section">
+                    <div class="section-title">Verified DigiLocker Information</div>
+                    <div class="data-grid" aria-label="Linked DigiLocker data summary">
+                        <div class="data-item">
+                            <div class="data-label">Full Name</div>
+                            <div class="data-value">@context.name_validation.digi_name@</div>
+                        </div>
+                        <div class="data-item">
+                            <div class="data-label">Email Address</div>
+                            <div class="data-value">@context.email_validation.digi_email@</div>
+                        </div>
+                        <div class="data-item">
+                            <div class="data-label">Phone Number</div>
+                            <div class="data-value">@context.phone_validation.digi_phone_no@</div>
+                        </div>
+                        <div class="data-item">
+                            <div class="data-label">Date of Birth</div>
+                            <div class="data-value">@context.dob_validation.digi_dob@</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Section -->
+                <div class="action-section">
+                    <div class="action-message">
+                        <strong>You're all set!</strong> Click the button below to continue to your TrustMeInsurance dashboard and start exploring your coverage options.
+                    </div>
+                    <a id="continueBtn" class="btn btn-primary" href="@context.app_login_link@">
+                        Continue to Dashboard
+                    </a>
+                    <div class="redirect-note">
+                        You will be securely redirected to complete your sign-in.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="success-footer">
+                © 2024 TrustMe Insurance. All rights reserved.
+            </div>
+        </div>
+    </div>
+</body>
+</html>

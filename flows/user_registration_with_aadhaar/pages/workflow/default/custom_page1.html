@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <base href="/" />
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="shortcut icon" type="image/x-icon" href="/ui/assets/img/favicon.ico" />
+    <link rel="stylesheet" href="/profile/static/carbon-components.min.css">
+    <link rel="stylesheet" href="/template/v1.0/static/theme.css?themeId=@THEME_ID@" />
+    <title>TrustMeInsurance - Aadhaar Verification</title>
+    <style>
+        :root {
+            --trustme-primary: #00468C;
+            --trustme-secondary: #5cb3cc;
+            --trustme-dark: #1a1a1a;
+            --trustme-text: #4a4a4a;
+            --trustme-light-bg: #f8f9fa;
+            --trustme-border: #e0e0e0;
+            --success-bg: #defbe6;
+            --success-text: #0b803a;
+            --warning-bg: #fff7e6;
+            --warning-text: #8a5700;
+            --error-bg: #fff1f1;
+            --error-text: #a2191f;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'IBM Plex Sans', 'Open Sans', Arial, sans-serif;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e8f4f8 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--trustme-dark);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .consent-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 70, 140, 0.15);
+            overflow: hidden;
+        }
+
+        /* Header Section */
+        .consent-header {
+            background: linear-gradient(135deg, var(--trustme-primary) 0%, var(--trustme-secondary) 100%);
+            padding: 30px 40px;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .trustme-logo {
+            flex-shrink: 0;
+        }
+
+        .trustme-logo svg {
+            width: 200px;
+            height: 40px;
+        }
+
+        .header-title {
+            flex: 1;
+        }
+
+        .header-title h1 {
+            font-size: 24px;
+            font-weight: 600;
+            margin: 0 0 5px 0;
+        }
+
+        .header-title p {
+            font-size: 14px;
+            opacity: 0.9;
+            margin: 0;
+        }
+
+        /* Content Section */
+        .consent-content {
+            padding: 40px;
+        }
+
+        .verification-grid {
+            display: grid;
+            grid-template-columns: 140px 1fr 1fr 160px;
+            gap: 20px;
+            align-items: start;
+            margin-bottom: 30px;
+        }
+
+        .aadhaar-photo {
+            width: 130px;
+            height: 130px;
+            border-radius: 8px;
+            border: 3px solid var(--trustme-border);
+            object-fit: cover;
+            grid-row: 1 / 5;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .field-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding: 12px;
+            background: var(--trustme-light-bg);
+            border-radius: 6px;
+        }
+
+        .field-label {
+            font-weight: 600;
+            color: var(--trustme-primary);
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .field-source {
+            font-size: 11px;
+            color: var(--trustme-text);
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .field-value {
+            font-size: 14px;
+            color: var(--trustme-dark);
+            font-weight: 500;
+            word-break: break-word;
+        }
+
+        .status-column {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            text-align: center;
+            font-size: 12px;
+            white-space: nowrap;
+        }
+
+        .status-badge.matched {
+            background: var(--success-bg);
+            color: var(--success-text);
+        }
+
+        .status-badge.digi_missing {
+            background: var(--warning-bg);
+            color: var(--warning-text);
+        }
+
+        .status-badge.profile_missing {
+            background: var(--error-bg);
+            color: var(--error-text);
+        }
+
+        .status-badge.invalid {
+            background: var(--error-bg);
+            color: var(--error-text);
+        }
+
+        .divider {
+            height: 1px;
+            background: var(--trustme-border);
+            margin: 30px 0;
+        }
+
+        /* Consent Section */
+        .consent-section {
+            background: var(--trustme-light-bg);
+            padding: 25px;
+            border-radius: 8px;
+            border: 2px solid var(--trustme-border);
+        }
+
+        .consent-checkbox-wrapper {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .consent-checkbox-wrapper input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-top: 2px;
+            cursor: pointer;
+            accent-color: var(--trustme-primary);
+        }
+
+        .consent-text {
+            flex: 1;
+            font-size: 14px;
+            color: var(--trustme-dark);
+            line-height: 1.6;
+        }
+
+        .consent-text strong {
+            color: var(--trustme-primary);
+        }
+
+        .button-group {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--trustme-secondary) 0%, var(--trustme-primary) 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(0, 70, 140, 0.3);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 70, 140, 0.4);
+        }
+
+        .btn-primary:disabled {
+            background: #c6c6c6;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .consent-header {
+                flex-direction: column;
+                padding: 20px;
+                text-align: center;
+            }
+
+            .consent-content {
+                padding: 20px;
+            }
+
+            .verification-grid {
+                grid-template-columns: 100px 1fr;
+                gap: 15px;
+            }
+
+            .aadhaar-photo {
+                width: 90px;
+                height: 90px;
+                grid-row: 1 / 2;
+            }
+
+            .status-column {
+                grid-column: 1 / -1;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="consent-container">
+        <!-- Header -->
+        <div class="consent-header">
+            <div class="trustme-logo">
+                <svg width="100%" height="40" viewBox="0 0 280 40" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMid meet">
+                    <text x="0" y="30" font-family="'Open Sans', sans-serif">
+                      <tspan font-size="30" font-weight="700" fill="#ffffff">TrustMe</tspan><tspan font-size="32" font-weight="400" fill="#ffffff">Insurance</tspan>
+                    </text>
+                    <!--<text x="0" y="30" font-family="'Open Sans', sans-serif" font-size="28" font-weight="700" fill="#ffffff">TrustMe</text>-->
+                    <!--<text x="125" y="30" font-family="'Open Sans', sans-serif" font-size="20" font-weight="400" fill="#ffffff">Insurance</text>-->
+                </svg>
+            </div>
+            <div class="header-title">
+                <h1>Aadhaar Verification</h1>
+                <p>Review and confirm your identity information</p>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="consent-content">
+            <form id="consentForm" method="POST" action="@WORKFLOW_CALLBACK_URL@">
+                <div class="verification-grid">
+                    <img class="aadhaar-photo" src="@context.photo@" alt="Aadhaar photo">
+
+                    <!-- Name -->
+                    <div class="field-group">
+                        <div class="field-label">Name</div>
+                        <div class="field-source">DigiLocker</div>
+                        <div class="field-value">@context.name_validation.digi_name@</div>
+                    </div>
+                    <div class="field-group">
+                        <div class="field-source">Your Profile</div>
+                        <div class="field-value">@context.name_validation.profile_name@</div>
+                    </div>
+                    <div class="status-column">
+                        <div class="status-badge" data-status="@context.name_validation.match_status@"></div>
+                    </div>
+
+                    <!-- Email -->
+                    <div class="field-group">
+                        <div class="field-label">Email</div>
+                        <div class="field-source">DigiLocker</div>
+                        <div class="field-value">@context.email_validation.digi_email@</div>
+                    </div>
+                    <div class="field-group">
+                        <div class="field-source">Your Profile</div>
+                        <div class="field-value">@context.email_validation.profile_email@</div>
+                    </div>
+                    <div class="status-column">
+                        <div class="status-badge" data-status="@context.email_validation.match_status@"></div>
+                    </div>
+
+                    <!-- Phone -->
+                    <div class="field-group">
+                        <div class="field-label">Phone</div>
+                        <div class="field-source">DigiLocker</div>
+                        <div class="field-value">@context.phone_validation.digi_phone_no@</div>
+                    </div>
+                    <div class="field-group">
+                        <div class="field-source">Your Profile</div>
+                        <div class="field-value">@context.phone_validation.profile_phone_mobile@</div>
+                    </div>
+                    <div class="status-column">
+                        <div class="status-badge" data-status="@context.phone_validation.match_status@"></div>
+                    </div>
+
+                    <!-- DOB -->
+                    <div class="field-group">
+                        <div class="field-label">Date of Birth</div>
+                        <div class="field-source">DigiLocker</div>
+                        <div class="field-value">@context.dob_validation.digi_dob@</div>
+                    </div>
+                    <div class="field-group">
+                        <div class="field-source">Your Profile</div>
+                        <div class="field-value">@context.dob_validation.profile_dob@</div>
+                    </div>
+                    <div class="status-column">
+                        <div class="status-badge" data-status="@context.dob_validation.match_status@"></div>
+                    </div>
+                </div>
+
+                <div class="divider"></div>
+
+                <!-- Hidden Fields -->
+                <input type="hidden" name="name_digi" value="@context.name_validation.digi_name@">
+                <input type="hidden" name="name_profile" value="@context.name_validation.profile_name@">
+                <input type="hidden" name="name_status" value="@context.name_validation.match_status@">
+
+                <input type="hidden" name="email_digi" value="@context.email_validation.digi_email@">
+                <input type="hidden" name="email_profile" value="@context.email_validation.profile_email@">
+                <input type="hidden" name="email_status" value="@context.email_validation.match_status@">
+
+                <input type="hidden" name="phone_digi" value="@context.phone_validation.digi_phone_no@">
+                <input type="hidden" name="phone_profile" value="@context.phone_validation.profile_phone_mobile@">
+                <input type="hidden" name="phone_status" value="@context.phone_validation.match_status@">
+
+                <input type="hidden" name="dob_digi" value="@context.dob_validation.digi_dob@">
+                <input type="hidden" name="dob_profile" value="@context.dob_validation.profile_dob@">
+                <input type="hidden" name="dob_status" value="@context.dob_validation.match_status@">
+
+                <!-- Consent Section -->
+                <div class="consent-section">
+                    <div class="consent-checkbox-wrapper">
+                        <input id="userConsentCheckbox" name="user_consent_checkbox" type="checkbox" onchange="toggleSubmitButton()">
+                        <label for="userConsentCheckbox" class="consent-text">
+                            I hereby <strong>consent</strong> to use my Aadhaar DigiLocker data (including name, email, phone number, and date of birth) for identity verification purposes with TrustMeInsurance.
+                        </label>
+                    </div>
+
+                    <input type="hidden" id="userConsentValue" name="user_consent" value="no">
+                    
+                    <div class="button-group">
+                        <button id="submitButton" class="btn btn-primary" type="submit" disabled>
+                            Confirm & Submit
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function toggleSubmitButton() {
+            const checkbox = document.getElementById('userConsentCheckbox');
+            const submitBtn = document.getElementById('submitButton');
+            const consentValue = document.getElementById('userConsentValue');
+            
+            if (checkbox.checked) {
+                submitBtn.disabled = false;
+                consentValue.value = 'yes';
+            } else {
+                submitBtn.disabled = true;
+                consentValue.value = 'no';
+            }
+        }
+
+        (function mapStatusBadges() {
+            const statusMapping = {
+                'matched': { text: '✓ Validated', className: 'matched' },
+                'digi_missing': { text: 'Aadhaar Data Missing', className: 'digi_missing' },
+                'profile_missing': { text: 'Profile Data Missing', className: 'profile_missing' },
+                'invalid': { text: '✗ Mismatch', className: 'invalid' }
+            };
+
+            document.querySelectorAll('.status-badge').forEach(function(badge) {
+                const status = (badge.getAttribute('data-status') || '').trim();
+                const mapping = statusMapping[status] || { text: status || 'Unknown', className: '' };
+                
+                if (mapping.className) {
+                    badge.classList.add(mapping.className);
+                }
+                badge.textContent = mapping.text;
+            });
+        })();
+    </script>
+</body>
+</html>

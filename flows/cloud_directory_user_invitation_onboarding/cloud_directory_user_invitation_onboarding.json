@@ -1,0 +1,382 @@
+{
+    "reference": "cloud_directory_user_invitation_onboarding",
+    "propertiesSchemaVersion": 5,
+    "model": [
+        {
+            "id": "node-1-Start",
+            "name": "Start",
+            "position": {
+                "x": -266,
+                "y": -60
+            },
+            "taskType": "Start",
+            "next": {
+                "node": "node-2-Function",
+                "connectionWayPoints": [
+                    {
+                        "x": -140,
+                        "y": -40
+                    },
+                    {
+                        "x": -60,
+                        "y": -40
+                    }
+                ]
+            }
+        },
+        {
+            "id": "node-2-Function",
+            "name": "Get Bearer Token",
+            "position": {
+                "x": -60,
+                "y": -78
+            },
+            "taskType": "Function",
+            "next": {
+                "node": "node-3-Function",
+                "connectionWayPoints": [
+                    {
+                        "x": 128,
+                        "y": -40
+                    },
+                    {
+                        "x": 234,
+                        "y": -40
+                    }
+                ]
+            },
+            "input": {
+                "inputData": "statements:\n- context: hostname := \"https://\"+ ctx.__tenantid\n- context: tokenEndpoint := context.hostname + \"/oidc/endpoint/default/token\"\n- context: clientId := \"<clientId>\"\n- context: secret := \"<secret>\"\n- context: bearerToken := oauth.GetBearerToken(context.tokenEndpoint, context.clientId, context.secret)\n- return: >\n        {\n            \"bearerToken\": context.bearerToken,\n            \"hostname\": context.hostname\n        }\n"
+            },
+            "output": [
+                "JSON"
+            ]
+        },
+        {
+            "id": "node-3-Function",
+            "name": "Validate Invite",
+            "position": {
+                "x": 234,
+                "y": -78
+            },
+            "taskType": "Function",
+            "next": {
+                "node": "node-4-ConditionPoint",
+                "connectionWayPoints": [
+                    {
+                        "x": 422,
+                        "y": -40
+                    },
+                    {
+                        "x": 580,
+                        "y": -40
+                    }
+                ]
+            },
+            "input": {
+                "inputData": "statements:\n- context: bearerTokenFormatted := \"Bearer \" + ctx.bearerToken\n- context: uscId := ctx.uscTrxId\n- context: trxOtp := ctx.factorTrnxId\n- debug: context.uscId\n- debug: context.trxOtp\n- context: validateInviteEndpoint := context.hostname + \"/gta/v1.0/usc/user/invitation/\" + context.uscId + \"/validator\"\n- context: payload := \"{\\\"otp\\\":\\\"\" + context.trxOtp + \"\\\"}\"\n- context: response := hc.Post(context.validateInviteEndpoint,{\"Authorization\":context.bearerTokenFormatted,\"Content-Type\":\"application/json\"},context.payload)\n- context: statusCode := context.response.statusCode\n- context: isInviteValid := context.statusCode.matches(\"200\")\n\n- return: >\n        {\n            \"response\": context.response.responseBody,\n            \"status\": context.statusCode,\n            \"isInviteValid\": context.isInviteValid,\n            \"uscId\": context.uscId,\n            \"trxOtp\": context.trxOtp\n        }\n"
+            },
+            "output": [
+                "JSON"
+            ]
+        },
+        {
+            "id": "node-4-ConditionPoint",
+            "position": {
+                "x": 580,
+                "y": -64
+            },
+            "taskType": "ConditionPoint",
+            "branches": [
+                {
+                    "next": {
+                        "node": "node-6-UserForm",
+                        "connectionWayPoints": [
+                            {
+                                "x": 604,
+                                "y": -16
+                            },
+                            {
+                                "x": 604,
+                                "y": 53.29600209497207
+                            },
+                            {
+                                "x": -178.56145251396651,
+                                "y": 53.29600209497207
+                            },
+                            {
+                                "x": -178.56145251396651,
+                                "y": 122.59200418994413
+                            }
+                        ]
+                    },
+                    "condition": {
+                        "type": "basic",
+                        "condition": [
+                            {
+                                "@context.isInviteValid@": [
+                                    {
+                                        "op": "isTrue",
+                                        "vl": ""
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                },
+                {
+                    "next": {
+                        "node": "node-5-Page",
+                        "connectionWayPoints": [
+                            {
+                                "x": 628,
+                                "y": -40
+                            },
+                            {
+                                "x": 722.149965083799,
+                                "y": -40
+                            },
+                            {
+                                "x": 722.149965083799,
+                                "y": 475.0040153631285
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "id": "node-5-Page",
+            "name": "Error Page",
+            "position": {
+                "x": 628.149965083799,
+                "y": 475.0040153631285
+            },
+            "taskType": "Page",
+            "next": {
+                "node": "node-9-End",
+                "connectionWayPoints": [
+                    {
+                        "x": 628.149965083799,
+                        "y": 513.0040153631285
+                    },
+                    {
+                        "x": 453.0432960893854,
+                        "y": 513.0040153631285
+                    }
+                ]
+            },
+            "input": {
+                "themeId": "4575974c-6885-460f-b298-3f3636efe9b9",
+                "templateName": "custom_page2",
+                "actionRequired": false
+            }
+        },
+        {
+            "id": "node-6-UserForm",
+            "name": "Collect UserInfo",
+            "position": {
+                "x": -272.5614525139665,
+                "y": 122.59200418994413
+            },
+            "taskType": "UserForm",
+            "next": {
+                "node": "node-11-Function",
+                "connectionWayPoints": [
+                    {
+                        "x": -84.56145251396651,
+                        "y": 160.59200418994413
+                    },
+                    {
+                        "x": -3.822191027248934,
+                        "y": 160.59200418994413
+                    }
+                ]
+            },
+            "input": {
+                "formId": "2b594831-5b5c-4d14-880a-55ee6ed9be1e",
+                "actionRequired": true
+            },
+            "output": [
+                "userFormData"
+            ]
+        },
+        {
+            "id": "node-7-CreateUser",
+            "name": "Create user",
+            "position": {
+                "x": 366.10811195986776,
+                "y": 371.2287224945844
+            },
+            "taskType": "CreateUser",
+            "next": {
+                "node": "node-8-Function",
+                "connectionWayPoints": [
+                    {
+                        "x": 366.10811195986776,
+                        "y": 409.2287224945844
+                    },
+                    {
+                        "x": 248.3378498745867,
+                        "y": 409.2287224945844
+                    }
+                ]
+            },
+            "output": [
+                "user"
+            ]
+        },
+        {
+            "id": "node-8-Function",
+            "name": "Complete Invitation",
+            "position": {
+                "x": 60.33784987458671,
+                "y": 371.2287224945844
+            },
+            "taskType": "Function",
+            "next": {
+                "node": "node-10-Redirect",
+                "connectionWayPoints": [
+                    {
+                        "x": 60.33784987458671,
+                        "y": 409.2287224945844
+                    },
+                    {
+                        "x": -178.56145251396651,
+                        "y": 409.2287224945844
+                    },
+                    {
+                        "x": -178.56145251396651,
+                        "y": 475.0040153631285
+                    }
+                ]
+            },
+            "input": {
+                "inputData": "statements:\n- context: bearerTokenFormatted := \"Bearer \" + ctx.bearerToken\n- context: uscId := ctx.uscId\n- context: trxOtp := ctx.trxOtp\n- context: acceptInviteEndpoint := context.hostname + \"/gta/v1.0/usc/user/invitation/\" + context.uscId\n- context: payload := \"{\\\"otp\\\":\\\"\" + context.trxOtp + \"\\\",\\\"notifyComplete\\\":true,\\\"user\\\":\\\"\" + user.id + \"\\\"}\"\n- context: response := hc.Put(context.acceptInviteEndpoint,{\"Authorization\":context.bearerTokenFormatted,\"Content-Type\":\"application/json\"},context.payload)\n- context: statusCode := context.response.statusCode\n- context: isUserCreated := context.statusCode.matches(\"200\")\n\n- return: >\n        {\n            \"response\": context.response.responseBody,\n            \"status\": context.statusCode,\n            \"isUserCreated\": context.isUserCreated\n        }\n"
+            },
+            "output": [
+                "JSON"
+            ]
+        },
+        {
+            "id": "node-9-End",
+            "name": "End",
+            "position": {
+                "x": 327.0432960893854,
+                "y": 493.00401536312853
+            },
+            "taskType": "End"
+        },
+        {
+            "id": "node-10-Redirect",
+            "name": "Redirect to homepage",
+            "position": {
+                "x": -272.5614525139665,
+                "y": 475.0040153631285
+            },
+            "taskType": "Redirect",
+            "next": {
+                "node": "node-9-End",
+                "connectionWayPoints": [
+                    {
+                        "x": -84.56145251396651,
+                        "y": 513.0040153631285
+                    },
+                    {
+                        "x": 327.0432960893854,
+                        "y": 513.0040153631285
+                    }
+                ]
+            },
+            "input": {
+                "redirectUrl": "${S(workflow_context).prop(\"hostname\").stringValue()}",
+                "actionRequired": false
+            }
+        },
+        {
+            "id": "node-11-Function",
+            "name": "Validate UserInfo",
+            "position": {
+                "x": -3.822191027248934,
+                "y": 122.59200418994413
+            },
+            "taskType": "Function",
+            "next": {
+                "node": "node-12-ConditionPoint",
+                "connectionWayPoints": [
+                    {
+                        "x": 184.17780897275105,
+                        "y": 160.59200418994413
+                    },
+                    {
+                        "x": 436.10811195986776,
+                        "y": 160.59200418994413
+                    }
+                ]
+            },
+            "input": {
+                "inputData": "statements:\n- context: bearerTokenFormatted := \"Bearer \" + ctx.bearerToken\n- context: uscId := ctx.uscTrxId\n- context: trxOtp := ctx.factorTrnxId\n- context: validateInviteEndpoint := context.hostname + \"/gta/v1.0/usc/user/invitation/\" + context.uscId\n\n# Make API call to get invitation details\n- context: response := hc.GetAsJson(context.validateInviteEndpoint,{\"Authorization\":context.bearerTokenFormatted,\"Content-Type\":\"application/json\", \"Accept\":\"application/json\"})\n\n# Extract email from invitation\n- context: emailId_invite := context.response.email\n\n# Get email provided by user in the form (from profileUserData.payload.userData.3)\n- context: emailId_user := context.profileUserData.payload.userData[\"3\"]\n\n# Check if emails match (case-sensitive)\n- context: emails_match := context.emailId_invite == context.emailId_user\n\n# Return result with email match status\n- return: >\n          {\n          \"email_match\": context.emails_match,\n          \"invite_email\": context.emailId_invite,\n          \"user_email\": context.emailId_user\n          }\n\n"
+            },
+            "output": [
+                "JSON"
+            ]
+        },
+        {
+            "id": "node-12-ConditionPoint",
+            "position": {
+                "x": 436.10811195986776,
+                "y": 136.59200418994413
+            },
+            "taskType": "ConditionPoint",
+            "branches": [
+                {
+                    "next": {
+                        "node": "node-7-CreateUser",
+                        "connectionWayPoints": [
+                            {
+                                "x": 460.10811195986776,
+                                "y": 184.59200418994413
+                            },
+                            {
+                                "x": 460.10811195986776,
+                                "y": 371.2287224945844
+                            }
+                        ]
+                    },
+                    "condition": {
+                        "type": "basic",
+                        "condition": [
+                            {
+                                "@context.email_match@": [
+                                    {
+                                        "op": "isTrue",
+                                        "vl": ""
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                },
+                {
+                    "next": {
+                        "node": "node-5-Page",
+                        "connectionWayPoints": [
+                            {
+                                "x": 484.10811195986776,
+                                "y": 160.59200418994413
+                            },
+                            {
+                                "x": 722.149965083799,
+                                "y": 160.59200418994413
+                            },
+                            {
+                                "x": 722.149965083799,
+                                "y": 475.0040153631285
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,446 @@
+{
+    "propertiesSchemaVersion": 5,
+    "model": [
+        {
+            "id": "Event_0onayf9",
+            "name": "Start",
+            "position": {
+                "x": 257,
+                "y": 0
+            },
+            "taskType": "Start",
+            "next": {
+                "node": "isv_function_1704827009683_customId",
+                "connectionLabel": "",
+                "connectionWayPoints": [
+                    {
+                        "x": 320,
+                        "y": 40
+                    },
+                    {
+                        "x": 320,
+                        "y": 102
+                    }
+                ]
+            }
+        },
+        {
+            "id": "isv_function_1704827009683_customId",
+            "name": "Set vars",
+            "position": {
+                "x": 226,
+                "y": 102
+            },
+            "taskType": "Function",
+            "next": {
+                "node": "isv_user_form_1704484987262_customId",
+                "connectionLabel": "",
+                "connectionWayPoints": [
+                    {
+                        "x": 320,
+                        "y": 178
+                    },
+                    {
+                        "x": 320,
+                        "y": 262
+                    }
+                ]
+            },
+            "input": {
+                "inputData": "statements:\n# TODO: Replace placeholder values with real Socure credentials before production deployment\n- return: >\n        {\n            \"APIkey\": \"SocureApiKey <your-api-key>\",\n            \"externalRiskProviderURL\": \"<your-socure-endpoint>\"\n        }\n"
+            },
+            "output": [
+                "JSON"
+            ]
+        },
+        {
+            "id": "isv_user_form_1704484987262_customId",
+            "name": "Email Validation",
+            "position": {
+                "x": 226,
+                "y": 262
+            },
+            "taskType": "UserForm",
+            "next": {
+                "node": "isv_user_form_1704485500144_customId",
+                "connectionLabel": "",
+                "connectionWayPoints": [
+                    {
+                        "x": 320,
+                        "y": 338
+                    },
+                    {
+                        "x": 320,
+                        "y": 462
+                    }
+                ]
+            },
+            "input": {
+                "formId": "<your-email-validation-form-id>",
+                "actionRequired": true
+            },
+            "output": [
+                "userFormData"
+            ]
+        },
+        {
+            "id": "isv_user_form_1704485500144_customId",
+            "name": "Gather basic details",
+            "position": {
+                "x": 226,
+                "y": 462
+            },
+            "taskType": "UserForm",
+            "next": {
+                "node": "isv_user_form_1704712464891_customId",
+                "connectionLabel": "",
+                "connectionWayPoints": [
+                    {
+                        "x": 320,
+                        "y": 538
+                    },
+                    {
+                        "x": 320,
+                        "y": 662
+                    }
+                ]
+            },
+            "input": {
+                "formId": "<your-basic-details-form-id>",
+                "actionRequired": true
+            },
+            "output": [
+                "userFormData"
+            ]
+        },
+        {
+            "id": "isv_user_form_1704712464891_customId",
+            "name": "Gather work details",
+            "position": {
+                "x": 226,
+                "y": 662
+            },
+            "taskType": "UserForm",
+            "next": {
+                "node": "isv_user_form_1704712640445_customId",
+                "connectionLabel": "",
+                "connectionWayPoints": [
+                    {
+                        "x": 320,
+                        "y": 738
+                    },
+                    {
+                        "x": 320,
+                        "y": 862
+                    }
+                ]
+            },
+            "input": {
+                "formId": "<your-work-details-form-id>",
+                "actionRequired": true
+            },
+            "output": [
+                "userFormData"
+            ]
+        },
+        {
+            "id": "isv_user_form_1704712640445_customId",
+            "name": "Gather account details",
+            "position": {
+                "x": 226,
+                "y": 862
+            },
+            "taskType": "UserForm",
+            "next": {
+                "node": "isv_function_1704481627638_customId",
+                "connectionLabel": "",
+                "connectionWayPoints": [
+                    {
+                        "x": 320,
+                        "y": 938
+                    },
+                    {
+                        "x": 320,
+                        "y": 1082
+                    }
+                ]
+            },
+            "input": {
+                "formId": "<your-account-details-form-id>",
+                "actionRequired": true
+            },
+            "output": [
+                "userFormData"
+            ]
+        },
+        {
+            "id": "isv_function_1704481627638_customId",
+            "name": "Fetch risk score",
+            "position": {
+                "x": 226,
+                "y": 1082
+            },
+            "taskType": "Function",
+            "next": {
+                "node": "Gateway_0zwyk7j_customId",
+                "connectionLabel": "",
+                "connectionWayPoints": [
+                    {
+                        "x": 320,
+                        "y": 1158
+                    },
+                    {
+                        "x": 320,
+                        "y": 1225
+                    }
+                ]
+            },
+            "input": {
+                "inputData": "statements:\n- context: email := ctx.userFormData.userData['3']\n# Calls Socure EmailAuthScore API to evaluate email risk.\n# Falls back to 'false' (no risk assumed) if API is unavailable or credentials are not yet configured.\n- context: >\n    riskDecision := has(ctx.APIkey) && ctx.APIkey != \"SocureApiKey <your-api-key>\" ?\n        hc.Post(ctx.externalRiskProviderURL , {'Authorization': ctx.APIkey , 'Content-Type': 'application/json'}, \"{\\\"email\\\":\\\"\"+ context.email + \"\\\",\\\"modules\\\":[\\\"emailrisk\\\" , \\\"decision\\\"]}\").responseBody.decision.value\n        : \"accept\"\n- return: >\n        {\n            \"isRisk\": context.riskDecision != \"accept\" ? \"true\" : \"false\"\n        }\n"
+            },
+            "output": [
+                "JSON"
+            ]
+        },
+        {
+            "id": "Gateway_0zwyk7j_customId",
+            "name": "",
+            "position": {
+                "x": 295,
+                "y": 1225
+            },
+            "taskType": "ConditionPoint",
+            "branches": [
+                {
+                    "next": {
+                        "node": "isv_create_user_1704485488985_customId",
+                        "connectionLabel": "No Risk",
+                        "connectionWayPoints": [
+                            {
+                                "x": 320,
+                                "y": 1275
+                            },
+                            {
+                                "x": 320,
+                                "y": 1322
+                            }
+                        ]
+                    },
+                    "condition": {
+                        "type": "basic",
+                        "condition": [
+                            {
+                                "@context@": [
+                                    {
+                                        "op": "hasProp",
+                                        "vl": "isRisk"
+                                    }
+                                ],
+                                "@context.isRisk@": [
+                                    {
+                                        "op": "eq",
+                                        "vl": "false"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                },
+                {
+                    "next": {
+                        "node": "isv_page_1704482083541_customId",
+                        "connectionLabel": "Risk Detected",
+                        "connectionWayPoints": [
+                            {
+                                "x": 345,
+                                "y": 1250
+                            },
+                            {
+                                "x": 686,
+                                "y": 1250
+                            }
+                        ]
+                    },
+                    "condition": {
+                        "type": "basic",
+                        "condition": [
+                            {
+                                "@context@": [
+                                    {
+                                        "op": "hasProp",
+                                        "vl": "isRisk"
+                                    }
+                                ],
+                                "@context.isRisk@": [
+                                    {
+                                        "op": "eq",
+                                        "vl": "true"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "id": "isv_create_user_1704485488985_customId",
+            "name": "Create user",
+            "position": {
+                "x": 226,
+                "y": 1322
+            },
+            "taskType": "CreateUser",
+            "next": {
+                "node": "Gateway_1m0u3ec_customId",
+                "connectionLabel": "",
+                "connectionWayPoints": [
+                    {
+                        "x": 320,
+                        "y": 1398
+                    },
+                    {
+                        "x": 320,
+                        "y": 1455
+                    }
+                ]
+            },
+            "output": [
+                "user"
+            ]
+        },
+        {
+            "id": "Gateway_1m0u3ec_customId",
+            "name": "",
+            "position": {
+                "x": 295,
+                "y": 1455
+            },
+            "taskType": "ConditionPoint",
+            "branches": [
+                {
+                    "next": {
+                        "node": "isv_page_1704485864790_customId",
+                        "connectionLabel": "User created",
+                        "connectionWayPoints": [
+                            {
+                                "x": 320,
+                                "y": 1505
+                            },
+                            {
+                                "x": 320,
+                                "y": 1542
+                            }
+                        ]
+                    },
+                    "condition": {
+                        "type": "basic",
+                        "condition": [
+                            {
+                                "@context@": [
+                                    {
+                                        "op": "hasProp",
+                                        "vl": "user"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                },
+                {
+                    "next": {
+                        "node": "isv_page_1704482083541_customId",
+                        "connectionLabel": "",
+                        "connectionWayPoints": [
+                            {
+                                "x": 345,
+                                "y": 1480
+                            },
+                            {
+                                "x": 780,
+                                "y": 1480
+                            },
+                            {
+                                "x": 780,
+                                "y": 1250
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "id": "isv_page_1704485864790_customId",
+            "name": "Account creation",
+            "position": {
+                "x": 226,
+                "y": 1542
+            },
+            "taskType": "Page",
+            "next": {
+                "node": "Event_0hkasax_customId",
+                "connectionLabel": "",
+                "connectionWayPoints": [
+                    {
+                        "x": 320,
+                        "y": 1618
+                    },
+                    {
+                        "x": 320,
+                        "y": 1690
+                    }
+                ]
+            },
+            "input": {
+                "themeId": "<your-theme-id>",
+                "templateName": "custom_page5",
+                "actionRequired": false
+            }
+        },
+        {
+            "id": "isv_page_1704482083541_customId",
+            "name": "Error",
+            "position": {
+                "x": 686,
+                "y": 1212
+            },
+            "taskType": "Page",
+            "next": {
+                "node": "Event_0hkasax_customId",
+                "connectionLabel": "",
+                "connectionWayPoints": [
+                    {
+                        "x": 874,
+                        "y": 1250
+                    },
+                    {
+                        "x": 1020,
+                        "y": 1250
+                    },
+                    {
+                        "x": 1020,
+                        "y": 1710
+                    },
+                    {
+                        "x": 383,
+                        "y": 1710
+                    }
+                ]
+            },
+            "input": {
+                "themeId": "<your-theme-id>",
+                "templateName": "custom_page4",
+                "actionRequired": false
+            }
+        },
+        {
+            "id": "Event_0hkasax_customId",
+            "name": "End",
+            "position": {
+                "x": 257,
+                "y": 1690
+            },
+            "taskType": "End"
+        }
+    ]
+}
