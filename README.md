@@ -1,6 +1,6 @@
-# IBM Security Verify SaaS Resources
+# IBM Verify SaaS Resources
 
-This repository contains a collection of resources for IBM Security Verify SaaS. This includes sample flows that can be imported into Verify tenants, scripts and API collections.
+This repository contains a collection of resources for IBM Verify SaaS. This includes sample flows that can be imported into Verify tenants, scripts and API collections.
 
 ## Directories
 
