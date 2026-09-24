@@ -1,1 +1,5 @@
-@vivshankar
+* @ibm-verify/verify-maintainers
+fr/flows/** @ibm-verify/verify-maintainers @ibm-verify/workflow-maintainers
+fr/apps/** @ibm-verify/verify-maintainers @ibm-verify/sdk-javascript-maintainers
+flows/** @ibm-verify/verify-maintainers @ibm-verify/workflow-maintainers
+apps/** @ibm-verify/verify-maintainers @ibm-verify/sdk-javascript-maintainers
